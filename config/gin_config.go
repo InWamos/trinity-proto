@@ -4,15 +4,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ServerConfig struct {
-	BindAddress  string `mapstructure:"GIN_ADDRESS"`
-	Port         int    `mapstructure:"GIN_PORT"`
-	Mode         string `mapstructure:"GIN_MODE"`
-	TrustedProxy string `mapstrucrure:"GIN_TRUSTED_PROXY"`
+type GinConfig struct {
+	BindAddress   string `mapstructure:"GIN_ADDRESS"`
+	Port          int    `mapstructure:"GIN_PORT"`
+	Mode          string `mapstructure:"GIN_MODE"`
+	TrustedProxy  string `mapstructure:"GIN_TRUSTED_PROXY"`
+	AllowedOrigin string `mapstructure:"GIN_ALLOWED_ORIGIN"`
 }
 
-func NewServerConfig() (*ServerConfig, error) {
-	var serverConfig ServerConfig
+func NewServerConfig() (*GinConfig, error) {
+	var serverConfig GinConfig
 	if err := viper.Unmarshal(&serverConfig); err != nil {
 		return nil, err
 	}

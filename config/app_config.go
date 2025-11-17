@@ -5,7 +5,7 @@ import "github.com/spf13/viper"
 type AppConfig struct {
 	LoggingConf    LoggingConfig  `mapstructure:",squash"`
 	DatabaseConfig DatabaseConfig `mapstructure:",squash"`
-	ServerConfig   ServerConfig   `mapstructure:",squash"`
+	GinConfig      GinConfig      `mapstructure:",squash"`
 }
 
 func NewAppConfig() (*AppConfig, error) {

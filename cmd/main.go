@@ -12,6 +12,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getLogger(level string) *slog.Logger {
+	var logLevel slog.Level
+	if err := logLevel.UnmarshalText([]byte(level)); err != nil {
+		logLevel = slog.LevelInfo
+	}
+	opts := &slog.HandlerOptions{
+		Level:     logLevel,
+		AddSource: true,
+	}
+
+	handler := slog.NewJSONHandler(os.Stdout, opts)
+	return slog.New(handler)
+}
+
 func getConfig() (*config.AppConfig, error) {
 	config, err := config.NewAppConfig()
 	if err != nil {
@@ -20,14 +34,15 @@ func getConfig() (*config.AppConfig, error) {
 	return config, nil
 }
 
-func bootstrapServer(server *gin.Engine, allowOrigin string, trustedProxy string) {
+func bootstrapServer(server *gin.Engine, allowOrigin string, trustedProxy string, logger *slog.Logger) {
 	server.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{allowOrigin},
 		AllowMethods:     []string{"GET", "DELETE", "PUT", "PATCH", "POST"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		//nolint:mnd // we need to obtain a day in this manner here
+		MaxAge: time.Hour * 24,
 	}))
 
 	server.Use(ginslog.SetLogger(
@@ -52,7 +67,7 @@ func bootstrapServer(server *gin.Engine, allowOrigin string, trustedProxy string
 		}),
 		// Provide your own logger (to add global fields, etc.)
 		ginslog.WithLogger(func(c *gin.Context, l *slog.Logger) *slog.Logger {
-			return l.With("request_id", c.GetString("request_id"))
+			return l.With("module", "ginMiddleware", "request_id", c.GetString("request_id"))
 		}),
 		// Custom Skipper (function: skip logging if ...), example:
 		ginslog.WithSkipper(func(c *gin.Context) bool {
@@ -65,14 +80,16 @@ func bootstrapServer(server *gin.Engine, allowOrigin string, trustedProxy string
 		}),
 	))
 	server.Use(gin.Recovery())
-	server.SetTrustedProxies([]string{trustedProxy})
+	if err := server.SetTrustedProxies([]string{trustedProxy}); err != nil {
+		logger.Error("Failed to set trusted proxy for this server", "error", err)
+	}
 	server.RemoteIPHeaders = []string{"X-Forwarded-For"}
 }
 
-func runServer(server *gin.Engine, bindIp string, port int) {
-	bindAddress := bindIp + ":" + string(rune(port))
+func runServer(server *gin.Engine, bindIP string, port int, logger *slog.Logger) {
+	bindAddress := bindIP + ":" + string(rune(port))
 	if err := server.Run(bindAddress); err != nil {
-		slog.Error("Failed to start server", "error", err, "bind_address", bindAddress)
+		logger.Error("Failed to start server", "error", err, "bind_address", bindAddress)
 		panic(err)
 	}
 }
@@ -80,10 +97,16 @@ func runServer(server *gin.Engine, bindIp string, port int) {
 func main() {
 	config, err := getConfig()
 	if err != nil {
+		//nolint:sloglint // Can't set up logger unless have valid config
 		slog.Error("Failed to parse config", "error", err)
 		os.Exit(1)
 	}
+	masterLogger := getLogger(config.LoggingConf.Level)
+	masterLogger.Info("Master Logger created")
+	mainLogger := masterLogger.With("module", "main")
+
 	server := gin.New()
-	bootstrapServer(server, config.GinConfig.AllowedOrigin, config.GinConfig.TrustedProxy)
-	runServer(server, config.GinConfig.BindAddress, config.GinConfig.Port)
+	bootstrapServer(server, config.GinConfig.AllowedOrigin, config.GinConfig.TrustedProxy, mainLogger)
+
+	runServer(server, config.GinConfig.BindAddress, config.GinConfig.Port, mainLogger)
 }

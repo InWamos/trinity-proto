@@ -4,7 +4,6 @@ import "github.com/spf13/viper"
 
 type LoggingConfig struct {
 	Level string `mapstructure:"LOGGING_LEVEL"`
-	Out   string `mapstructure:"LOGGING_OUT"`
 }
 
 func NewLoggingConfig() (*LoggingConfig, error) {

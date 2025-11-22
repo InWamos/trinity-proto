@@ -25,10 +25,9 @@ type User struct {
 	DeletedAt    sql.NullTime
 }
 
-func NewUser(username string, displayName string, passwordHash string, role Role) *User {
-	randomUUID4 := uuid.New()
+func NewUser(uuid4 uuid.UUID, username string, displayName string, passwordHash string, role Role) *User {
 	return &User{
-		ID:           randomUUID4,
+		ID:           uuid4,
 		Username:     username,
 		DisplayName:  displayName,
 		PasswordHash: passwordHash,

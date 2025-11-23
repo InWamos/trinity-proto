@@ -8,6 +8,7 @@ Proto for the Trinity project
 
 # Use Cases
 - User
+    - [ ] Get User by ID
     - [ ] Create User
     - [ ] Promote User
     - [ ] Demote User

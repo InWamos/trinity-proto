@@ -25,9 +25,10 @@ type User struct {
 	DeletedAt    sql.NullTime
 }
 
-func NewUser(uuid4 uuid.UUID, username string, displayName string, passwordHash string, role Role) *User {
+func NewUser(uuid7 uuid.UUID, username string, displayName string, passwordHash string, role Role) *User {
+	// Consider using uuidv7 for a better indexing
 	return &User{
-		ID:           uuid4,
+		ID:           uuid7,
 		Username:     username,
 		DisplayName:  displayName,
 		PasswordHash: passwordHash,

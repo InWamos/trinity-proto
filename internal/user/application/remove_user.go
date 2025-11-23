@@ -7,7 +7,7 @@ import (
 )
 
 type RemoveUserRequest struct {
-	id uuid.UUID
+	ID uuid.UUID
 }
 
 type RemoveUser struct {

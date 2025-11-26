@@ -1,5 +1,7 @@
 package interfaces
 
+import "context"
+
 type Interactor[InputDTO any, OutputDTO any] interface {
-	Execute(input InputDTO) (OutputDTO, error)
+	Execute(ctx context.Context, input InputDTO) (OutputDTO, error)
 }

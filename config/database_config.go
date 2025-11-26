@@ -3,10 +3,12 @@ package config
 import "github.com/spf13/viper"
 
 type DatabaseConfig struct {
-	Address      string `mapstructure:"DATABASE_ADDRESS"`
-	Port         int    `mapstructure:"DATABASE_PORT"`
-	DatabaseName string `mapstructure:"DATABASE_NAME"`
-	DatabaseUser string `mapstructure:"DATABASE_USER"`
+	Address          string `mapstructure:"DATABASE_ADDRESS"`
+	Port             int    `mapstructure:"DATABASE_PORT"`
+	DatabaseName     string `mapstructure:"DATABASE_NAME"`
+	DatabaseUser     string `mapstructure:"DATABASE_USER"`
+	DatabasePassword string `mapstructure:"DATABASE_PASSWORD"`
+	DatabaseSslMode  string `mapstructure:"DATABASE_SSL_MODE"`
 }
 
 func NewDatabaseConfig() (*DatabaseConfig, error) {

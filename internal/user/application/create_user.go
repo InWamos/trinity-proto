@@ -16,6 +16,22 @@ type CreateUserRequest struct {
 
 type CreateUser struct {
 	passwordHasher     service.PasswordHasher
+	uuidGenerator      service.UUIDGenerator
 	transactionManager interfaces.TransactionManager
 	userRepository     infrastructure.UserRepository
 }
+
+func NewCreateUser(
+	passwordHasher service.PasswordHasher,
+	uuidGenerator service.UUIDGenerator,
+	transactionManager interfaces.TransactionManager,
+	userRepository infrastructure.UserRepository,
+) *CreateUser {
+	return &CreateUser{
+		passwordHasher:     passwordHasher,
+		uuidGenerator:      uuidGenerator,
+		transactionManager: transactionManager,
+		userRepository:     userRepository,
+	}
+}
+

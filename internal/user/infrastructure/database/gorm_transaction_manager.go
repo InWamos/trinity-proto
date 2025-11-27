@@ -1,4 +1,4 @@
-package infrastructure
+package database
 
 type GormTransactionManager struct {
 	session *GormSession

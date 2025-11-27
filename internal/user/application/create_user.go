@@ -28,14 +28,14 @@ type CreateUser struct {
 	passwordHasher     service.PasswordHasher
 	uuidGenerator      service.UUIDGenerator
 	transactionManager interfaces.TransactionManager
-	userRepository     infrastructure.UserRepository
+	userRepository     repository.UserRepository
 }
 
 func NewCreateUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator service.UUIDGenerator,
 	transactionManager interfaces.TransactionManager,
-	userRepository infrastructure.UserRepository,
+	userRepository repository.UserRepository,
 ) *CreateUser {
 	return &CreateUser{
 		passwordHasher:     passwordHasher,

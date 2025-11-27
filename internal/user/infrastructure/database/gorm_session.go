@@ -1,4 +1,4 @@
-package infrastructure
+package database
 
 import "gorm.io/gorm"
 

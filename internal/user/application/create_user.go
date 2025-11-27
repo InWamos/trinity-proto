@@ -1,10 +1,19 @@
 package application
 
 import (
+	"context"
+	"errors"
+
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure"
+	"github.com/google/uuid"
+)
+
+var (
+	ErrHashingFailed  = errors.New("password hashing failed")
+	ErrUUIDGeneration = errors.New("UUID generation failed")
 )
 
 // Input DTO.
@@ -36,3 +45,15 @@ func NewCreateUser(
 	}
 }
 
+func (interactor *CreateUser) Execute(ctx context.Context, input createUserRequest) error {
+	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
+	if err != nil {
+		return ErrHashingFailed
+	}
+	var randomUUID uuid.UUID
+	if randomUUID, err = interactor.uuidGenerator.GetUUIDv7(); err != nil {
+		return ErrUUIDGeneration
+	}
+	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
+	return interactor.userRepository.CreateUser(ctx, *newUser)
+}

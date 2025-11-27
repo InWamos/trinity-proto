@@ -7,7 +7,8 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure"
 )
 
-type CreateUserRequest struct {
+// Input DTO.
+type createUserRequest struct {
 	Username    string
 	DisplayName string
 	Password    string

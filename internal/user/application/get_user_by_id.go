@@ -2,7 +2,7 @@ package application
 
 import (
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure"
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
 )
 
@@ -15,5 +15,5 @@ type GetUserByIDResponce struct {
 }
 
 type GetUserByID struct {
-	userRepository infrastructure.UserRepository
+	userRepository repository.UserRepository
 }

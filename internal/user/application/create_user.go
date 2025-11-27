@@ -7,7 +7,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure"
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
 )
 

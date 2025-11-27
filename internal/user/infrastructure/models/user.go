@@ -8,11 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type role string
+type Role string
 
 const (
-	RoleUser  role = "user"
-	RoleAdmin role = "admin"
+	RoleUser  Role = "user"
+	RoleAdmin Role = "admin"
 )
 
 type UserModel struct {
@@ -20,7 +20,7 @@ type UserModel struct {
 	Username     string    `gorm:"unique;size:32"`
 	DisplayName  string
 	PasswordHash string
-	Role         role `gorm:"type:enum('user', 'admin')"`
+	Role         Role `gorm:"type:enum('user', 'admin')"`
 	CreatedAt    time.Time
 	DeletedAt    gorm.DeletedAt
 }

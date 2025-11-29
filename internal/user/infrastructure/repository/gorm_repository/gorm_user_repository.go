@@ -7,13 +7,9 @@ import (
 
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/models"
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrUserNotFound       = errors.New("user was not found")
-	ErrUserCreationFailed = errors.New("failed to save user")
 )
 
 type GormUserRepository struct {
@@ -35,7 +31,7 @@ func (ur *GormUserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (do
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by id", "id", id)
-			return domain.User{}, ErrUserNotFound
+			return domain.User{}, repository.ErrUserNotFound
 		}
 	}
 	return ur.gormMapper.ToDomain(&user), nil
@@ -46,10 +42,10 @@ func (ur *GormUserRepository) GetUserByUsername(ctx context.Context, username st
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by username", "username", username)
-			return domain.User{}, ErrUserNotFound
+			return domain.User{}, repository.ErrUserNotFound
 		}
 		ur.logger.ErrorContext(ctx, "Failed to find user by username", "username", username, "err", err)
-		return domain.User{}, ErrUserNotFound
+		return domain.User{}, repository.ErrUserNotFound
 	}
 	return ur.gormMapper.ToDomain(&user), nil
 }
@@ -59,7 +55,7 @@ func (ur *GormUserRepository) RemoveUserByID(ctx context.Context, id uuid.UUID) 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by id", "id", id)
-			return ErrUserNotFound
+			return repository.ErrUserNotFound
 		}
 		ur.logger.ErrorContext(ctx, "Failed to find user by id", "id", id, "err", err)
 		return err
@@ -73,7 +69,7 @@ func (ur *GormUserRepository) ChangeUserRoleByID(ctx context.Context, id uuid.UU
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by id", "id", id)
-			return ErrUserNotFound
+			return repository.ErrUserNotFound
 		}
 		ur.logger.ErrorContext(ctx, "Failed to find user by id", "id", id, "err", err)
 		return err
@@ -86,7 +82,7 @@ func (ur *GormUserRepository) CreateUser(ctx context.Context, user domain.User) 
 	err := gorm.G[models.UserModel](ur.session).Create(ctx, &userModel)
 	if err != nil {
 		ur.logger.ErrorContext(ctx, "Failed to save user record")
-		return ErrUserCreationFailed
+		return repository.ErrUserCreationFailed
 	}
 	ur.logger.DebugContext(ctx, "User has been created", "userID", userModel.ID)
 	return nil

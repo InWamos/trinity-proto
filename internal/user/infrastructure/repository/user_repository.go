@@ -2,9 +2,15 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/google/uuid"
+)
+
+var (
+	ErrUserNotFound       = errors.New("user was not found")
+	ErrUserCreationFailed = errors.New("failed to save user")
 )
 
 type UserRepository interface {

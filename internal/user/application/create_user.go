@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	ErrHashingFailed  = errors.New("password hashing failed")
-	ErrUUIDGeneration = errors.New("UUID generation failed")
+	ErrHashingFailed           = errors.New("password hashing failed")
+	ErrUUIDGeneration          = errors.New("UUID generation failed")
+	ErrUserWithIDAlreadyExists = errors.New("this uuid is already in the database")
+	ErrDatabaseFailed          = errors.New("the database operation has failed")
 )
 
 // Input DTO.

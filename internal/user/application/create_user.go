@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
@@ -57,10 +58,12 @@ func NewCreateUser(
 func (interactor *CreateUser) Execute(ctx context.Context, input createUserRequest) error {
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
 	if err != nil {
+		interactor.logger.ErrorContext(ctx, "The password hasher has failed")
 		return ErrHashingFailed
 	}
 	var randomUUID uuid.UUID
 	if randomUUID, err = interactor.uuidGenerator.GetUUIDv7(); err != nil {
+		interactor.logger.ErrorContext(ctx, "The uuid generator has failed")
 		return ErrUUIDGeneration
 	}
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)

@@ -31,6 +31,7 @@ type CreateUser struct {
 	uuidGenerator      service.UUIDGenerator
 	transactionManager interfaces.TransactionManager
 	userRepository     repository.UserRepository
+	logger             *slog.Logger
 }
 
 func NewCreateUser(
@@ -38,12 +39,18 @@ func NewCreateUser(
 	uuidGenerator service.UUIDGenerator,
 	transactionManager interfaces.TransactionManager,
 	userRepository repository.UserRepository,
+	logger *slog.Logger,
 ) *CreateUser {
+	culogger := logger.With(
+		slog.String("component", "interactor"),
+		slog.String("name", "create_user"),
+	)
 	return &CreateUser{
 		passwordHasher:     passwordHasher,
 		uuidGenerator:      uuidGenerator,
 		transactionManager: transactionManager,
 		userRepository:     userRepository,
+		logger:             culogger,
 	}
 }
 

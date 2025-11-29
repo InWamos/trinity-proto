@@ -1,6 +1,8 @@
 package application
 
 import (
+	"log/slog"
+
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
@@ -16,4 +18,5 @@ type GetUserByIDResponce struct {
 
 type GetUserByID struct {
 	userRepository repository.UserRepository
+	logger         *slog.Logger
 }

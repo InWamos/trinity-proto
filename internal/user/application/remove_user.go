@@ -1,6 +1,8 @@
 package application
 
 import (
+	"log/slog"
+
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
@@ -13,4 +15,5 @@ type RemoveUserRequest struct {
 type RemoveUser struct {
 	transactionManager interfaces.TransactionManager
 	userRepository     repository.UserRepository
+	logger             *slog.Logger
 }

@@ -64,5 +64,16 @@ func (interactor *CreateUser) Execute(ctx context.Context, input createUserReque
 		return ErrUUIDGeneration
 	}
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
-	return interactor.userRepository.CreateUser(ctx, *newUser)
+	err = interactor.userRepository.CreateUser(ctx, *newUser)
+	if err != nil {
+		interactor.logger.ErrorContext(ctx, "failed to create user", slog.Any("err", err))
+		return ErrDatabaseFailed
+	}
+
+	if err = interactor.transactionManager.Commit(); err != nil {
+		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
+		return ErrDatabaseFailed
+	}
+
+	return nil
 }

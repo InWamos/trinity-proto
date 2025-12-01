@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/InWamos/trinity-proto/config"
-	"github.com/gin-gonic/gin"
 	"github.com/rs/cors"
 	"go.uber.org/fx"
 )
@@ -37,6 +36,11 @@ func getConfig() (*config.AppConfig, error) {
 	return config, nil
 }
 
+func respondPong(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{\"hello\": \"world\"}"))
+}
+
 func getCORSHeaders(allowedOrigin string) *cors.Cors {
 	return cors.New(cors.Options{
 		AllowedOrigins:   []string{allowedOrigin},
@@ -49,29 +53,34 @@ func getCORSHeaders(allowedOrigin string) *cors.Cors {
 
 }
 
-func bootstrapServer(server *gin.Engine, allowOrigin string, trustedProxy string, logger *slog.Logger) {
-
-}
-
-func runServer(server *gin.Engine, bindIP string, port int, logger *slog.Logger) {
-	bindAddress := bindIP + ":" + string(rune(port))
-	if err := server.Run(bindAddress); err != nil {
-		logger.Error("Failed to start server", "error", err, "bind_address", bindAddress)
+func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {
+	if err := server.Serve(*listener); err != nil {
+		logger.Error("Failed to start server", slog.Any("err", err))
 		panic(err)
 	}
 }
 
-func NewHTTPServer(lc fx.Lifecycle, serverConfig *config.AppConfig) *http.Server {
+func NewHTTPServer(lc fx.Lifecycle, serverConfig *config.AppConfig, logger *slog.Logger) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.GinConfig.BindAddress, serverConfig.GinConfig.Port)
-	srv := &http.Server{Addr: listenAddress, ReadHeaderTimeout: 5 * time.Second}
+	cors := getCORSHeaders("*")
+	masterMux := http.NewServeMux()
+	masterMux.HandleFunc("GET /ping", respondPong)
+
+	srv := &http.Server{
+		Addr:              listenAddress,
+		Handler:           cors.Handler(masterMux),
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      5 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
+	listenConfig := &net.ListenConfig{KeepAlive: 3 * time.Minute}
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			lc := net.ListenConfig{}
-			ln, err := lc.Listen(ctx, "tcp4", srv.Addr)
+			ln, err := listenConfig.Listen(ctx, "tcp4", srv.Addr)
 			if err != nil {
 				return err
 			}
-			go srv.Serve(ln)
+			go runServer(srv, &ln, logger)
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {

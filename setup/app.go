@@ -50,7 +50,6 @@ func getCORSHeaders(allowedOrigin string) *cors.Cors {
 		AllowCredentials: true,
 		MaxAge:           int(time.Hour.Seconds() * 24),
 	})
-
 }
 
 func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {

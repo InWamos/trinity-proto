@@ -7,7 +7,7 @@ import (
 	"github.com/InWamos/trinity-proto/config"
 )
 
-func getLogger(loggerConfig *config.LoggingConfig) *slog.Logger {
+func GetLogger(loggerConfig *config.LoggingConfig) *slog.Logger {
 	var logLevel slog.Level
 	if err := logLevel.UnmarshalText([]byte(loggerConfig.Level)); err != nil {
 		logLevel = slog.LevelInfo

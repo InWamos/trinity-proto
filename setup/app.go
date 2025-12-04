@@ -6,35 +6,12 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/InWamos/trinity-proto/config"
 	"github.com/rs/cors"
 	"go.uber.org/fx"
 )
-
-func getLogger(level string) *slog.Logger {
-	var logLevel slog.Level
-	if err := logLevel.UnmarshalText([]byte(level)); err != nil {
-		logLevel = slog.LevelInfo
-	}
-	opts := &slog.HandlerOptions{
-		Level:     logLevel,
-		AddSource: true,
-	}
-
-	handler := slog.NewJSONHandler(os.Stdout, opts)
-	return slog.New(handler)
-}
-
-func getConfig() (*config.AppConfig, error) {
-	config, err := config.NewAppConfig()
-	if err != nil {
-		return nil, err
-	}
-	return config, nil
-}
 
 func respondPong(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

@@ -9,24 +9,13 @@ import (
 	"time"
 
 	"github.com/InWamos/trinity-proto/config"
-	"github.com/rs/cors"
+	"github.com/InWamos/trinity-proto/middleware"
 	"go.uber.org/fx"
 )
 
 func respondPong(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("{\"hello\": \"world\"}"))
-}
-
-func getCORSHeaders(allowedOrigin string) *cors.Cors {
-	return cors.New(cors.Options{
-		AllowedOrigins:   []string{allowedOrigin},
-		AllowedMethods:   []string{"GET", "DELETE", "PUT", "PATCH", "POST"},
-		AllowedHeaders:   []string{"Origin"},
-		ExposedHeaders:   []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           int(time.Hour.Seconds() * 24),
-	})
 }
 
 func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {
@@ -36,15 +25,21 @@ func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger)
 	}
 }
 
-func NewHTTPServer(lc fx.Lifecycle, serverConfig *config.ServerConfig, logger *slog.Logger) *http.Server {
+func NewHTTPServer(
+	lc fx.Lifecycle,
+	serverConfig *config.ServerConfig,
+	corsMiddleware *middleware.GlobalCORSMiddleware,
+	trustedProxyMiddleware *middleware.TrustedProxyMiddleware,
+	logger *slog.Logger,
+) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
-	cors := getCORSHeaders(serverConfig.AllowedOrigin)
 	masterMux := http.NewServeMux()
 	masterMux.HandleFunc("GET /ping", respondPong)
+	masterHandler := corsMiddleware.Handler()(trustedProxyMiddleware.Handler()(masterMux))
 
 	srv := &http.Server{
 		Addr:              listenAddress,
-		Handler:           cors.Handler(masterMux),
+		Handler:           masterHandler,
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      5 * time.Second,
 		MaxHeaderBytes:    1 << 20,

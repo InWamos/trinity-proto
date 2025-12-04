@@ -4,11 +4,21 @@ import (
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/InWamos/trinity-proto/config"
 )
 
-func TrustedProxyMiddleware(trustedProxies []string) func(http.Handler) http.Handler {
+type TrustedProxyMiddleware struct {
+	trustedProxies []string
+}
+
+func NewTrustedProxyMiddleware(serverConfig *config.ServerConfig) *TrustedProxyMiddleware {
+	return &TrustedProxyMiddleware{trustedProxies: []string{serverConfig.TrustedProxy}}
+}
+
+func (middleware *TrustedProxyMiddleware) Handler() func(http.Handler) http.Handler {
 	trustedMap := make(map[string]bool)
-	for _, ip := range trustedProxies {
+	for _, ip := range middleware.trustedProxies {
 		trustedMap[ip] = true
 	}
 

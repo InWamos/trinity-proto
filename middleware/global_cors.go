@@ -4,12 +4,21 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/InWamos/trinity-proto/config"
 	"github.com/rs/cors"
 )
 
-func GlobalCORSHeaders(allowedOrigin []string) func(http.Handler) http.Handler {
+type GlobalCORSMiddleware struct {
+	allowedOrigin string
+}
+
+func NewGlobalCORSMiddleware(serverConfig *config.ServerConfig) *GlobalCORSMiddleware {
+	return &GlobalCORSMiddleware{allowedOrigin: serverConfig.AllowedOrigin}
+}
+
+func (middleware *GlobalCORSMiddleware) Handler() func(http.Handler) http.Handler {
 	corsHeaders := cors.New(cors.Options{
-		AllowedOrigins:   allowedOrigin,
+		AllowedOrigins:   []string{middleware.allowedOrigin},
 		AllowedMethods:   []string{"GET", "DELETE", "PUT", "PATCH", "POST"},
 		AllowedHeaders:   []string{"Origin"},
 		ExposedHeaders:   []string{"Content-Length"},

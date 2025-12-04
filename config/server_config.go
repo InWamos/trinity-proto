@@ -7,7 +7,6 @@ import (
 type ServerConfig struct {
 	BindAddress   string `mapstructure:"SERVER_ADDRESS"`
 	Port          int    `mapstructure:"SERVER_PORT"`
-	Mode          string `mapstructure:"SERVER_MODE"`
 	TrustedProxy  string `mapstructure:"SERVER_TRUSTED_PROXY"`
 	AllowedOrigin string `mapstructure:"SERVER_ALLOWED_ORIGIN"`
 }

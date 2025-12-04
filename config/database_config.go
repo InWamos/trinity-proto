@@ -12,6 +12,15 @@ type DatabaseConfig struct {
 }
 
 func NewDatabaseConfig() (*DatabaseConfig, error) {
+	viper.AutomaticEnv()
+
+	_ = viper.BindEnv("DATABASE_ADDRESS")
+	_ = viper.BindEnv("DATABASE_PORT")
+	_ = viper.BindEnv("DATABASE_NAME")
+	_ = viper.BindEnv("DATABASE_USER")
+	_ = viper.BindEnv("DATABASE_PASSWORD")
+	_ = viper.BindEnv("DATABASE_SSL_MODE")
+
 	var databaseConfig DatabaseConfig
 	if err := viper.Unmarshal(&databaseConfig); err != nil {
 		return nil, err

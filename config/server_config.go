@@ -12,6 +12,13 @@ type ServerConfig struct {
 }
 
 func NewServerConfig() (*ServerConfig, error) {
+	viper.AutomaticEnv()
+
+	_ = viper.BindEnv("SERVER_ADDRESS")
+	_ = viper.BindEnv("SERVER_PORT")
+	_ = viper.BindEnv("SERVER_TRUSTED_PROXY")
+	_ = viper.BindEnv("SERVER_ALLOWED_ORIGIN")
+
 	var serverConfig ServerConfig
 	if err := viper.Unmarshal(&serverConfig); err != nil {
 		return nil, err

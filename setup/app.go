@@ -36,9 +36,9 @@ func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger)
 	}
 }
 
-func NewHTTPServer(lc fx.Lifecycle, serverConfig *config.AppConfig, logger *slog.Logger) *http.Server {
-	listenAddress := fmt.Sprintf("%s:%d", serverConfig.GinConfig.BindAddress, serverConfig.GinConfig.Port)
-	cors := getCORSHeaders("*")
+func NewHTTPServer(lc fx.Lifecycle, serverConfig *config.ServerConfig, logger *slog.Logger) *http.Server {
+	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
+	cors := getCORSHeaders(serverConfig.AllowedOrigin)
 	masterMux := http.NewServeMux()
 	masterMux.HandleFunc("GET /ping", respondPong)
 

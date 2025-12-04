@@ -1,0 +1,36 @@
+package middleware
+
+import (
+	"net"
+	"net/http"
+	"strings"
+)
+
+func TrustedProxyMiddleware(trustedProxies []string) func(http.Handler) http.Handler {
+	trustedMap := make(map[string]bool)
+	for _, ip := range trustedProxies {
+		trustedMap[ip] = true
+	}
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Get the remote IP (without port)
+			remoteIP, _, _ := net.SplitHostPort(r.RemoteAddr)
+
+			// Only trust X-Forwarded-For if request comes from trusted proxy
+			if trustedMap[remoteIP] {
+				if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+					// Take the first IP (leftmost = original client)
+					if idx := strings.Index(xff, ","); idx != -1 {
+						xff = strings.TrimSpace(xff[:idx])
+					}
+					// Store in context or custom header for handlers to use
+					r.RemoteAddr = xff + ":0"
+				}
+			}
+			// If not from trusted proxy, keep original RemoteAddr
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}

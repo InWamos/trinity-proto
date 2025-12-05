@@ -28,6 +28,7 @@ func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger)
 func NewHTTPServer(
 	lc fx.Lifecycle,
 	serverConfig *config.ServerConfig,
+	loggingMiddleware *middleware.LoggingMiddleware,
 	corsMiddleware *middleware.GlobalCORSMiddleware,
 	trustedProxyMiddleware *middleware.TrustedProxyMiddleware,
 	logger *slog.Logger,
@@ -35,7 +36,7 @@ func NewHTTPServer(
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
 	masterMux.HandleFunc("GET /ping", respondPong)
-	masterHandler := corsMiddleware.Handler()(trustedProxyMiddleware.Handler()(masterMux))
+	masterHandler := loggingMiddleware.Handler(corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)))
 
 	srv := &http.Server{
 		Addr:              listenAddress,

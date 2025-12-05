@@ -16,7 +16,11 @@ func main() {
 	fx.New(
 		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig),
 		fx.Provide(logger.GetLogger),
-		fx.Provide(middleware.NewGlobalCORSMiddleware, middleware.NewTrustedProxyMiddleware),
+		fx.Provide(
+			middleware.NewGlobalCORSMiddleware,
+			middleware.NewTrustedProxyMiddleware,
+			middleware.NewLoggingMiddleware,
+		),
 		fx.Provide(setup.NewHTTPServer),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &fxevent.SlogLogger{Logger: logger}

@@ -16,7 +16,7 @@ func NewGlobalCORSMiddleware(serverConfig *config.ServerConfig) *GlobalCORSMiddl
 	return &GlobalCORSMiddleware{allowedOrigin: serverConfig.AllowedOrigin}
 }
 
-func (middleware *GlobalCORSMiddleware) Handler() func(http.Handler) http.Handler {
+func (middleware *GlobalCORSMiddleware) Handler(next http.Handler) http.Handler {
 	corsHeaders := cors.New(cors.Options{
 		AllowedOrigins:   []string{middleware.allowedOrigin},
 		AllowedMethods:   []string{"GET", "DELETE", "PUT", "PATCH", "POST"},
@@ -25,7 +25,6 @@ func (middleware *GlobalCORSMiddleware) Handler() func(http.Handler) http.Handle
 		AllowCredentials: true,
 		MaxAge:           int(time.Hour.Seconds() * 24),
 	})
-	return func(h http.Handler) http.Handler {
-		return corsHeaders.Handler(h)
-	}
+
+	return corsHeaders.Handler(next)
 }

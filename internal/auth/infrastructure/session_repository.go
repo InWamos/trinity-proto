@@ -2,9 +2,14 @@ package infrastructure
 
 import (
 	"context"
+	"errors"
 
 	"github.com/InWamos/trinity-proto/internal/auth/domain"
 	"github.com/google/uuid"
+)
+
+var (
+	ErrSessionNotFound = errors.New("session not found")
 )
 
 type SessionRepository interface {

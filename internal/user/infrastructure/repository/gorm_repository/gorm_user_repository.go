@@ -18,7 +18,7 @@ type GormUserRepository struct {
 	logger     *slog.Logger
 }
 
-func NewGormUserRepository(session *gorm.DB, logger *slog.Logger) *GormUserRepository {
+func NewGormUserRepository(session *gorm.DB, logger *slog.Logger) repository.UserRepository {
 	urlogger := logger.With(
 		slog.String("component", "repository"),
 		slog.String("name", "gorm_user_repository"),

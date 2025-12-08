@@ -19,8 +19,8 @@ var (
 	ErrDatabaseFailed          = errors.New("the database operation has failed")
 )
 
-// Input DTO.
-type createUserRequest struct {
+// CreateUserRequest Input DTO for interactor.
+type CreateUserRequest struct {
 	Username    string
 	DisplayName string
 	Password    string
@@ -55,7 +55,7 @@ func NewCreateUser(
 	}
 }
 
-func (interactor *CreateUser) Execute(ctx context.Context, input createUserRequest) error {
+func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) error {
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")

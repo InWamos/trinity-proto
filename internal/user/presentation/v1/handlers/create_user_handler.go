@@ -7,7 +7,7 @@ import (
 
 	"github.com/InWamos/trinity-proto/internal/user/application"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/go-playground/validator/v10"
+	"github.com/InWamos/trinity-proto/internal/user/presentation/service"
 )
 
 type createUserForm struct {
@@ -19,31 +19,25 @@ type createUserForm struct {
 
 type CreateUserHandler struct {
 	interactor *application.CreateUser
-	validator  *validator.Validate
+	validator  service.PostFormValidator
 	logger     *slog.Logger
 }
 
 // NewCreateUserHandler builds a new CreateUserHandler.
 func NewCreateUserHandler(
 	interactor *application.CreateUser,
-	validator *validator.Validate,
+	validator service.PostFormValidator,
 	logger *slog.Logger,
 ) *CreateUserHandler {
 	cuhLogger := logger.With(slog.String("component", "handler"), slog.String("name", "create_user"))
 	return &CreateUserHandler{interactor: interactor, validator: validator, logger: cuhLogger}
 }
 
-// ServeHTTP handles an HTTP request to the /user/create endpoint.
+// ServeHTTP handles an HTTP request to the POST /api/v1/user/ endpoint.
 func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var userForm createUserForm
-	if err := json.NewDecoder(r.Body).Decode(&userForm); err != nil {
-		handler.logger.DebugContext(r.Context(), "failed to validate json body of request", slog.Any("err", err))
-		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
-		return
-	}
-	if err := handler.validator.Struct(userForm); err != nil {
-		handler.logger.DebugContext(r.Context(), "failed to validate body of request", slog.Any("err", err))
+	if err := handler.validator.ValidateBody(r.Body, userForm); err != nil {
+		handler.logger.DebugContext(r.Context(), "failed to validate the form", slog.Any("err", err))
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
 		return

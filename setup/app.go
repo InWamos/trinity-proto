@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/InWamos/trinity-proto/config"
+	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"
+
 	"github.com/InWamos/trinity-proto/middleware"
 	"go.uber.org/fx"
 )
@@ -31,11 +33,13 @@ func NewHTTPServer(
 	loggingMiddleware *middleware.LoggingMiddleware,
 	corsMiddleware *middleware.GlobalCORSMiddleware,
 	trustedProxyMiddleware *middleware.TrustedProxyMiddleware,
+	userMuxV1 *userV1Mux.UserMuxV1,
 	logger *slog.Logger,
 ) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
 	masterMux.HandleFunc("GET /ping", respondPong)
+	masterMux.Handle("/api/v1/users", userMuxV1.GetMux())
 	masterHandler := loggingMiddleware.Handler(corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)))
 
 	srv := &http.Server{

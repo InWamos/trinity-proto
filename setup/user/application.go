@@ -14,6 +14,7 @@ func NewUserApplicationContainer() fx.Option {
 			service.NewBcryptPasswordHasher,
 			// Provides uuid generator
 			service.NewUUIDGenerator,
+			// Provides CreateUserInteractor
 			application.NewCreateUser,
 		),
 	)

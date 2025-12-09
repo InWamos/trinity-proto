@@ -6,10 +6,14 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/presentation/v1/handlers"
 )
 
-func GetUserMuxV1(createUserHandler *handlers.CreateUserHandler) *http.ServeMux {
+type UserMuxV1 struct {
+	mux *http.ServeMux
+}
+
+func NewUserMuxV1(createUserHandler *handlers.CreateUserHandler) *UserMuxV1 {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /", createUserHandler.ServeHTTP)
 
-	return mux
+	return &UserMuxV1{mux: mux}
 }

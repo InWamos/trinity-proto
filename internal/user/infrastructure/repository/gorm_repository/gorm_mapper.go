@@ -9,6 +9,10 @@ import (
 type GormMapper struct {
 }
 
+func NewGormMapper() *GormMapper {
+	return &GormMapper{}
+}
+
 func (gm *GormMapper) ToDomain(inputModel *models.UserModel) domain.User {
 	return *domain.NewUser(inputModel.ID, inputModel.Username,
 		inputModel.DisplayName, inputModel.PasswordHash,

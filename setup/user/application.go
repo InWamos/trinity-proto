@@ -8,7 +8,7 @@ import (
 
 func NewUserApplicationContainer() fx.Option {
 	return fx.Module(
-		"user_presentation",
+		"user_application",
 		fx.Provide(
 			// Provides password hasher
 			service.NewBcryptPasswordHasher,

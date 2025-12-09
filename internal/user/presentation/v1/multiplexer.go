@@ -17,3 +17,7 @@ func NewUserMuxV1(createUserHandler *handlers.CreateUserHandler) *UserMuxV1 {
 
 	return &UserMuxV1{mux: mux}
 }
+
+func (um *UserMuxV1) GetMux() *http.ServeMux {
+	return um.mux
+}

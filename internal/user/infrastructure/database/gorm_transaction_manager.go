@@ -1,10 +1,12 @@
 package database
 
+import "github.com/InWamos/trinity-proto/internal/shared/interfaces"
+
 type GormTransactionManager struct {
 	session *GormSession
 }
 
-func NewTransactionManager(session *GormSession) *GormTransactionManager {
+func NewTransactionManager(session *GormSession) interfaces.TransactionManager {
 	return &GormTransactionManager{session: session}
 }
 

@@ -13,6 +13,10 @@ var (
 type UUIDGenerator struct {
 }
 
+func NewUUIDGenerator() *UUIDGenerator {
+	return &UUIDGenerator{}
+}
+
 func (ug *UUIDGenerator) GetUUIDv7() (uuid.UUID, error) {
 	result, err := uuid.NewV7()
 	if err != nil {

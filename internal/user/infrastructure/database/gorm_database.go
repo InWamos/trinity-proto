@@ -40,6 +40,10 @@ func NewGormDatabase(config config.DatabaseConfig) (*GormDatabase, error) {
 	return &GormDatabase{engine: engine}, nil
 }
 
+func (db *GormDatabase) GetEngine() *gorm.DB {
+	return db.engine
+}
+
 func (db *GormDatabase) GetSession(ctx context.Context) *GormSession {
 	tx := db.engine.WithContext(ctx).Begin()
 	return &GormSession{tx: tx}

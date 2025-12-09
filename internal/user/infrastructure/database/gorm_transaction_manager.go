@@ -6,7 +6,7 @@ type GormTransactionManager struct {
 	session *GormSession
 }
 
-func NewTransactionManager(session *GormSession) interfaces.TransactionManager {
+func NewGormTransactionManager(session *GormSession) interfaces.TransactionManager {
 	return &GormTransactionManager{session: session}
 }
 

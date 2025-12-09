@@ -15,11 +15,6 @@ import (
 	"go.uber.org/fx"
 )
 
-func respondPong(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{\"hello\": \"world\"}"))
-}
-
 func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {
 	if err := server.Serve(*listener); err != nil {
 		logger.Error("Failed to start server", slog.Any("err", err))
@@ -38,7 +33,6 @@ func NewHTTPServer(
 ) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
-	masterMux.HandleFunc("GET /ping", respondPong)
 	masterMux.Handle("/api/v1/users", userMuxV1.GetMux())
 	masterHandler := loggingMiddleware.Handler(corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)))
 

@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "docker-compose-up-migrations",
+            "type": "shell",
+            "command": "docker compose up -d && sleep 5 && migrate -path ${workspaceFolder}/internal/user/infrastructure/migrations -database \"postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@localhost:5432/${DATABASE_NAME}?sslmode=disable\" up",
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": [],
+            "isBackground": false
+        }
+    ]
+}

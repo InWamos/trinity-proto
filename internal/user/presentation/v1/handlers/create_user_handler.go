@@ -36,7 +36,7 @@ func NewCreateUserHandler(
 // ServeHTTP handles an HTTP request to the POST /api/v1/user/ endpoint.
 func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var userForm createUserForm
-	if err := handler.validator.ValidateBody(r.Body, userForm); err != nil {
+	if err := handler.validator.ValidateBody(r.Body, &userForm); err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to validate the form", slog.Any("err", err))
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})

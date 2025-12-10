@@ -1,8 +1,11 @@
+-- Create schema for user module
+CREATE SCHEMA IF NOT EXISTS "user";
+
 -- Create enum for role column
-CREATE TYPE user_role AS ENUM ('user', 'admin');
+CREATE TYPE "user".user_role AS ENUM ('user', 'admin');
 
 -- Create users table
-CREATE TABLE users (
+CREATE TABLE "user".users (
     id UUID PRIMARY KEY NOT NULL,
     username VARCHAR(32) NOT NULL UNIQUE,
     display_name VARCHAR(255) NOT NULL,
@@ -14,5 +17,5 @@ CREATE TABLE users (
 );
 
 -- Create indexes
-CREATE INDEX idx_users_id ON users(id);
-CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_id ON "user".users(id);
+CREATE INDEX idx_users_username ON "user".users(username);

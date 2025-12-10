@@ -19,7 +19,7 @@ type GormDatabase struct {
 	engine *gorm.DB
 }
 
-func NewGormDatabase(config config.DatabaseConfig) (*GormDatabase, error) {
+func NewGormDatabase(config *config.DatabaseConfig) (*GormDatabase, error) {
 	dsn := buildGormDSN(
 		config.Address,
 		config.DatabaseUser,

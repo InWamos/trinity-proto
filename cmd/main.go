@@ -13,6 +13,24 @@ import (
 	"go.uber.org/fx/fxevent"
 )
 
+//	@title			Trinity API
+//	@version		1.0
+//	@description	Trinity API schema.
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	MIT
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.apikey	SessionCookie
+//	@in							cookie
+//	@name						session_id
+//	@description				Session cookie for authenticated requests. Roles: Admin, User
+
 func main() {
 	fx.New(
 		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig),

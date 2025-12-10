@@ -1,0 +1,20 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Trinity API schema.
+  license:
+    name: MIT
+  title: Trinity API
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  SessionCookie:
+    description: 'Session cookie for authenticated requests. Roles: Admin, User'
+    in: cookie
+    name: session_id
+    type: apiKey
+swagger: "2.0"

@@ -10,7 +10,7 @@ CREATE TABLE "user".users (
     username VARCHAR(32) NOT NULL UNIQUE,
     display_name VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role user_role NOT NULL DEFAULT 'user',
+    role "user".user_role NOT NULL DEFAULT 'user',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE,
     CONSTRAINT username_length CHECK (LENGTH(username) > 0)

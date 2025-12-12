@@ -66,6 +66,56 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+// VerboseFxLogger logs every fx event including constructor calls
+type VerboseFxLogger struct {
+	logger *slog.Logger
+}
+
+func (l *VerboseFxLogger) LogEvent(event fxevent.Event) {
+	switch e := event.(type) {
+	case *fxevent.OnStartExecuting:
+		l.logger.Info("fx lifecycle: OnStart hook executing",
+			slog.String("caller", e.FunctionName),
+			slog.String("callee", e.CallerName))
+	case *fxevent.OnStartExecuted:
+		l.logger.Info("fx lifecycle: OnStart hook executed",
+			slog.String("caller", e.FunctionName),
+			slog.String("callee", e.CallerName),
+			slog.Duration("runtime", e.Runtime))
+	case *fxevent.OnStopExecuting:
+		l.logger.Info("fx lifecycle: OnStop hook executing",
+			slog.String("caller", e.FunctionName),
+			slog.String("callee", e.CallerName))
+	case *fxevent.OnStopExecuted:
+		l.logger.Info("fx lifecycle: OnStop hook executed",
+			slog.String("caller", e.FunctionName),
+			slog.String("callee", e.CallerName),
+			slog.Duration("runtime", e.Runtime))
+	case *fxevent.Supplied:
+		l.logger.Info("fx: constructor supplied",
+			slog.String("type", e.TypeName))
+	case *fxevent.Provided:
+		for _, output := range e.OutputTypeNames {
+			l.logger.Info("fx: object created",
+				slog.String("constructor", e.ConstructorName),
+				slog.String("type", output),
+				slog.Bool("private", e.Private))
+		}
+	case *fxevent.Invoked:
+		l.logger.Info("fx: function invoked",
+			slog.String("function", e.FunctionName))
+	case *fxevent.Invoking:
+		l.logger.Info("fx: invoking function",
+			slog.String("function", e.FunctionName))
+	case *fxevent.Started:
+		l.logger.Info("fx: application started",
+			slog.Any("error", e.Err))
+	case *fxevent.Stopped:
+		l.logger.Info("fx: application stopped",
+			slog.Any("error", e.Err))
+	}
+}
+
 // startTestServer starts the fx application for testing
 func startTestServer(t *testing.T) *fxtest.App {
 	t.Helper()
@@ -81,7 +131,7 @@ func startTestServer(t *testing.T) *fxtest.App {
 		user.NewUserModuleContainer(),
 		fx.Provide(setup.NewHTTPServer),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
-			return &fxevent.SlogLogger{Logger: logger}
+			return &VerboseFxLogger{logger: logger}
 		}),
 		fx.Invoke(func(*http.Server) {}),
 	)

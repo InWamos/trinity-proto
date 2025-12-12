@@ -12,7 +12,7 @@ import (
 
 type createUserForm struct {
 	Username    string `json:"username"     validate:"required,alphanum,min=2,max=32"`
-	DisplayName string `json:"display_name" validate:"required,alphanumunicode,min=1,max=64"`
+	DisplayName string `json:"display_name" validate:"required,min=1,max=64"`
 	Password    string `json:"password"     validate:"required,alphanumunicode,min=8,max=64"`
 	Role        string `json:"role"         validate:"required,oneof=user admin"`
 }

@@ -18,6 +18,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  migrate:
+    image: migrate/migrate:v4.19.1
+    container_name: migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./internal/user/infrastructure/migrations:/migrations
+    command: -path=/migrations -database=postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}?sslmode=disable up
+    networks:
+      trinity-net:
+        ipv4_address: 172.20.0.3
+    healthcheck:
+      test: ["CMD", "test", "-f", "/migrations/.migrate-completed"]
+      interval: 5s
+      timeout: 5s
+      retries: 0
 
   redis:
     image: redis:8.4-bookworm
@@ -28,7 +46,7 @@ services:
       - redis_data:/data
     networks:
       trinity-net:
-        ipv4_address: 172.20.0.3
+        ipv4_address: 172.20.0.4
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -54,12 +72,14 @@ services:
       - "8080:8080"
     networks:
       trinity-net:
-        ipv4_address: 172.20.0.4
+        ipv4_address: 172.20.0.5
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: "service_completed_successfully"
 
 networks:
   trinity-net:

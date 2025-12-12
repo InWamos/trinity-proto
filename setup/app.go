@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"time"
 
+	_ "net/http/pprof"
+
 	"github.com/InWamos/trinity-proto/config"
 	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"
-
 	"github.com/InWamos/trinity-proto/middleware"
 	"go.uber.org/fx"
 )

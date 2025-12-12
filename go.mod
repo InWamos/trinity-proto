@@ -5,6 +5,7 @@ go 1.25.2
 require (
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/google/uuid v1.6.0
+	github.com/orandin/slog-gorm v1.4.0
 	github.com/redis/go-redis/v9 v9.17.2
 	github.com/rs/cors v1.11.1
 	github.com/spf13/viper v1.21.0

@@ -23,3 +23,7 @@ type UserModel struct {
 	CreatedAt    time.Time
 	DeletedAt    gorm.DeletedAt
 }
+
+func (UserModel) TableName() string {
+	return "user.users"
+}

@@ -57,7 +57,7 @@ services:
     build: .
     container_name: trinity-app
     environment:
-      DATABASE_ADDRESS: postgres
+      DATABASE_ADDRESS: ${DATABASE_ADDRESS}
       DATABASE_PORT: ${DATABASE_PORT}
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER: ${DATABASE_USER}

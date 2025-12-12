@@ -3,9 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/InWamos/trinity-proto/config"
+	slogGorm "github.com/orandin/slog-gorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -19,7 +21,16 @@ type GormDatabase struct {
 	engine *gorm.DB
 }
 
-func NewGormDatabase(config *config.DatabaseConfig) (*GormDatabase, error) {
+func NewGormDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*GormDatabase, error) {
+	gdlogger := logger.With(
+		slog.String("component", "database_engine"),
+	)
+	gdlogger.Debug("The Gorm database engine has been invoked")
+	gormLogger := slogGorm.New(
+		slogGorm.WithHandler(gdlogger.Handler()),
+		slogGorm.WithTraceAll(),
+		slogGorm.SetLogLevel(slogGorm.DefaultLogType, slog.LevelInfo),
+	)
 	dsn := buildGormDSN(
 		config.Address,
 		config.DatabaseUser,
@@ -32,6 +43,7 @@ func NewGormDatabase(config *config.DatabaseConfig) (*GormDatabase, error) {
 	// Horrible feature, you will loose a fraction of your brain cells by leaving it enabled
 	engine, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true,
+		Logger:                 gormLogger,
 	})
 	if err != nil {
 		return nil, err

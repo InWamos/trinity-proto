@@ -74,44 +74,44 @@ type VerboseFxLogger struct {
 func (l *VerboseFxLogger) LogEvent(event fxevent.Event) {
 	switch e := event.(type) {
 	case *fxevent.OnStartExecuting:
-		l.logger.Info("fx lifecycle: OnStart hook executing",
+		l.logger.Debug("fx lifecycle: OnStart hook executing",
 			slog.String("caller", e.FunctionName),
 			slog.String("callee", e.CallerName))
 	case *fxevent.OnStartExecuted:
-		l.logger.Info("fx lifecycle: OnStart hook executed",
+		l.logger.Debug("fx lifecycle: OnStart hook executed",
 			slog.String("caller", e.FunctionName),
 			slog.String("callee", e.CallerName),
 			slog.Duration("runtime", e.Runtime))
 	case *fxevent.OnStopExecuting:
-		l.logger.Info("fx lifecycle: OnStop hook executing",
+		l.logger.Debug("fx lifecycle: OnStop hook executing",
 			slog.String("caller", e.FunctionName),
 			slog.String("callee", e.CallerName))
 	case *fxevent.OnStopExecuted:
-		l.logger.Info("fx lifecycle: OnStop hook executed",
+		l.logger.Debug("fx lifecycle: OnStop hook executed",
 			slog.String("caller", e.FunctionName),
 			slog.String("callee", e.CallerName),
 			slog.Duration("runtime", e.Runtime))
 	case *fxevent.Supplied:
-		l.logger.Info("fx: constructor supplied",
+		l.logger.Debug("fx: constructor supplied",
 			slog.String("type", e.TypeName))
 	case *fxevent.Provided:
 		for _, output := range e.OutputTypeNames {
-			l.logger.Info("fx: object created",
+			l.logger.Debug("fx: object created",
 				slog.String("constructor", e.ConstructorName),
 				slog.String("type", output),
 				slog.Bool("private", e.Private))
 		}
 	case *fxevent.Invoked:
-		l.logger.Info("fx: function invoked",
+		l.logger.Debug("fx: function invoked",
 			slog.String("function", e.FunctionName))
 	case *fxevent.Invoking:
-		l.logger.Info("fx: invoking function",
+		l.logger.Debug("fx: invoking function",
 			slog.String("function", e.FunctionName))
 	case *fxevent.Started:
-		l.logger.Info("fx: application started",
+		l.logger.Debug("fx: application started",
 			slog.Any("error", e.Err))
 	case *fxevent.Stopped:
-		l.logger.Info("fx: application stopped",
+		l.logger.Debug("fx: application stopped",
 			slog.Any("error", e.Err))
 	}
 }

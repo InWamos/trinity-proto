@@ -27,7 +27,10 @@ func NewGormUserRepository(session *gorm.DB, logger *slog.Logger) repository.Use
 }
 
 func (ur *GormUserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
+	ur.logger.DebugContext(ctx, "Started GetUserByID request")
 	user, err := gorm.G[models.UserModel](ur.session).Where("id = ?", id).First(ctx)
+	ur.logger.DebugContext(ctx, "Finished GetUserByID request")
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by id", slog.String("user_id", id.String()))
@@ -38,7 +41,9 @@ func (ur *GormUserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (do
 }
 
 func (ur *GormUserRepository) GetUserByUsername(ctx context.Context, username string) (domain.User, error) {
+	ur.logger.DebugContext(ctx, "Started GetUserByUsername request")
 	user, err := gorm.G[models.UserModel](ur.session).Where("username = ?", username).First(ctx)
+	ur.logger.DebugContext(ctx, "Finished GetUserByUsername request")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by username", slog.String("user_username", username))
@@ -56,7 +61,10 @@ func (ur *GormUserRepository) GetUserByUsername(ctx context.Context, username st
 }
 
 func (ur *GormUserRepository) RemoveUserByID(ctx context.Context, id uuid.UUID) error {
+	ur.logger.DebugContext(ctx, "Started RemoveUserByID request")
 	rowsAffected, err := gorm.G[models.UserModel](ur.session).Where("id = ?", id).Delete(ctx)
+	ur.logger.DebugContext(ctx, "Finished RemoveUserByID request")
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by id", slog.String("id", id.String()))
@@ -80,7 +88,9 @@ func (ur *GormUserRepository) RemoveUserByID(ctx context.Context, id uuid.UUID) 
 }
 
 func (ur *GormUserRepository) ChangeUserRoleByID(ctx context.Context, id uuid.UUID, changeToRole domain.Role) error {
+	ur.logger.DebugContext(ctx, "Started ChangeUserRoleByID request")
 	rowsAffected, err := gorm.G[models.UserModel](ur.session).Where("id = ?", id).Update(ctx, "role", changeToRole)
+	ur.logger.DebugContext(ctx, "Finished ChangeUserRoleByID request")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.logger.InfoContext(ctx, "User not found by id", slog.String("user_id", id.String()))
@@ -104,8 +114,11 @@ func (ur *GormUserRepository) ChangeUserRoleByID(ctx context.Context, id uuid.UU
 }
 
 func (ur *GormUserRepository) CreateUser(ctx context.Context, user domain.User) error {
+	ur.logger.DebugContext(ctx, "Started CreateUser request")
 	userModel := ur.gormMapper.ToModel(&user)
 	err := gorm.G[models.UserModel](ur.session).Create(ctx, &userModel)
+	ur.logger.DebugContext(ctx, "Finished CreateUser request")
+
 	if err != nil {
 		ur.logger.ErrorContext(ctx, "Failed to save user record", slog.Any("err", err))
 		return repository.ErrUserCreationFailed

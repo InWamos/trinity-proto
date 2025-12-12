@@ -56,6 +56,7 @@ func NewCreateUser(
 }
 
 func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) error {
+	interactor.logger.DebugContext(ctx, "Started Create User execution")
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")
@@ -77,6 +78,6 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
 		return ErrDatabaseFailed
 	}
-
+	interactor.logger.DebugContext(ctx, "Finished Create User execution")
 	return nil
 }

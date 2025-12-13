@@ -71,7 +71,7 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
 
-	transactionManager := interactor.transactionManagerFactory.NewTransaction(ctx)
+	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	userRepository := interactor.userRepositoryFactory.CreateUserRepository(ctx)
 	err = userRepository.CreateUser(ctx, *newUser)
 	if err != nil {

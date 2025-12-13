@@ -126,3 +126,15 @@ func (ur *GormUserRepository) CreateUser(ctx context.Context, user domain.User) 
 	ur.logger.DebugContext(ctx, "User has been created", slog.String("user_id", userModel.ID.String()))
 	return nil
 }
+
+// type GormUserRepositoryFactory struct {
+// 	logger *slog.Logger
+// }
+
+// func NewGormUserRepositoryFactory(logger *slog.Logger) repository.UserRepositoryFactory {
+// 	return &GormUserRepositoryFactory{logger: logger}
+// }
+
+// func (*GormUserRepositoryFactory) CreateUserRepository(session any) repository.UserRepository {
+// 	return &GormUserRepository{session: session}
+// }

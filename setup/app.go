@@ -17,7 +17,7 @@ import (
 )
 
 func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {
-	if err := server.Serve(*listener); err != nil {
+	if err := server.Serve(*listener); err != nil && err != http.ErrServerClosed {
 		logger.Error("Failed to start server", slog.Any("err", err))
 		panic(err)
 	}

@@ -10,7 +10,7 @@ func NewBcryptPasswordHasher() PasswordHasher {
 }
 
 func (b *BcryptPasswordHasher) HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 20)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 

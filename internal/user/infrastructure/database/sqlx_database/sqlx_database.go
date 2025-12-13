@@ -1,4 +1,4 @@
-package sqlxdatabase
+package database
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/InWamos/trinity-proto/config"
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -19,7 +20,7 @@ type SQLXDatabase struct {
 	logger *slog.Logger
 }
 
-func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*SQLXDatabase, error) {
+func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (database.Database, error) {
 	dbLogger := logger.With(
 		slog.String("component", "database_engine"),
 	)

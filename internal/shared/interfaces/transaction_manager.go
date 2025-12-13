@@ -1,6 +1,8 @@
 package interfaces
 
+import "context"
+
 type TransactionManager interface {
-	Commit() error
-	Rollback() error
+	Commit(ctx context.Context) error
+	Rollback(ctx context.Context) error
 }

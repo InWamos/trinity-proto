@@ -1,31 +1,40 @@
 package database
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 )
 
 type GormTransactionManager struct {
-	session *GormSession
-	logger  *slog.Logger
+	transaction *GormTransaction
+	logger      *slog.Logger
 }
 
-func NewGormTransactionManager(session *GormSession, logger *slog.Logger) interfaces.TransactionManager {
+func NewGormTransactionManager(transaction *GormTransaction, logger *slog.Logger) interfaces.TransactionManager {
 	gtmLogger := logger.With("component", "gorm_transaction_manager")
-	return &GormTransactionManager{session: session, logger: gtmLogger}
+	return &GormTransactionManager{transaction: transaction, logger: gtmLogger}
 }
 
-func (tm *GormTransactionManager) Commit() error {
-	tm.logger.Debug("Commiting transaction")
-	if err := tm.session.tx.Commit().Error; err != nil {
+func (tm *GormTransactionManager) Commit(ctx context.Context) error {
+	tm.logger.DebugContext(ctx, "Commiting transaction")
+	if err := tm.transaction.tx.Commit().Error; err != nil {
 		tm.logger.Error("Failed to commit transaction", "err", err)
 		return err
 	}
-	tm.logger.Debug("Transaction commited")
+	tm.logger.DebugContext(ctx, "Transaction commited")
 	return nil
 }
 
-func (tm *GormTransactionManager) Rollback() error {
-	return tm.session.tx.Rollback().Error
+func (tm *GormTransactionManager) Rollback(ctx context.Context) error {
+	tm.logger.DebugContext(ctx, "rolling back transaction")
+
+	if err := tm.transaction.tx.Rollback().Error; err != nil {
+		tm.logger.ErrorContext(ctx, "failed to rollback transaction", slog.Any("error", err))
+		return err
+	}
+
+	tm.logger.DebugContext(ctx, "transaction rolled back")
+	return nil
 }

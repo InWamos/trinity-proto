@@ -1,7 +1,6 @@
 package database
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -54,11 +53,6 @@ func NewGormDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*GormD
 
 func (db *GormDatabase) GetEngine() *gorm.DB {
 	return db.engine
-}
-
-func (db *GormDatabase) GetSession(ctx context.Context) *GormSession {
-	tx := db.engine.WithContext(ctx).Begin()
-	return &GormSession{tx: tx}
 }
 
 func (db *GormDatabase) Dispose() error {

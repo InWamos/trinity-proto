@@ -74,7 +74,7 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		return ErrDatabaseFailed
 	}
 
-	if err = interactor.transactionManager.Commit(); err != nil {
+	if err = interactor.transactionManager.Commit(ctx); err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
 		return ErrDatabaseFailed
 	}

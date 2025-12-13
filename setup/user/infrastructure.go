@@ -1,8 +1,6 @@
 package user
 
 import (
-	"context"
-
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	gormrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/gorm_repository"
 	"go.uber.org/fx"
@@ -20,17 +18,13 @@ func NewUserInfrastructureContainer() fx.Option {
 			// Provides Transaction manager
 			database.NewGormTransactionManager,
 			// Provides GORM session
-			NewGormSession,
+			database.NewGormTransaction,
 			// Provides GormDatabase
 			database.NewGormDatabase,
 			// Provides *gorm.DB
 			NewGormDB,
 		),
 	)
-}
-
-func NewGormSession(gormDB *database.GormDatabase) *database.GormSession {
-	return gormDB.GetSession(context.Background())
 }
 
 func NewGormDB(gormDB *database.GormDatabase) *gorm.DB {

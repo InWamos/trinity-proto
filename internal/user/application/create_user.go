@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
 )
@@ -28,18 +28,18 @@ type CreateUserRequest struct {
 }
 
 type CreateUser struct {
-	passwordHasher     service.PasswordHasher
-	uuidGenerator      *service.UUIDGenerator
-	transactionManager interfaces.TransactionManager
-	userRepository     repository.UserRepository
-	logger             *slog.Logger
+	passwordHasher            service.PasswordHasher
+	uuidGenerator             *service.UUIDGenerator
+	transactionManagerFactory *database.GormTransactionFactory
+	userRepositoryFactory     repository.UserRepositoryFactory
+	logger                    *slog.Logger
 }
 
 func NewCreateUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator *service.UUIDGenerator,
-	transactionManager interfaces.TransactionManager,
-	userRepository repository.UserRepository,
+	transactionManagerFactory *database.GormTransactionFactory,
+	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *CreateUser {
 	culogger := logger.With(
@@ -47,11 +47,11 @@ func NewCreateUser(
 		slog.String("name", "create_user"),
 	)
 	return &CreateUser{
-		passwordHasher:     passwordHasher,
-		uuidGenerator:      uuidGenerator,
-		transactionManager: transactionManager,
-		userRepository:     userRepository,
-		logger:             culogger,
+		passwordHasher:            passwordHasher,
+		uuidGenerator:             uuidGenerator,
+		transactionManagerFactory: transactionManagerFactory,
+		userRepositoryFactory:     userRepositoryFactory,
+		logger:                    culogger,
 	}
 }
 
@@ -62,19 +62,24 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")
 		return ErrHashingFailed
 	}
+
 	var randomUUID uuid.UUID
 	if randomUUID, err = interactor.uuidGenerator.GetUUIDv7(); err != nil {
 		interactor.logger.ErrorContext(ctx, "The uuid generator has failed")
 		return ErrUUIDGeneration
 	}
+
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
-	err = interactor.userRepository.CreateUser(ctx, *newUser)
+
+	transactionManager := interactor.transactionManagerFactory.NewTransaction(ctx)
+	userRepository := interactor.userRepositoryFactory.CreateUserRepository(ctx)
+	err = userRepository.CreateUser(ctx, *newUser)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create user", slog.Any("err", err))
 		return ErrDatabaseFailed
 	}
 
-	if err = interactor.transactionManager.Commit(ctx); err != nil {
+	if err = transactionManager.Commit(ctx); err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
 		return ErrDatabaseFailed
 	}

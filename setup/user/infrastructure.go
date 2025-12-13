@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
+	database "github.com/InWamos/trinity-proto/internal/user/infrastructure/database/gorm_database"
 	gormrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/gorm_repository"
 	"go.uber.org/fx"
 )

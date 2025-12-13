@@ -1,8 +1,8 @@
 package user
 
 import (
-	database "github.com/InWamos/trinity-proto/internal/user/infrastructure/database/gorm_database"
-	gormrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/gorm_repository"
+	sqlxdatabase "github.com/InWamos/trinity-proto/internal/user/infrastructure/database/sqlx_database"
+	sqlxrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/sqlx_repository"
 	"go.uber.org/fx"
 )
 
@@ -10,14 +10,14 @@ func NewUserInfrastructureContainer() fx.Option {
 	return fx.Module(
 		"user_infrastructure",
 		fx.Provide(
-			// Provides Gorm mapper for repository
-			gormrepository.NewGormMapper,
-			// Provides User repository
-			gormrepository.NewGormUserRepository,
-			// Provides GORM session
-			database.NewGormTransactionFactory,
+			// Provides Sqlx mapper for repository
+			sqlxrepository.NewSqlxMapper,
+			// Provides User repository factory
+			sqlxrepository.NewSqlxUserRepositoryFactory,
+			// Provides GORM sessiona
+			sqlxdatabase.NewSQLXTransactionFactory,
 			// Provides GormDatabase
-			database.NewGormDatabase,
+			sqlxdatabase.NewSQLXDatabase,
 		),
 	)
 }

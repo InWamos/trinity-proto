@@ -10,6 +10,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 var (
@@ -72,7 +73,12 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
-	userRepository := interactor.userRepositoryFactory.CreateUserRepository(ctx)
+	if err != nil {
+		return err
+	}
+	transaction := transactionManager.GetTransaction().(*sqlx.Tx)
+
+	userRepository := interactor.userRepositoryFactory.CreateUserRepository(transaction)
 	err = userRepository.CreateUser(ctx, *newUser)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create user", slog.Any("err", err))

@@ -1,4 +1,4 @@
-package database
+package sqlxdatabase
 
 import (
 	"context"
@@ -40,6 +40,6 @@ func (tm *SQLXTransactionManager) Rollback(ctx context.Context) error {
 	return nil
 }
 
-func (tm *SQLXTransactionManager) GetTransaction() *sqlx.Tx {
+func (tm *SQLXTransactionManager) GetTransaction() any {
 	return tm.transaction
 }

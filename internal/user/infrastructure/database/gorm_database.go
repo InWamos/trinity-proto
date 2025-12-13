@@ -51,10 +51,6 @@ func NewGormDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*GormD
 	return &GormDatabase{engine: engine}, nil
 }
 
-func (db *GormDatabase) GetEngine() *gorm.DB {
-	return db.engine
-}
-
 func (db *GormDatabase) Dispose() error {
 	sqlDB, err := db.engine.DB()
 	if err != nil {

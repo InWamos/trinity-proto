@@ -53,10 +53,6 @@ func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (databa
 	}, nil
 }
 
-func (db *SQLXDatabase) GetEngine() *sqlx.DB {
-	return db.engine
-}
-
 func (db *SQLXDatabase) Dispose() error {
 	db.logger.Debug("closing database connection")
 	if err := db.engine.Close(); err != nil {

@@ -30,7 +30,7 @@ type CreateUserRequest struct {
 type CreateUser struct {
 	passwordHasher            service.PasswordHasher
 	uuidGenerator             *service.UUIDGenerator
-	transactionManagerFactory *database.GormTransactionFactory
+	transactionManagerFactory database.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	logger                    *slog.Logger
 }
@@ -38,7 +38,7 @@ type CreateUser struct {
 func NewCreateUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator *service.UUIDGenerator,
-	transactionManagerFactory *database.GormTransactionFactory,
+	transactionManagerFactory database.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *CreateUser {

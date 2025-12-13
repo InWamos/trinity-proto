@@ -20,3 +20,7 @@ type UserRepository interface {
 	ChangeUserRoleByID(ctx context.Context, id uuid.UUID, changeToRole domain.Role) error
 	CreateUser(ctx context.Context, user domain.User) error
 }
+
+type UserRepositoryFactory interface {
+	CreateUserRepository(session any) UserRepository
+}

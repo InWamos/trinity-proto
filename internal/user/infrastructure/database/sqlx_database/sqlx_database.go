@@ -1,4 +1,4 @@
-package database
+package sqlxdatabase
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/InWamos/trinity-proto/config"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -20,7 +20,7 @@ type SQLXDatabase struct {
 	logger *slog.Logger
 }
 
-func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (database.Database, error) {
+func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*SQLXDatabase, error) {
 	dbLogger := logger.With(
 		slog.String("component", "database_engine"),
 	)
@@ -35,7 +35,7 @@ func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (databa
 		config.DatabaseSslMode,
 	)
 
-	engine, err := sqlx.Connect("postgres", dsn)
+	engine, err := sqlx.Connect("pgx", dsn)
 	if err != nil {
 		dbLogger.Error("failed to connect to database", slog.Any("error", err))
 		return nil, err

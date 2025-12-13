@@ -58,5 +58,5 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]string{"message": "The user has been created. you can login now"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"message": "The user has been created. You can login now"})
 }

@@ -16,7 +16,7 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
-        "/api/v1/users": {
+        "/api/v1/users/": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
                 "consumes": [

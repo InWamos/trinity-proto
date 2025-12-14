@@ -27,7 +27,7 @@ func TestCreateUser_Success(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -77,7 +77,7 @@ func TestCreateUser_InvalidUsername_TooShort(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -116,7 +116,7 @@ func TestCreateUser_InvalidPassword_TooShort(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -155,7 +155,7 @@ func TestCreateUser_InvalidRole(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -192,7 +192,7 @@ func TestCreateUser_MissingFields(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -222,7 +222,7 @@ func TestCreateUser_InvalidJSON(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -261,7 +261,7 @@ func TestCreateUser_AdminRole(t *testing.T) {
 
 	// Make request
 	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)

@@ -10,10 +10,23 @@ type UserMuxV1 struct {
 	mux *http.ServeMux
 }
 
-func NewUserMuxV1(createUserHandler *handlers.CreateUserHandler) *UserMuxV1 {
+func NewUserMuxV1(
+	createUserHandler *handlers.CreateUserHandler,
+	getUserHandler *handlers.GetUserHandler,
+	promoteUserHandler *handlers.PromoteUserHandler,
+	demoteUserHandler *handlers.DemoteUserHandler,
+	removeUserHandler *handlers.RemoveUserHandler,
+) *UserMuxV1 {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /", createUserHandler.ServeHTTP)
+	// User CRUD operations with full paths
+	mux.HandleFunc("POST /api/v1/users", createUserHandler.ServeHTTP)
+	mux.HandleFunc("GET /api/v1/users/{id}", getUserHandler.ServeHTTP)
+	mux.HandleFunc("DELETE /api/v1/users/{id}", removeUserHandler.ServeHTTP)
+	
+	// User role management
+	mux.HandleFunc("PATCH /api/v1/users/{id}/promote", promoteUserHandler.ServeHTTP)
+	mux.HandleFunc("PATCH /api/v1/users/{id}/demote", demoteUserHandler.ServeHTTP)
 
 	return &UserMuxV1{mux: mux}
 }

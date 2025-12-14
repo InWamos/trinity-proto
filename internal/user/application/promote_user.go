@@ -55,7 +55,7 @@ func (interactor *PromoteUser) Execute(ctx context.Context, input PromoteUserReq
 		if rollbackErr := transactionManager.Rollback(ctx); rollbackErr != nil {
 			interactor.logger.ErrorContext(ctx, "failed to rollback transaction", slog.Any("err", rollbackErr))
 		}
-		
+
 		// Check if the error is because the user was not found
 		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, repository.ErrUserNotFound) {
 			return ErrUserNotFound

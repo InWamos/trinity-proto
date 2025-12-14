@@ -50,7 +50,7 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		Password:    userForm.Password,
 		Role:        domain.Role(userForm.Role),
 	}
-	err := handler.interactor.Execute(r.Context(), requestDTO)
+	response, err := handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to call the interactor", slog.Any("err", err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -59,5 +59,8 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]string{"message": "The user has been created. You can login now"})
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "The user has been created. You can login now",
+		"id":      response.UserID.String(),
+	})
 }

@@ -83,7 +83,7 @@ info:
   title: Trinity API
   version: "1.0"
 paths:
-  /v1/users:
+  /v1/users/:
     post:
       consumes:
       - application/json

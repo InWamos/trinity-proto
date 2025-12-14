@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/users": {
+        "/v1/users/": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
                 "consumes": [

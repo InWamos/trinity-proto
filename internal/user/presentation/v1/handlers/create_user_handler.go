@@ -59,7 +59,7 @@ func NewCreateUserHandler(
 //	@Success		201		{object}	CreateUserResponse	"User created successfully"
 //	@Failure		400		{object}	ErrorResponse		"Invalid request (validation failed)"
 //	@Failure		500		{object}	ErrorResponse		"Server error"
-//	@Router			/v1/users [post]
+//	@Router			/v1/users/ [post]
 func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var userForm createUserForm

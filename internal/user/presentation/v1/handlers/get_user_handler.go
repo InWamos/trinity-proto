@@ -11,7 +11,8 @@ import (
 )
 
 // GetUserResponse represents the response from the GetUser endpoint
-// @Description User information response
+//
+//	@Description	User information response
 type GetUserResponse struct {
 	ID          string    `json:"id"           example:"019b1a49-dbf6-74d6-97bf-2d7e57d30c75"`
 	Username    string    `json:"username"     example:"johndoe"`
@@ -40,15 +41,16 @@ func NewGetUserHandler(
 }
 
 // ServeHTTP handles an HTTP GET request to retrieve a user by ID.
-// @Summary Get user by ID
-// @Description Retrieve a user's information by their ID
-// @Tags users
-// @Produce json
-// @Param id path string true "User ID (UUID)" format(uuid)
-// @Success 200 {object} GetUserResponse "User found"
-// @Failure 400 {object} ErrorResponse "Invalid user ID format"
-// @Failure 404 {object} ErrorResponse "User not found"
-// @Router /api/v1/users/{id} [get]
+//
+//	@Summary		Get user by ID
+//	@Description	Retrieve a user's information by their ID
+//	@Tags			users
+//	@Produce		json
+//	@Param			id	path		string			true	"User ID (UUID)"	format(uuid)
+//	@Success		200	{object}	GetUserResponse	"User found"
+//	@Failure		400	{object}	ErrorResponse	"Invalid user ID format"
+//	@Failure		404	{object}	ErrorResponse	"User not found"
+//	@Router			/api/v1/users/{id} [get]
 func (handler *GetUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

@@ -31,16 +31,17 @@ func NewRemoveUserHandler(
 }
 
 // ServeHTTP handles an HTTP DELETE request to remove a user.
-// @Summary Delete a user
-// @Description Permanently remove a user from the system
-// @Tags users
-// @Produce json
-// @Param id path string true "User ID (UUID)" format(uuid)
-// @Success 200 {object} SuccessResponse "User deleted successfully"
-// @Failure 400 {object} ErrorResponse "Invalid user ID format"
-// @Failure 404 {object} ErrorResponse "User not found"
-// @Failure 500 {object} ErrorResponse "Server error"
-// @Router /api/v1/users/{id} [delete]
+//
+//	@Summary		Delete a user
+//	@Description	Permanently remove a user from the system
+//	@Tags			users
+//	@Produce		json
+//	@Param			id	path		string			true	"User ID (UUID)"	format(uuid)
+//	@Success		200	{object}	SuccessResponse	"User deleted successfully"
+//	@Failure		400	{object}	ErrorResponse	"Invalid user ID format"
+//	@Failure		404	{object}	ErrorResponse	"User not found"
+//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Router			/api/v1/users/{id} [delete]
 func (handler *RemoveUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

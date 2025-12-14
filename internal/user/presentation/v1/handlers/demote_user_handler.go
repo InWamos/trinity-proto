@@ -31,16 +31,17 @@ func NewDemoteUserHandler(
 }
 
 // ServeHTTP handles an HTTP PATCH request to demote a user from admin to regular user.
-// @Summary Demote user to regular user
-// @Description Change a user's role from admin to user
-// @Tags users
-// @Produce json
-// @Param id path string true "User ID (UUID)" format(uuid)
-// @Success 200 {object} SuccessResponse "User demoted successfully"
-// @Failure 400 {object} ErrorResponse "Invalid user ID format"
-// @Failure 404 {object} ErrorResponse "User not found"
-// @Failure 500 {object} ErrorResponse "Server error"
-// @Router /api/v1/users/{id}/demote [patch]
+//
+//	@Summary		Demote user to regular user
+//	@Description	Change a user's role from admin to user
+//	@Tags			users
+//	@Produce		json
+//	@Param			id	path		string			true	"User ID (UUID)"	format(uuid)
+//	@Success		200	{object}	SuccessResponse	"User demoted successfully"
+//	@Failure		400	{object}	ErrorResponse	"Invalid user ID format"
+//	@Failure		404	{object}	ErrorResponse	"User not found"
+//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Router			/api/v1/users/{id}/demote [patch]
 func (handler *DemoteUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

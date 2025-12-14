@@ -12,7 +12,8 @@ import (
 )
 
 // SuccessResponse represents a successful operation response
-// @Description Standard success response with message
+//
+//	@Description	Standard success response with message
 type SuccessResponse struct {
 	Message string `json:"message" example:"User promoted to admin successfully"`
 }
@@ -37,16 +38,17 @@ func NewPromoteUserHandler(
 }
 
 // ServeHTTP handles an HTTP PATCH request to promote a user to admin.
-// @Summary Promote user to admin
-// @Description Change a user's role from user to admin
-// @Tags users
-// @Produce json
-// @Param id path string true "User ID (UUID)" format(uuid)
-// @Success 200 {object} SuccessResponse "User promoted successfully"
-// @Failure 400 {object} ErrorResponse "Invalid user ID format"
-// @Failure 404 {object} ErrorResponse "User not found"
-// @Failure 500 {object} ErrorResponse "Server error"
-// @Router /api/v1/users/{id}/promote [patch]
+//
+//	@Summary		Promote user to admin
+//	@Description	Change a user's role from user to admin
+//	@Tags			users
+//	@Produce		json
+//	@Param			id	path		string			true	"User ID (UUID)"	format(uuid)
+//	@Success		200	{object}	SuccessResponse	"User promoted successfully"
+//	@Failure		400	{object}	ErrorResponse	"Invalid user ID format"
+//	@Failure		404	{object}	ErrorResponse	"User not found"
+//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Router			/api/v1/users/{id}/promote [patch]
 func (handler *PromoteUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

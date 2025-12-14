@@ -10,7 +10,6 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 var (
@@ -58,6 +57,7 @@ func NewCreateUser(
 
 func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) error {
 	interactor.logger.DebugContext(ctx, "Started Create User execution")
+
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")
@@ -72,16 +72,22 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
 
+	// Execute within a transaction managed by the factory
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
-		return err
+		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))
+		return ErrDatabaseFailed
 	}
-	transaction := transactionManager.GetTransaction().(*sqlx.Tx)
 
-	userRepository := interactor.userRepositoryFactory.CreateUserRepository(transaction)
+	// Get repository scoped to this transaction
+	userRepository := interactor.userRepositoryFactory.CreateUserRepositoryWithTransaction(transactionManager)
+
 	err = userRepository.CreateUser(ctx, *newUser)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create user", slog.Any("err", err))
+		if rollbackErr := transactionManager.Rollback(ctx); rollbackErr != nil {
+			interactor.logger.ErrorContext(ctx, "failed to rollback transaction", slog.Any("err", rollbackErr))
+		}
 		return ErrDatabaseFailed
 	}
 
@@ -89,6 +95,7 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
 		return ErrDatabaseFailed
 	}
+
 	interactor.logger.DebugContext(ctx, "Finished Create User execution")
 	return nil
 }

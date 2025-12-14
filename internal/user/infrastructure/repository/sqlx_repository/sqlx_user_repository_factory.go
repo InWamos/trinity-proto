@@ -3,6 +3,7 @@ package sqlxrepository
 import (
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/jmoiron/sqlx"
 )
@@ -12,15 +13,19 @@ type SqlxUserRepositoryFactory struct {
 	sqlxMapper *SqlxMapper
 }
 
-func NewSqlxUserRepositoryFactory(logger *slog.Logger) repository.UserRepositoryFactory {
-	return &SqlxUserRepositoryFactory{logger: logger}
+func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxMapper) repository.UserRepositoryFactory {
+	return &SqlxUserRepositoryFactory{
+		logger:     logger,
+		sqlxMapper: mapper,
+	}
 }
 
-func (surf *SqlxUserRepositoryFactory) CreateUserRepository(session any) repository.UserRepository {
-	tx, ok := session.(*sqlx.Tx)
+func (surf *SqlxUserRepositoryFactory) CreateUserRepositoryWithTransaction(tm database.TransactionManager) repository.UserRepository {
+	// Extract the underlying sqlx transaction
+	tx, ok := tm.GetTransaction().(*sqlx.Tx)
 	if !ok {
-		surf.logger.Error("invalid session type, expected *sqlx.Tx")
-		panic("invalid session type for sqlx repository")
+		surf.logger.Error("invalid transaction type, expected *sqlx.Tx")
+		panic("invalid transaction type for sqlx repository")
 	}
 
 	return &SqlxUserRepository{

@@ -16,6 +16,14 @@ func NewUserApplicationContainer() fx.Option {
 			service.NewUUIDGenerator,
 			// Provides CreateUserInteractor
 			application.NewCreateUser,
+			// Provides GetUserByIDInteractor
+			application.NewGetUserByID,
+			// Provides PromoteUserInteractor
+			application.NewPromoteUser,
+			// Provides DemoteUserInteractor
+			application.NewDemoteUser,
+			// Provides RemoveUserInteractor
+			application.NewRemoveUser,
 		),
 	)
 }

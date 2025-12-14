@@ -35,6 +35,7 @@ func NewCreateUserHandler(
 
 // ServeHTTP handles an HTTP request to the POST /api/v1/user/ endpoint.
 func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var userForm createUserForm
 	if err := handler.validator.ValidateBody(r.Body, &userForm); err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to validate the form", slog.Any("err", err))

@@ -50,7 +50,7 @@ func NewGetUserHandler(
 //	@Success		200	{object}	GetUserResponse	"User found"
 //	@Failure		400	{object}	ErrorResponse	"Invalid user ID format"
 //	@Failure		404	{object}	ErrorResponse	"User not found"
-//	@Router			/api/v1/users/{id} [get]
+//	@Router			/v1/users/{id} [get]
 func (handler *GetUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

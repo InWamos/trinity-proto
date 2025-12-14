@@ -14,9 +14,9 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api/v1",
+    "basePath": "/api",
     "paths": {
-        "/api/v1/users/": {
+        "/v1/users": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
                 "consumes": [
@@ -62,7 +62,7 @@
                 }
             }
         },
-        "/api/v1/users/{id}": {
+        "/v1/users/{id}": {
             "get": {
                 "description": "Retrieve a user's information by their ID",
                 "produces": [
@@ -150,7 +150,7 @@
                 }
             }
         },
-        "/api/v1/users/{id}/demote": {
+        "/v1/users/{id}/demote": {
             "patch": {
                 "description": "Change a user's role from admin to user",
                 "produces": [
@@ -198,7 +198,7 @@
                 }
             }
         },
-        "/api/v1/users/{id}/promote": {
+        "/v1/users/{id}/promote": {
             "patch": {
                 "description": "Change a user's role from user to admin",
                 "produces": [

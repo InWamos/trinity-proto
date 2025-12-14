@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/users/": {
+        "/v1/users": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
                 "consumes": [
@@ -68,7 +68,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/{id}": {
+        "/v1/users/{id}": {
             "get": {
                 "description": "Retrieve a user's information by their ID",
                 "produces": [
@@ -156,7 +156,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/{id}/demote": {
+        "/v1/users/{id}/demote": {
             "patch": {
                 "description": "Change a user's role from admin to user",
                 "produces": [
@@ -204,7 +204,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/{id}/promote": {
+        "/v1/users/{id}/promote": {
             "patch": {
                 "description": "Change a user's role from user to admin",
                 "produces": [
@@ -366,7 +366,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Trinity API",
 	Description:      "Trinity API schema.",

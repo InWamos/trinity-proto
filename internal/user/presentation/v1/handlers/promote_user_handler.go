@@ -48,7 +48,7 @@ func NewPromoteUserHandler(
 //	@Failure		400	{object}	ErrorResponse	"Invalid user ID format"
 //	@Failure		404	{object}	ErrorResponse	"User not found"
 //	@Failure		500	{object}	ErrorResponse	"Server error"
-//	@Router			/api/v1/users/{id}/promote [patch]
+//	@Router			/v1/users/{id}/promote [patch]
 func (handler *PromoteUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

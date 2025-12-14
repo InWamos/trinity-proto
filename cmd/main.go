@@ -25,7 +25,7 @@ import (
 //	@license.name	MIT
 
 //	@host		localhost:8080
-//	@BasePath	/api/v1
+//	@BasePath	/api
 
 //	@securityDefinitions.apikey	SessionCookie
 //	@in							cookie

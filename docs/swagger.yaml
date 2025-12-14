@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /api
 definitions:
   handlers.CreateUserResponse:
     description: User creation response with ID
@@ -83,7 +83,7 @@ info:
   title: Trinity API
   version: "1.0"
 paths:
-  /api/v1/users/:
+  /v1/users:
     post:
       consumes:
       - application/json
@@ -113,7 +113,7 @@ paths:
       summary: Create a new user
       tags:
       - users
-  /api/v1/users/{id}:
+  /v1/users/{id}:
     delete:
       description: Permanently remove a user from the system
       parameters:
@@ -172,7 +172,7 @@ paths:
       summary: Get user by ID
       tags:
       - users
-  /api/v1/users/{id}/demote:
+  /v1/users/{id}/demote:
     patch:
       description: Change a user's role from admin to user
       parameters:
@@ -204,7 +204,7 @@ paths:
       summary: Demote user to regular user
       tags:
       - users
-  /api/v1/users/{id}/promote:
+  /v1/users/{id}/promote:
     patch:
       description: Change a user's role from user to admin
       parameters:

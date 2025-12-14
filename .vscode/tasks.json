@@ -10,6 +10,16 @@
             },
             "problemMatcher": [],
             "isBackground": false
+        },
+        {
+            "label": "generate-swagger",
+            "type": "shell",
+            "command": "swag init -g cmd/main.go --output docs",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
         }
     ]
 }

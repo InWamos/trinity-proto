@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/InWamos/trinity-proto/config"
+	_ "github.com/InWamos/trinity-proto/docs"
 	"github.com/InWamos/trinity-proto/logger"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/InWamos/trinity-proto/setup"
 	"github.com/InWamos/trinity-proto/setup/user"
-	_ "github.com/swaggo/swag"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 )

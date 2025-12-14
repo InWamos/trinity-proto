@@ -8,11 +8,11 @@ Proto for the Trinity project
 
 # Use Cases
 - User
-    - [ ] Get User by ID
-    - [ ] Create User
-    - [ ] Promote User
-    - [ ] Demote User
-    - [ ] Delete User
+    - [x] Get User by ID
+    - [x] Create User
+    - [x] Promote User
+    - [x] Demote User
+    - [x] Delete User
 
 - Auth
     - [ ] Login

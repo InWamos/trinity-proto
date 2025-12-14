@@ -9,6 +9,7 @@ import (
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/InWamos/trinity-proto/setup"
 	"github.com/InWamos/trinity-proto/setup/user"
+	_ "github.com/swaggo/swag"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 )

@@ -10,6 +10,19 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/presentation/service"
 )
 
+// CreateUserResponse represents the response from the CreateUser endpoint
+// @Description User creation response with ID
+type CreateUserResponse struct {
+	Message string `json:"message" example:"The user has been created. You can login now"`
+	ID      string `json:"id" example:"019b1a49-dbf6-74d6-97bf-2d7e57d30c75"`
+}
+
+// ErrorResponse represents an error response
+// @Description Standard error response
+type ErrorResponse struct {
+	Error string `json:"error" example:"Invalid request body"`
+}
+
 type createUserForm struct {
 	Username    string `json:"username"     validate:"required,alphanum,min=2,max=32"`
 	DisplayName string `json:"display_name" validate:"required,min=1,max=64"`
@@ -33,7 +46,17 @@ func NewCreateUserHandler(
 	return &CreateUserHandler{interactor: interactor, validator: validator, logger: cuhLogger}
 }
 
-// ServeHTTP handles an HTTP request to the POST /api/v1/user/ endpoint.
+// ServeHTTP handles an HTTP request to create a user.
+// @Summary Create a new user
+// @Description Create a new user with username, display name, password and role
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body createUserForm true "User creation request"
+// @Success 201 {object} CreateUserResponse "User created successfully"
+// @Failure 400 {object} ErrorResponse "Invalid request (validation failed)"
+// @Failure 500 {object} ErrorResponse "Server error"
+// @Router /api/v1/users [post]
 func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var userForm createUserForm

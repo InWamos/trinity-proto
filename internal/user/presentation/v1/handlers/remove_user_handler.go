@@ -30,7 +30,17 @@ func NewRemoveUserHandler(
 	}
 }
 
-// ServeHTTP handles an HTTP request to the DELETE /api/v1/users/{id} endpoint.
+// ServeHTTP handles an HTTP DELETE request to remove a user.
+// @Summary Delete a user
+// @Description Permanently remove a user from the system
+// @Tags users
+// @Produce json
+// @Param id path string true "User ID (UUID)" format(uuid)
+// @Success 200 {object} SuccessResponse "User deleted successfully"
+// @Failure 400 {object} ErrorResponse "Invalid user ID format"
+// @Failure 404 {object} ErrorResponse "User not found"
+// @Failure 500 {object} ErrorResponse "Server error"
+// @Router /api/v1/users/{id} [delete]
 func (handler *RemoveUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -58,14 +68,14 @@ func (handler *RemoveUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	err = handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {
 		handler.logger.ErrorContext(r.Context(), "failed to remove user", slog.Any("err", err))
-		
+
 		// Check if error is due to user not found
 		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, application.ErrUserNotFound) {
 			w.WriteHeader(http.StatusNotFound)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "User not found"})
 			return
 		}
-		
+
 		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error": "Failed to remove user",

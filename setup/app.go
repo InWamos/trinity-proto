@@ -13,6 +13,7 @@ import (
 	"github.com/InWamos/trinity-proto/config"
 	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"
 	"github.com/InWamos/trinity-proto/middleware"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/fx"
 )
 
@@ -34,7 +35,10 @@ func NewHTTPServer(
 ) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
-	masterMux.Handle("/api/v1/users", userMuxV1.GetMux())
+	masterMux.Handle("/api/v1/users/", userMuxV1.GetMux())
+	// Swagger documentation
+	masterMux.Handle("/swagger/", httpSwagger.WrapHandler)
+
 	masterHandler := loggingMiddleware.Handler(corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)))
 
 	srv := &http.Server{

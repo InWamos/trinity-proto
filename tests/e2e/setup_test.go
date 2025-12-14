@@ -16,7 +16,7 @@ var (
 func TestMain(m *testing.M) {
 	fmt.Println("=== Starting E2E Tests ===")
 	fmt.Println("Setting up test containers...")
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 

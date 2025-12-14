@@ -26,7 +26,7 @@ func TestDemoteUser_Success(t *testing.T) {
 	}
 
 	createResp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users", baseURL),
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
 		"application/json",
 		bytes.NewReader(body),
 	)

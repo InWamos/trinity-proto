@@ -35,7 +35,9 @@ func NewHTTPServer(
 ) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
-	masterMux.Handle("/api/v1/users", userMuxV1.GetMux())
+	// /api/v1/users set of handlers
+	masterMux.Handle("/api/v1/users/", http.StripPrefix("/api/v1/users", userMuxV1.GetMux()))
+
 	// Swagger documentation
 	masterMux.Handle("/swagger/", httpSwagger.WrapHandler)
 

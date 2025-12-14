@@ -19,7 +19,6 @@ func NewUserMuxV1(
 ) *UserMuxV1 {
 	mux := http.NewServeMux()
 
-	// User CRUD operations with full paths
 	mux.HandleFunc("POST /", createUserHandler.ServeHTTP)
 	mux.HandleFunc("GET /{id}", getUserHandler.ServeHTTP)
 	mux.HandleFunc("DELETE /{id}", removeUserHandler.ServeHTTP)

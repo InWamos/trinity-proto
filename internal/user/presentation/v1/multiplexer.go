@@ -20,13 +20,13 @@ func NewUserMuxV1(
 	mux := http.NewServeMux()
 
 	// User CRUD operations with full paths
-	mux.HandleFunc("POST /api/v1/users", createUserHandler.ServeHTTP)
-	mux.HandleFunc("GET /api/v1/users/{id}", getUserHandler.ServeHTTP)
-	mux.HandleFunc("DELETE /api/v1/users/{id}", removeUserHandler.ServeHTTP)
-	
+	mux.HandleFunc("POST /", createUserHandler.ServeHTTP)
+	mux.HandleFunc("GET /{id}", getUserHandler.ServeHTTP)
+	mux.HandleFunc("DELETE /{id}", removeUserHandler.ServeHTTP)
+
 	// User role management
-	mux.HandleFunc("PATCH /api/v1/users/{id}/promote", promoteUserHandler.ServeHTTP)
-	mux.HandleFunc("PATCH /api/v1/users/{id}/demote", demoteUserHandler.ServeHTTP)
+	mux.HandleFunc("PATCH /{id}/promote", promoteUserHandler.ServeHTTP)
+	mux.HandleFunc("PATCH /{id}/demote", demoteUserHandler.ServeHTTP)
 
 	return &UserMuxV1{mux: mux}
 }

@@ -27,6 +27,11 @@ type CreateUserRequest struct {
 	Role        domain.Role
 }
 
+// CreateUserResponse Output DTO for interactor.
+type CreateUserResponse struct {
+	UserID uuid.UUID
+}
+
 type CreateUser struct {
 	passwordHasher            service.PasswordHasher
 	uuidGenerator             *service.UUIDGenerator
@@ -55,19 +60,19 @@ func NewCreateUser(
 	}
 }
 
-func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) error {
+func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) (*CreateUserResponse, error) {
 	interactor.logger.DebugContext(ctx, "Started Create User execution")
 
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")
-		return ErrHashingFailed
+		return nil, ErrHashingFailed
 	}
 
 	var randomUUID uuid.UUID
 	if randomUUID, err = interactor.uuidGenerator.GetUUIDv7(); err != nil {
 		interactor.logger.ErrorContext(ctx, "The uuid generator has failed")
-		return ErrUUIDGeneration
+		return nil, ErrUUIDGeneration
 	}
 
 	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
@@ -76,7 +81,7 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))
-		return ErrDatabaseFailed
+		return nil, ErrDatabaseFailed
 	}
 
 	// Get repository scoped to this transaction
@@ -88,14 +93,14 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		if rollbackErr := transactionManager.Rollback(ctx); rollbackErr != nil {
 			interactor.logger.ErrorContext(ctx, "failed to rollback transaction", slog.Any("err", rollbackErr))
 		}
-		return ErrDatabaseFailed
+		return nil, ErrDatabaseFailed
 	}
 
 	if err = transactionManager.Commit(ctx); err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
-		return ErrDatabaseFailed
+		return nil, ErrDatabaseFailed
 	}
 
 	interactor.logger.DebugContext(ctx, "Finished Create User execution")
-	return nil
+	return &CreateUserResponse{UserID: randomUUID}, nil
 }

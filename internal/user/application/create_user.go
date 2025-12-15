@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
@@ -10,13 +9,6 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
-)
-
-var (
-	ErrHashingFailed           = errors.New("password hashing failed")
-	ErrUUIDGeneration          = errors.New("UUID generation failed")
-	ErrUserWithIDAlreadyExists = errors.New("this uuid is already in the database")
-	ErrDatabaseFailed          = errors.New("the database operation has failed")
 )
 
 // CreateUserRequest Input DTO for interactor.

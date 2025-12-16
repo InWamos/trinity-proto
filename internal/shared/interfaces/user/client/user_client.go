@@ -1,5 +1,7 @@
 package client
 
+import "context"
+
 type UserClient interface {
-	VerifyCredentials(username, password string) error
+	VerifyCredentials(ctx context.Context, username, password string) error
 }

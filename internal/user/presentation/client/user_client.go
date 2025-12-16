@@ -25,13 +25,27 @@ func NewUserClient(
 func (uClient *UserClient) VerifyCredentials(ctx context.Context, username, password string) error {
 	interactorRequest := application.ValidateUserCredentialsRequest{Username: username, Password: password}
 	if err := uClient.validateUserCredentialsInteractor.Execute(ctx, interactorRequest); err != nil {
-		if errors.Is(err, application.ErrPasswordMismatch) {
-			return client.ErrPasswordMissmatch
-		}
-		if errors.Is(err, application.ErrUsernameAbsent) {
+		switch {
+		case errors.Is(err, application.ErrUsernameAbsent):
+			uClient.logger.InfoContext(ctx, "login attempt with non-existent username",
+				slog.String("username", username))
 			return client.ErrUsernameAbsent
+
+		case errors.Is(err, application.ErrPasswordMismatch):
+			uClient.logger.InfoContext(ctx, "invalid password attempt",
+				slog.String("username", username))
+			return client.ErrPasswordMissmatch
+
+		case errors.Is(err, application.ErrDatabaseFailed):
+			uClient.logger.ErrorContext(ctx, "database error during credential verification",
+				slog.Any("err", err))
+			return client.ErrUnexpectedError
+
+		default:
+			uClient.logger.ErrorContext(ctx, "unexpected error during credential verification",
+				slog.Any("err", err))
+			return client.ErrUnexpectedError
 		}
-		return client.ErrUnexpectedError
 	}
 	return nil
 }

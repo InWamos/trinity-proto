@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/user/client"
@@ -20,4 +21,16 @@ func NewUserClient(
 	return &UserClient{validateUserCredentialsInteractor: validateUserCredentialsInteractor, logger: logger}
 }
 
-func (client *UserClient) VerifyCredentials(ctx context.Context, username, password string) error
+func (uClient *UserClient) VerifyCredentials(ctx context.Context, username, password string) error {
+	interactorRequest := application.ValidateUserCredentialsRequest{Username: username, Password: password}
+	if err := uClient.validateUserCredentialsInteractor.Execute(ctx, interactorRequest); err != nil {
+		if errors.Is(err, application.ErrPasswordMismatch) {
+			return client.ErrPasswordMissmatch
+		}
+		if errors.Is(err, application.ErrUsernameAbsent) {
+			return client.ErrUsernameAbsent
+		}
+		return client.ErrUnexpectedError
+	}
+	return nil
+}

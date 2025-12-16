@@ -18,7 +18,8 @@ func NewUserClient(
 	validateUserCredentialsInteractor *application.ValidateUserCredentials,
 	logger *slog.Logger,
 ) client.UserClient {
-	return &UserClient{validateUserCredentialsInteractor: validateUserCredentialsInteractor, logger: logger}
+	ucLogger := logger.With(slog.String("component", "user_client"))
+	return &UserClient{validateUserCredentialsInteractor: validateUserCredentialsInteractor, logger: ucLogger}
 }
 
 func (uClient *UserClient) VerifyCredentials(ctx context.Context, username, password string) error {

@@ -6,6 +6,11 @@ import (
 	"github.com/InWamos/trinity-proto/internal/auth/infrastructure"
 )
 
+type AddSessionRequest struct {
+	Username string
+	Password string
+}
+
 type AddSession struct {
 	sessionRepository infrastructure.SessionRepository
 	logger            *slog.Logger

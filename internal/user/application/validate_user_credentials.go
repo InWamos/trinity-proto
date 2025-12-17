@@ -8,6 +8,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
+	"github.com/google/uuid"
 )
 
 type ValidateUserCredentialsRequest struct {
@@ -43,7 +44,7 @@ func NewValidateUserCredentials(
 func (interactor *ValidateUserCredentials) Execute(
 	ctx context.Context,
 	input ValidateUserCredentialsRequest,
-) error {
+) (uuid.UUID, error) {
 	interactor.logger.DebugContext(
 		ctx,
 		"Started ValidateUserCredentials execution",
@@ -53,20 +54,20 @@ func (interactor *ValidateUserCredentials) Execute(
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))
-		return ErrDatabaseFailed
+		return uuid.Nil, ErrDatabaseFailed
 	}
 	userRepository := interactor.userRepositoryFactory.CreateUserRepositoryWithTransaction(transactionManager)
 	user, err := userRepository.GetUserByUsername(ctx, input.Username)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
-			return ErrUsernameAbsent
+			return uuid.Nil, ErrUsernameAbsent
 		} else {
-			return ErrDatabaseFailed
+			return uuid.Nil, ErrDatabaseFailed
 		}
 	}
 	if err := interactor.passwordHasher.CheckPasswordHash(input.Password, user.PasswordHash); err != nil {
-		return ErrPasswordMismatch
+		return uuid.Nil, ErrPasswordMismatch
 	} else {
-		return nil
+		return user.ID, nil
 	}
 }

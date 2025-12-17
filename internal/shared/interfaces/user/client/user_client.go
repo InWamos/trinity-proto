@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -12,5 +14,5 @@ var (
 )
 
 type UserClient interface {
-	VerifyCredentials(ctx context.Context, username, password string) error
+	VerifyCredentials(ctx context.Context, username, password string) (uuid.UUID, error)
 }

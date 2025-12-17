@@ -17,7 +17,7 @@ Proto for the Trinity project
 - Auth
     - [ ] Login
     - [ ] Logout
-    - [ ] Verify
+    - [x] Verify
     - [ ] Logout specific session
 
 - REFACTORING:

@@ -10,6 +10,7 @@ import (
 
 var (
 	ErrSessionNotFound = errors.New("session not found")
+	ErrInternal        = errors.New("internal error")
 )
 
 type SessionRepository interface {

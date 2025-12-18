@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,10 +22,22 @@ type Session struct {
 	IPAddress string
 	UserAgent string
 	Token     string
+	CreatedAt time.Time
 	ExpiresAt time.Time
 }
 
-func NewSession(userID uuid.UUID, ipAddress string, userAgent string, token string) *Session {
+func NewSession(
+	userID uuid.UUID,
+	ipAddress string,
+	userAgent string,
+	token string,
+	duration time.Duration,
+) (*Session, error) {
+	token, err := generateToken(32)
+	if err != nil {
+		return &Session{}, err
+	}
+	createdAt := time.Now().UTC()
 	return &Session{
 		ID:        uuid.New(),
 		UserID:    userID,
@@ -31,5 +45,16 @@ func NewSession(userID uuid.UUID, ipAddress string, userAgent string, token stri
 		IPAddress: ipAddress,
 		UserAgent: userAgent,
 		Token:     token,
+		CreatedAt: createdAt,
+		ExpiresAt: createdAt.Add(duration),
+	}, nil
+}
+
+func generateToken(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
 	}
+	// Use URL-safe base64 encoding (no padding)
+	return base64.URLEncoding.EncodeToString(bytes), nil
 }

@@ -11,11 +11,16 @@ import (
 
 type RedisSessionRepository struct {
 	redisClient *redis.Client
+	redisMapper *RedisMapper
 	logger      *slog.Logger
 }
 
-func NewRedisSessionRepository(redisClient *redis.Client, logger *slog.Logger) SessionRepository {
-	return &RedisSessionRepository{redisClient: redisClient, logger: logger}
+func NewRedisSessionRepository(
+	redisClient *redis.Client,
+	redisMapper *RedisMapper,
+	logger *slog.Logger,
+) SessionRepository {
+	return &RedisSessionRepository{redisClient: redisClient, redisMapper: redisMapper, logger: logger}
 }
 
 func (repo *RedisSessionRepository) GetSessionByID(ctx context.Context, id uuid.UUID) (domain.Session, error)

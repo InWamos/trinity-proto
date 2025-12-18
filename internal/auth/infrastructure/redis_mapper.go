@@ -21,14 +21,14 @@ func (rm *RedisMapper) SessionToMap(session domain.Session) map[string]interface
 		"status":     string(session.Status),
 		"ip_address": session.IPAddress,
 		"user_agent": session.UserAgent,
-		"token":      session.Token,
 		"created_at": session.CreatedAt.Unix(),
 		"expires_at": session.ExpiresAt.Unix(),
 	}
 }
 
 // MapToSession converts a map from Redis to a domain.Session
-func (rm *RedisMapper) MapToSession(data map[string]interface{}) (domain.Session, error) {
+// Requires token parameter since it's stored as the Redis key, not in the hash
+func (rm *RedisMapper) MapToSession(data map[string]interface{}, token string) (domain.Session, error) {
 	id, err := uuid.Parse(data["id"].(string))
 	if err != nil {
 		return domain.Session{}, err
@@ -74,7 +74,7 @@ func (rm *RedisMapper) MapToSession(data map[string]interface{}) (domain.Session
 		Status:    domain.SessionStatus(data["status"].(string)),
 		IPAddress: data["ip_address"].(string),
 		UserAgent: data["user_agent"].(string),
-		Token:     data["token"].(string),
+		Token:     token,
 		CreatedAt: createdAt,
 		ExpiresAt: expiresAt,
 	}, nil

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
+	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
@@ -14,6 +15,11 @@ import (
 type ValidateUserCredentialsRequest struct {
 	Username string
 	Password string
+}
+
+type ValidateUserCredentialsResponse struct {
+	UserID   uuid.UUID
+	UserRole domain.Role
 }
 
 type ValidateUserCredentials struct {
@@ -44,7 +50,7 @@ func NewValidateUserCredentials(
 func (interactor *ValidateUserCredentials) Execute(
 	ctx context.Context,
 	input ValidateUserCredentialsRequest,
-) (uuid.UUID, error) {
+) (ValidateUserCredentialsResponse, error) {
 	interactor.logger.DebugContext(
 		ctx,
 		"Started ValidateUserCredentials execution",
@@ -54,20 +60,21 @@ func (interactor *ValidateUserCredentials) Execute(
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))
-		return uuid.Nil, ErrDatabaseFailed
+		return ValidateUserCredentialsResponse{}, ErrDatabaseFailed
 	}
 	userRepository := interactor.userRepositoryFactory.CreateUserRepositoryWithTransaction(transactionManager)
 	user, err := userRepository.GetUserByUsername(ctx, input.Username)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
-			return uuid.Nil, ErrUsernameAbsent
+			return ValidateUserCredentialsResponse{}, ErrUsernameAbsent
 		} else {
-			return uuid.Nil, ErrDatabaseFailed
+			return ValidateUserCredentialsResponse{}, ErrDatabaseFailed
 		}
 	}
 	if err := interactor.passwordHasher.CheckPasswordHash(input.Password, user.PasswordHash); err != nil {
-		return uuid.Nil, ErrPasswordMismatch
+		return ValidateUserCredentialsResponse{}, ErrPasswordMismatch
 	} else {
-		return user.ID, nil
+		response := ValidateUserCredentialsResponse{UserID: user.ID, UserRole: user.Role}
+		return response, nil
 	}
 }

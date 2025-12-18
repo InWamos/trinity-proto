@@ -1,6 +1,8 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/auth/domain"
@@ -38,3 +40,33 @@ func NewAddSession(
 		logger:            asLogger,
 	}
 }
+
+func (asInteractor *AddSession) Execute(ctx context.Context, input AddSessionRequest) error {
+	// Check whether the provided credentials valid
+	response, err := asInteractor.userClient.VerifyCredentials(ctx, input.Username, input.Password)
+	if err != nil {
+		switch {
+		case errors.Is(err, client.ErrUsernameAbsent):
+			asInteractor.logger.InfoContext(ctx, "Username doesn't exist", slog.String("username", input.Username))
+			return ErrInvalidCredentials
+		case errors.Is(err, client.ErrPasswordMissmatch):
+			asInteractor.logger.InfoContext(ctx, "Password didn't match", slog.String("username", input.Username))
+			return ErrInvalidCredentials
+		default:
+			asInteractor.logger.ErrorContext(ctx, "Unexpected error during credential verification")
+			return ErrUnexpected
+		}
+	}
+	newSession, err := domain.NewSession(
+		response.UserID,
+		domain.UserRole(response.UserRole),
+		input.IpAddress,
+		input.UserAgent,
+		"",
+		0,
+	)
+	asInteractor.sessionRepository.CreateSession(ctx, *newSession)
+	return nil
+}
+
+// TODO add Execute implementation to this interactor

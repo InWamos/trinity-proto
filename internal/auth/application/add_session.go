@@ -3,6 +3,7 @@ package application
 import (
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/auth/domain"
 	"github.com/InWamos/trinity-proto/internal/auth/infrastructure"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/user/client"
 )
@@ -13,8 +14,10 @@ var (
 )
 
 type AddSessionRequest struct {
-	Username string
-	Password string
+	Username  string
+	Password  string
+	IpAddress string
+	UserAgent string
 }
 
 type AddSession struct {

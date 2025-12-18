@@ -12,10 +12,12 @@ type RedisMapper struct {
 }
 
 // SessionToMap converts a domain.Session to a map for Redis storage
+// Note: Token is not included as it will be used as the Redis key
 func (rm *RedisMapper) SessionToMap(session domain.Session) map[string]interface{} {
 	return map[string]interface{}{
 		"id":         session.ID.String(),
 		"user_id":    session.UserID.String(),
+		"user_role":  string(session.UserRole),
 		"status":     string(session.Status),
 		"ip_address": session.IPAddress,
 		"user_agent": session.UserAgent,
@@ -36,6 +38,8 @@ func (rm *RedisMapper) MapToSession(data map[string]interface{}) (domain.Session
 	if err != nil {
 		return domain.Session{}, err
 	}
+
+	userRole := domain.UserRole(data["user_role"].(string))
 
 	// Handle created_at
 	var createdAt time.Time
@@ -66,6 +70,7 @@ func (rm *RedisMapper) MapToSession(data map[string]interface{}) (domain.Session
 	return domain.Session{
 		ID:        id,
 		UserID:    userID,
+		UserRole:  userRole,
 		Status:    domain.SessionStatus(data["status"].(string)),
 		IPAddress: data["ip_address"].(string),
 		UserAgent: data["user_agent"].(string),

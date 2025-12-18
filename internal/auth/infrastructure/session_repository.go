@@ -14,8 +14,8 @@ var (
 )
 
 type SessionRepository interface {
-	GetSessionByID(ctx context.Context, id uuid.UUID) (domain.Session, error)
-	RevokeSessionByID(ctx context.Context, id uuid.UUID) error
+	GetSessionByToken(ctx context.Context, token string) (domain.Session, error)
+	RevokeSessionByToken(ctx context.Context, token string) error
 	GetAllSessionsByUserID(ctx context.Context, userID uuid.UUID) ([]domain.Session, error)
 	CreateSession(ctx context.Context, session domain.Session) error
 }

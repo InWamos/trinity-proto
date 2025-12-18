@@ -25,7 +25,7 @@ func NewRedisSessionRepository(
 
 func (repo *RedisSessionRepository) GetSessionByID(ctx context.Context, id uuid.UUID) (domain.Session, error)
 func (repo *RedisSessionRepository) RevokeSessionByID(ctx context.Context, id uuid.UUID) error
-
+func (repo *RedisSessionRepository) CreateSession(ctx context.Context, session domain.Session) error
 func (repo *RedisSessionRepository) GetAllSessionsByUserID(
 	ctx context.Context,
 	userID uuid.UUID,

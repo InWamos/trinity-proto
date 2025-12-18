@@ -7,7 +7,6 @@ import (
 
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/user/client"
 	"github.com/InWamos/trinity-proto/internal/user/application"
-	"github.com/google/uuid"
 )
 
 type UserClient struct {
@@ -23,31 +22,40 @@ func NewUserClient(
 	return &UserClient{validateUserCredentialsInteractor: validateUserCredentialsInteractor, logger: ucLogger}
 }
 
-func (uClient *UserClient) VerifyCredentials(ctx context.Context, username, password string) (uuid.UUID, error) {
+func (uClient *UserClient) VerifyCredentials(
+	ctx context.Context,
+	username, password string,
+) (client.VerifyCredentialsResponse, error) {
 	interactorRequest := application.ValidateUserCredentialsRequest{Username: username, Password: password}
-	userID, err := uClient.validateUserCredentialsInteractor.Execute(ctx, interactorRequest)
+	responce, err := uClient.validateUserCredentialsInteractor.Execute(ctx, interactorRequest)
 	if err != nil {
 		switch {
 		case errors.Is(err, application.ErrUsernameAbsent):
 			uClient.logger.InfoContext(ctx, "login attempt with non-existent username",
 				slog.String("username", username))
-			return uuid.Nil, client.ErrUsernameAbsent
+			return client.VerifyCredentialsResponse{}, client.ErrUsernameAbsent
 
 		case errors.Is(err, application.ErrPasswordMismatch):
 			uClient.logger.InfoContext(ctx, "invalid password attempt",
 				slog.String("username", username))
-			return uuid.Nil, client.ErrPasswordMissmatch
+			return client.VerifyCredentialsResponse{}, client.ErrPasswordMissmatch
 
 		case errors.Is(err, application.ErrDatabaseFailed):
 			uClient.logger.ErrorContext(ctx, "database error during credential verification",
 				slog.Any("err", err))
-			return uuid.Nil, client.ErrUnexpectedError
+			return client.VerifyCredentialsResponse{}, client.ErrUnexpectedError
 
 		default:
 			uClient.logger.ErrorContext(ctx, "unexpected error during credential verification",
 				slog.Any("err", err))
-			return uuid.Nil, client.ErrUnexpectedError
+			return client.VerifyCredentialsResponse{}, client.ErrUnexpectedError
 		}
 	}
-	return userID, nil
+	uClient.logger.DebugContext(
+		ctx,
+		"Credentials successfully verified",
+		slog.String("user_id", responce.UserID.String()),
+		slog.String("role", string(responce.UserRole)),
+	)
+	return client.VerifyCredentialsResponse{UserID: responce.UserID, UserRole: client.UserRole(responce.UserRole)}, nil
 }

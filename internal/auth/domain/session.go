@@ -9,15 +9,19 @@ import (
 )
 
 type SessionStatus string
+type UserRole string
 
 const (
 	Active  SessionStatus = "active"
 	Revoked SessionStatus = "revoked"
+	Admin   UserRole      = "admin"
+	User    UserRole      = "user"
 )
 
 type Session struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
+	UserRole  UserRole
 	Status    SessionStatus
 	IPAddress string
 	UserAgent string
@@ -28,6 +32,7 @@ type Session struct {
 
 func NewSession(
 	userID uuid.UUID,
+	userRole UserRole,
 	ipAddress string,
 	userAgent string,
 	token string,
@@ -41,6 +46,7 @@ func NewSession(
 	return &Session{
 		ID:        uuid.New(),
 		UserID:    userID,
+		UserRole:  userRole,
 		Status:    Active,
 		IPAddress: ipAddress,
 		UserAgent: userAgent,

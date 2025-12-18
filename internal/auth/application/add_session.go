@@ -7,6 +7,11 @@ import (
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/user/client"
 )
 
+var (
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrUnexpected         = errors.New("unexpected error")
+)
+
 type AddSessionRequest struct {
 	Username string
 	Password string

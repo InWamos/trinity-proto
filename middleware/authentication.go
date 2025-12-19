@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -64,14 +65,17 @@ func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Hand
 			slog.String("uri", r.RequestURI))
 
 		// Call the next handler
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), "IdentityProvider", userIdentity)
+
+		// Call the next handler with updated context
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// extractToken extracts the session token from the Authentication header
-// Expected format: Authentication: Bearer {token}
+// extractToken extracts the session token from the Authorization header
+// Expected format: Authorization: Bearer {token}
 func extractToken(r *http.Request) (string, error) {
-	authHeader := r.Header.Get("Authentication")
+	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		return "", ErrMissingToken
 	}

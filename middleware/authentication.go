@@ -9,19 +9,19 @@ import (
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 )
 
-type AuthorizationMiddleware struct {
+type AuthenticationMiddleware struct {
 	logger     *slog.Logger
 	authClient client.AuthClient
 }
 
-func NewAuthorizationMiddleware(logger *slog.Logger, authClient client.AuthClient) *AuthorizationMiddleware {
-	middlewareLogger := logger.With(slog.String("component", "authorization_middleware"))
-	return &AuthorizationMiddleware{logger: middlewareLogger, authClient: authClient}
+func NewAuthenticationMiddleware(logger *slog.Logger, authClient client.AuthClient) *AuthenticationMiddleware {
+	middlewareLogger := logger.With(slog.String("component", "authentication_middleware"))
+	return &AuthenticationMiddleware{logger: middlewareLogger, authClient: authClient}
 }
 
-func (middleware *AuthorizationMiddleware) Handler(next http.Handler) http.Handler {
+func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Extract token from cookie or Authorization header
+		// Extract token from cookie or Authentication header
 		token, err := extractToken(r)
 		if err != nil {
 			middleware.logger.WarnContext(r.Context(), "failed to extract token", slog.String("err", err.Error()))
@@ -68,10 +68,10 @@ func (middleware *AuthorizationMiddleware) Handler(next http.Handler) http.Handl
 	})
 }
 
-// extractToken extracts the session token from the Authorization header
-// Expected format: Authorization: Bearer {token}
+// extractToken extracts the session token from the Authentication header
+// Expected format: Authentication: Bearer {token}
 func extractToken(r *http.Request) (string, error) {
-	authHeader := r.Header.Get("Authorization")
+	authHeader := r.Header.Get("Authentication")
 	if authHeader == "" {
 		return "", ErrMissingToken
 	}

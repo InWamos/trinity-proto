@@ -41,7 +41,7 @@ func main() {
 			middleware.NewGlobalCORSMiddleware,
 			middleware.NewTrustedProxyMiddleware,
 			middleware.NewLoggingMiddleware,
-			middleware.NewAuthorizationMiddleware,
+			middleware.NewAuthenticationMiddleware,
 		),
 		user.NewUserModuleContainer(),
 		auth.NewAuthModuleContainer(),

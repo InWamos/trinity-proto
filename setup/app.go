@@ -30,7 +30,7 @@ func NewHTTPServer(
 	loggingMiddleware *middleware.LoggingMiddleware,
 	corsMiddleware *middleware.GlobalCORSMiddleware,
 	trustedProxyMiddleware *middleware.TrustedProxyMiddleware,
-	authorizationMiddleware *middleware.AuthorizationMiddleware,
+	authorizationMiddleware *middleware.AuthenticationMiddleware,
 	userMuxV1 *userV1Mux.UserMuxV1,
 	logger *slog.Logger,
 ) *http.Server {

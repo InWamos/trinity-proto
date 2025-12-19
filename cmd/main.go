@@ -9,6 +9,7 @@ import (
 	"github.com/InWamos/trinity-proto/logger"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/InWamos/trinity-proto/setup"
+	"github.com/InWamos/trinity-proto/setup/auth"
 	"github.com/InWamos/trinity-proto/setup/user"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -40,8 +41,10 @@ func main() {
 			middleware.NewGlobalCORSMiddleware,
 			middleware.NewTrustedProxyMiddleware,
 			middleware.NewLoggingMiddleware,
+			middleware.NewAuthorizationMiddleware,
 		),
 		user.NewUserModuleContainer(),
+		auth.NewAuthModuleContainer(),
 		fx.Provide(setup.NewHTTPServer),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &fxevent.SlogLogger{Logger: logger}

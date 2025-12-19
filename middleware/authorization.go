@@ -29,8 +29,9 @@ func (middleware *AuthorizationMiddleware) Handler(next http.Handler) http.Handl
 			return
 		}
 
-		// Validate session token
-		if err := middleware.authClient.ValidateSession(r.Context(), token); err != nil {
+		// Validate session token and get user identity
+		userIdentity, err := middleware.authClient.ValidateSession(r.Context(), token)
+		if err != nil {
 			switch err {
 			case client.ErrSessionInvalid:
 				middleware.logger.WarnContext(r.Context(), "invalid session", slog.String("token", token))
@@ -58,6 +59,8 @@ func (middleware *AuthorizationMiddleware) Handler(next http.Handler) http.Handl
 
 		middleware.logger.DebugContext(r.Context(), "session validated successfully",
 			slog.String("method", r.Method),
+			slog.String("user_id", userIdentity.UserID.String()),
+			slog.String("user_role", string(userIdentity.UserRole)),
 			slog.String("uri", r.RequestURI))
 
 		// Call the next handler

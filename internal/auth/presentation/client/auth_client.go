@@ -22,34 +22,40 @@ func NewAuthClient(
 	return &AuthClient{verifySessionInteractor: verifySessionInteractor, logger: acLogger}
 }
 
-func (ac *AuthClient) ValidateSession(ctx context.Context, token string) error {
+func (ac *AuthClient) ValidateSession(ctx context.Context, token string) (client.UserIdentity, error) {
 	interactorRequest := application.VerifySessionRequest{Session_id: token}
-	err := ac.verifySessionInteractor.Execute(ctx, interactorRequest)
+	session, err := ac.verifySessionInteractor.Execute(ctx, interactorRequest)
 	if err != nil {
 		switch {
 		case errors.Is(err, application.ErrSessionNotFound):
 			ac.logger.InfoContext(ctx, "session not found or expired",
 				slog.String("token", token))
-			return client.ErrSessionInvalid
+			return client.UserIdentity{}, client.ErrSessionInvalid
 
 		case errors.Is(err, application.ErrSessionExpired):
 			ac.logger.InfoContext(ctx, "session has expired",
 				slog.String("token", token))
-			return client.ErrSessionExpired
+			return client.UserIdentity{}, client.ErrSessionExpired
 
 		case errors.Is(err, application.ErrSessionRevoked):
 			ac.logger.InfoContext(ctx, "session has been revoked",
 				slog.String("token", token))
-			return client.ErrSessionRevoked
+			return client.UserIdentity{}, client.ErrSessionRevoked
 
 		default:
 			ac.logger.ErrorContext(ctx, "unexpected error during session verification",
 				slog.Any("err", err))
-			return client.ErrUnexpectedError
+			return client.UserIdentity{}, client.ErrUnexpectedError
 		}
 	}
 
 	ac.logger.DebugContext(ctx, "Session successfully verified",
-		slog.String("token", token))
-	return nil
+		slog.String("token", token),
+		slog.String("user_id", session.UserID.String()),
+		slog.String("user_role", string(session.UserRole)))
+
+	return client.UserIdentity{
+		UserID:   session.UserID,
+		UserRole: client.UserRole(session.UserRole),
+	}, nil
 }

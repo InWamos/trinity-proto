@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -12,6 +14,18 @@ var (
 	ErrUnexpectedError = errors.New("unexpected error occurred")
 )
 
+type UserRole string
+
+const (
+	Admin UserRole = "admin"
+	User  UserRole = "user"
+)
+
+type UserIdentity struct {
+	UserID   uuid.UUID
+	UserRole UserRole
+}
+
 type AuthClient interface {
-	ValidateSession(ctx context.Context, session string) error
+	ValidateSession(ctx context.Context, token string) (UserIdentity, error)
 }

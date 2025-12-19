@@ -20,6 +20,10 @@ type VerifySessionRequest struct {
 	Session_id string
 }
 
+type VerifySessionResponse struct {
+	Session domain.Session
+}
+
 type VerifySession struct {
 	sessionRepository infrastructure.SessionRepository
 	logger            *slog.Logger
@@ -36,30 +40,30 @@ func NewVerifySession(
 	}
 }
 
-func (vs *VerifySession) Execute(ctx context.Context, request VerifySessionRequest) error {
+func (vs *VerifySession) Execute(ctx context.Context, request VerifySessionRequest) (domain.Session, error) {
 	// Retrieve the session from repository
 	session, err := vs.sessionRepository.GetSessionByToken(ctx, request.Session_id)
 	if err != nil {
 		vs.logger.ErrorContext(ctx, "failed to retrieve session", slog.Any("err", err))
-		return ErrSessionNotFound
+		return domain.Session{}, ErrSessionNotFound
 	}
 
 	// Check if session was found
 	if session.ID.String() == "" {
 		vs.logger.InfoContext(ctx, "session not found", slog.String("token", request.Session_id))
-		return ErrSessionNotFound
+		return domain.Session{}, ErrSessionNotFound
 	}
 
 	// Check if session has expired
 	if time.Now().UTC().After(session.ExpiresAt) {
 		vs.logger.InfoContext(ctx, "session has expired", slog.String("session_id", session.ID.String()))
-		return ErrSessionExpired
+		return domain.Session{}, ErrSessionExpired
 	}
 
 	// Check if session is revoked
 	if session.Status == domain.Revoked {
 		vs.logger.InfoContext(ctx, "session is revoked", slog.String("session_id", session.ID.String()))
-		return ErrSessionRevoked
+		return domain.Session{}, ErrSessionRevoked
 	}
 
 	vs.logger.DebugContext(ctx, "session verified successfully",
@@ -67,5 +71,5 @@ func (vs *VerifySession) Execute(ctx context.Context, request VerifySessionReque
 		slog.String("user_id", session.UserID.String()),
 	)
 
-	return nil
+	return session, nil
 }

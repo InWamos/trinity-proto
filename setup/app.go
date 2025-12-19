@@ -30,6 +30,7 @@ func NewHTTPServer(
 	loggingMiddleware *middleware.LoggingMiddleware,
 	corsMiddleware *middleware.GlobalCORSMiddleware,
 	trustedProxyMiddleware *middleware.TrustedProxyMiddleware,
+	authorizationMiddleware *middleware.AuthorizationMiddleware,
 	userMuxV1 *userV1Mux.UserMuxV1,
 	logger *slog.Logger,
 ) *http.Server {
@@ -41,7 +42,9 @@ func NewHTTPServer(
 	// Swagger documentation
 	masterMux.Handle("/swagger/", httpSwagger.WrapHandler)
 
-	masterHandler := loggingMiddleware.Handler(corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)))
+	masterHandler := loggingMiddleware.Handler(
+		corsMiddleware.Handler(trustedProxyMiddleware.Handler(authorizationMiddleware.Handler(masterMux))),
+	)
 
 	srv := &http.Server{
 		Addr:              listenAddress,

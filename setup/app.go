@@ -11,6 +11,7 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/InWamos/trinity-proto/config"
+	authV1Mux "github.com/InWamos/trinity-proto/internal/auth/presentation/v1"
 	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"
 	"github.com/InWamos/trinity-proto/middleware"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
@@ -30,20 +31,23 @@ func NewHTTPServer(
 	loggingMiddleware *middleware.LoggingMiddleware,
 	corsMiddleware *middleware.GlobalCORSMiddleware,
 	trustedProxyMiddleware *middleware.TrustedProxyMiddleware,
-	authorizationMiddleware *middleware.AuthenticationMiddleware,
+	authMiddleware *middleware.AuthenticationMiddleware,
 	userMuxV1 *userV1Mux.UserMuxV1,
+	authMuxV1 *authV1Mux.AuthMuxV1,
 	logger *slog.Logger,
 ) *http.Server {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
-	// /api/v1/users set of handlers
-	masterMux.Handle("/api/v1/users/", http.StripPrefix("/api/v1/users", userMuxV1.GetMux()))
+	// /api/v1/users set of handlers - protected with auth middleware
+	masterMux.Handle("/api/v1/users/", http.StripPrefix("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux())))
+	// /api/v1/auth set of handlers
+	masterMux.Handle("/api/v1/auth/", http.StripPrefix("/api/v1/auth", authMuxV1.GetMux()))
 
 	// Swagger documentation
 	masterMux.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	masterHandler := loggingMiddleware.Handler(
-		corsMiddleware.Handler(trustedProxyMiddleware.Handler(authorizationMiddleware.Handler(masterMux))),
+		corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)),
 	)
 
 	srv := &http.Server{

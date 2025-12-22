@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,6 +12,9 @@ func TestPromoteUser_Success(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// Login as admin to create and promote users
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// First, create a regular user
 	reqBody := map[string]string{
 		"username":     "promoteuser1",
@@ -20,19 +22,8 @@ func TestPromoteUser_Success(t *testing.T) {
 		"password":     "password123",
 		"role":         "user",
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	createResp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to create user: %v", err)
-	}
+	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer createResp.Body.Close()
 
 	if createResp.StatusCode != http.StatusCreated {
@@ -52,20 +43,8 @@ func TestPromoteUser_Success(t *testing.T) {
 		t.Skip("CreateUser endpoint doesn't return user ID yet")
 	}
 
-	// Now promote the user
-	promoteReq, err := http.NewRequest(
-		http.MethodPatch,
-		fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, userID),
-		nil,
-	)
-	if err != nil {
-		t.Fatalf("failed to create promote request: %v", err)
-	}
-
-	promoteResp, err := http.DefaultClient.Do(promoteReq)
-	if err != nil {
-		t.Fatalf("failed to promote user: %v", err)
-	}
+	// Now promote the user with authorization
+	promoteResp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, userID), adminToken, nil)
 	defer promoteResp.Body.Close()
 
 	respBody, err := io.ReadAll(promoteResp.Body)
@@ -99,22 +78,13 @@ func TestPromoteUser_NotFound(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// Login as admin
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Try to promote a non-existent user
 	fakeUserID := "00000000-0000-0000-0000-000000000000"
 
-	promoteReq, err := http.NewRequest(
-		http.MethodPatch,
-		fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, fakeUserID),
-		nil,
-	)
-	if err != nil {
-		t.Fatalf("failed to create promote request: %v", err)
-	}
-
-	resp, err := http.DefaultClient.Do(promoteReq)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	resp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, fakeUserID), adminToken, nil)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)

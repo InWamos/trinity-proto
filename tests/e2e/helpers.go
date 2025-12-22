@@ -1,7 +1,10 @@
 package e2e
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -11,6 +14,7 @@ import (
 	"github.com/InWamos/trinity-proto/logger"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/InWamos/trinity-proto/setup"
+	"github.com/InWamos/trinity-proto/setup/auth"
 	"github.com/InWamos/trinity-proto/setup/user"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -72,14 +76,16 @@ func StartTestServer(t *testing.T) (baseURL string, cleanup func()) {
 	t.Helper()
 
 	app := fxtest.New(t,
-		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig),
+		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig, config.NewRedisConfig),
 		fx.Provide(logger.GetLogger),
 		fx.Provide(
 			middleware.NewGlobalCORSMiddleware,
 			middleware.NewTrustedProxyMiddleware,
 			middleware.NewLoggingMiddleware,
+			middleware.NewAuthenticationMiddleware,
 		),
 		user.NewUserModuleContainer(),
+		auth.NewAuthModuleContainer(),
 		fx.Provide(setup.NewHTTPServer),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &VerboseFxLogger{logger: logger}
@@ -112,4 +118,84 @@ func StartTestServer(t *testing.T) (baseURL string, cleanup func()) {
 
 	baseURL = "http://127.0.0.1:18080"
 	return baseURL, cleanup
+}
+
+// LoginResponse represents the response from the login endpoint
+type LoginResponse struct {
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}
+
+// LoginUser logs in a user and returns an authorization token
+func LoginUser(t *testing.T, baseURL, username, password string) string {
+	t.Helper()
+
+	loginBody := map[string]string{
+		"username": username,
+		"password": password,
+	}
+	body, err := json.Marshal(loginBody)
+	if err != nil {
+		t.Fatalf("failed to marshal login request: %v", err)
+	}
+
+	resp, err := http.Post(
+		baseURL+"/api/v1/auth/login",
+		"application/json",
+		bytes.NewReader(body),
+	)
+	if err != nil {
+		t.Fatalf("failed to login: %v", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("failed to read login response: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("login failed with status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	var loginResp LoginResponse
+	if err := json.Unmarshal(respBody, &loginResp); err != nil {
+		t.Fatalf("failed to unmarshal login response: %v", err)
+	}
+
+	if loginResp.Token == "" {
+		t.Fatal("login response missing token")
+	}
+
+	return loginResp.Token
+}
+
+// MakeAuthorizedRequest makes an HTTP request with authorization header
+func MakeAuthorizedRequest(t *testing.T, method, url, token string, body interface{}) *http.Response {
+	t.Helper()
+
+	var bodyReader io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			t.Fatalf("failed to marshal request body: %v", err)
+		}
+		bodyReader = bytes.NewReader(jsonBody)
+	}
+
+	req, err := http.NewRequest(method, url, bodyReader)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("failed to make request: %v", err)
+	}
+
+	return resp
 }

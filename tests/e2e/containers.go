@@ -214,7 +214,9 @@ func (tc *TestContainers) GetDatabaseConfig() map[string]string {
 // GetRedisConfig returns environment variables for the test Redis
 func (tc *TestContainers) GetRedisConfig() map[string]string {
 	return map[string]string{
-		"REDIS_HOST": tc.RedisHost,
-		"REDIS_PORT": tc.RedisPort,
+		"REDIS_ADDRESS":  tc.RedisHost,
+		"REDIS_PORT":     tc.RedisPort,
+		"REDIS_DB_AUTH":  "0",
+		"REDIS_PASSWORD": "",
 	}
 }

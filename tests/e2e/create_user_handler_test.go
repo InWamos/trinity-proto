@@ -7,33 +7,31 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestCreateUser_Success(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
-	// Prepare request
+	// First, create and login an admin user to create another user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
+	// Prepare request to create a new user with a unique username (alphanumeric only)
+	uniqueUsername := fmt.Sprintf("user%d", time.Now().UnixNano()%1000000)
 	reqBody := map[string]string{
-		"username":     "testuser",
+		"username":     uniqueUsername,
 		"display_name": "Test User",
 		"password":     "password123",
 		"role":         "user",
 	}
-	body, err := json.Marshal(reqBody)
+	_, err := json.Marshal(reqBody)
 	if err != nil {
 		t.Fatalf("failed to marshal request body: %v", err)
 	}
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	// Make authorized request
+	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer resp.Body.Close()
 
 	// Read response body
@@ -63,6 +61,9 @@ func TestCreateUser_InvalidUsername_TooShort(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// First, login an admin user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Prepare request with invalid username (too short)
 	reqBody := map[string]string{
 		"username":     "a", // min is 2
@@ -70,20 +71,9 @@ func TestCreateUser_InvalidUsername_TooShort(t *testing.T) {
 		"password":     "password123",
 		"role":         "user",
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	// Make authorized request
+	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer resp.Body.Close()
 
 	// Assert
@@ -102,6 +92,9 @@ func TestCreateUser_InvalidPassword_TooShort(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// First, login an admin user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Prepare request with invalid password (too short)
 	reqBody := map[string]string{
 		"username":     "testuser2",
@@ -109,20 +102,9 @@ func TestCreateUser_InvalidPassword_TooShort(t *testing.T) {
 		"password":     "short", // min is 8
 		"role":         "user",
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	// Make authorized request
+	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer resp.Body.Close()
 
 	// Assert
@@ -141,6 +123,9 @@ func TestCreateUser_InvalidRole(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// First, login an admin user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Prepare request with invalid role
 	reqBody := map[string]string{
 		"username":     "testuser3",
@@ -148,20 +133,9 @@ func TestCreateUser_InvalidRole(t *testing.T) {
 		"password":     "password123",
 		"role":         "superadmin", // only "user" or "admin" allowed
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	// Make authorized request
+	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer resp.Body.Close()
 
 	// Assert
@@ -180,25 +154,17 @@ func TestCreateUser_MissingFields(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// First, login an admin user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Prepare request with missing required fields
 	reqBody := map[string]string{
 		"username": "testuser4",
 		// missing display_name, password, role
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	// Make authorized request
+	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer resp.Body.Close()
 
 	// Assert
@@ -217,15 +183,19 @@ func TestCreateUser_InvalidJSON(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
-	// Send invalid JSON
-	body := []byte(`{"username": "test", invalid json}`)
+	// First, login an admin user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
+	// Send invalid JSON with authorization header
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/users/", baseURL), bytes.NewReader([]byte(`{"username": "test", invalid json}`)))
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+adminToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		t.Fatalf("failed to make request: %v", err)
 	}
@@ -247,27 +217,20 @@ func TestCreateUser_AdminRole(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// First, login an admin user
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Prepare request with admin role
+	uniqueUsername := fmt.Sprintf("adminuser%d", time.Now().UnixNano()%1000000)
 	reqBody := map[string]string{
-		"username":     "adminuser",
+		"username":     uniqueUsername,
 		"display_name": "Admin User",
 		"password":     "adminpass123",
 		"role":         "admin",
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	// Make request
-	resp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	// Make authorized request
+	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer resp.Body.Close()
 
 	// Read response body

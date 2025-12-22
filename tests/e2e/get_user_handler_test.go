@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,26 +12,19 @@ func TestGetUserByID_Success(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
-	// First, create a user
+	// Login to get a token
+	userToken := LoginUser(t, baseURL, "testuser", "user12345")
+
+	// First, create a user as admin
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
 	reqBody := map[string]string{
 		"username":     "getuser1",
 		"display_name": "Get User Test",
 		"password":     "password123",
 		"role":         "user",
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	createResp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to create user: %v", err)
-	}
+	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer createResp.Body.Close()
 
 	if createResp.StatusCode != http.StatusCreated {
@@ -52,11 +44,8 @@ func TestGetUserByID_Success(t *testing.T) {
 		t.Skip("CreateUser endpoint doesn't return user ID yet")
 	}
 
-	// Now get the user by ID
-	getResp, err := http.Get(fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID))
-	if err != nil {
-		t.Fatalf("failed to get user: %v", err)
-	}
+	// Now get the user by ID with authorization
+	getResp := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID), userToken, nil)
 	defer getResp.Body.Close()
 
 	respBody, err := io.ReadAll(getResp.Body)
@@ -90,13 +79,13 @@ func TestGetUserByID_NotFound(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// Login to get a token
+	userToken := LoginUser(t, baseURL, "testuser", "user12345")
+
 	// Try to get a user with a non-existent UUID
 	fakeUserID := "00000000-0000-0000-0000-000000000000"
 
-	resp, err := http.Get(fmt.Sprintf("%s/api/v1/users/%s", baseURL, fakeUserID))
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	resp := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/users/%s", baseURL, fakeUserID), userToken, nil)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -114,13 +103,13 @@ func TestGetUserByID_InvalidUUID(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// Login to get a token
+	userToken := LoginUser(t, baseURL, "testuser", "user12345")
+
 	// Try to get a user with an invalid UUID
 	invalidUserID := "not-a-valid-uuid"
 
-	resp, err := http.Get(fmt.Sprintf("%s/api/v1/users/%s", baseURL, invalidUserID))
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	resp := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/users/%s", baseURL, invalidUserID), userToken, nil)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)

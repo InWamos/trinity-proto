@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,6 +12,9 @@ func TestDemoteUser_Success(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// Login as admin
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// First, create an admin user
 	reqBody := map[string]string{
 		"username":     "demoteuser1",
@@ -20,19 +22,8 @@ func TestDemoteUser_Success(t *testing.T) {
 		"password":     "password123",
 		"role":         "admin",
 	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatalf("failed to marshal request body: %v", err)
-	}
 
-	createResp, err := http.Post(
-		fmt.Sprintf("%s/api/v1/users/", baseURL),
-		"application/json",
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		t.Fatalf("failed to create user: %v", err)
-	}
+	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
 	defer createResp.Body.Close()
 
 	if createResp.StatusCode != http.StatusCreated {
@@ -52,20 +43,8 @@ func TestDemoteUser_Success(t *testing.T) {
 		t.Skip("CreateUser endpoint doesn't return user ID yet")
 	}
 
-	// Now demote the user
-	demoteReq, err := http.NewRequest(
-		http.MethodPatch,
-		fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, userID),
-		nil,
-	)
-	if err != nil {
-		t.Fatalf("failed to create demote request: %v", err)
-	}
-
-	demoteResp, err := http.DefaultClient.Do(demoteReq)
-	if err != nil {
-		t.Fatalf("failed to demote user: %v", err)
-	}
+	// Now demote the user with authorization
+	demoteResp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, userID), adminToken, nil)
 	defer demoteResp.Body.Close()
 
 	respBody, err := io.ReadAll(demoteResp.Body)
@@ -75,7 +54,12 @@ func TestDemoteUser_Success(t *testing.T) {
 
 	// Assert
 	if demoteResp.StatusCode != http.StatusOK {
-		t.Errorf("expected status %d, got %d. Response: %s", http.StatusOK, demoteResp.StatusCode, string(respBody))
+		t.Errorf(
+			"expected status %d, got %d. Response: %s",
+			http.StatusOK,
+			demoteResp.StatusCode,
+			string(respBody),
+		)
 	}
 
 	// Verify response message
@@ -94,22 +78,13 @@ func TestDemoteUser_NotFound(t *testing.T) {
 	baseURL, cleanup := StartTestServer(t)
 	defer cleanup()
 
+	// Login as admin
+	adminToken := LoginUser(t, baseURL, "admin", "admin123")
+
 	// Try to demote a non-existent user
 	fakeUserID := "00000000-0000-0000-0000-000000000000"
 
-	demoteReq, err := http.NewRequest(
-		http.MethodPatch,
-		fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, fakeUserID),
-		nil,
-	)
-	if err != nil {
-		t.Fatalf("failed to create demote request: %v", err)
-	}
-
-	resp, err := http.DefaultClient.Do(demoteReq)
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
+	resp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, fakeUserID), adminToken, nil)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)

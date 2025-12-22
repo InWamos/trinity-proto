@@ -83,7 +83,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	}
 
 	// Run migrations with network configuration
-	if err := runMigrations(ctx, pgContainer); err != nil {
+	if err := runMigrations(ctx); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
@@ -126,7 +126,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 }
 
 // runMigrations runs database migrations using the migrate container
-func runMigrations(ctx context.Context, pgContainer *postgres.PostgresContainer) error {
+func runMigrations(ctx context.Context) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
 	projectRoot := filepath.Join(filepath.Dir(currentFile), "..", "..")

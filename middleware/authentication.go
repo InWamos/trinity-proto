@@ -64,7 +64,7 @@ func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Hand
 			slog.String("user_role", string(userIdentity.UserRole)),
 			slog.String("uri", r.RequestURI))
 
-		// Call the next handler
+		// add idp to the context
 		ctx := context.WithValue(r.Context(), "IdentityProvider", userIdentity)
 
 		// Call the next handler with updated context

@@ -17,12 +17,12 @@ const (
 
 type UserModel struct {
 	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;not null;unique;index:idx_users_id" db:"id"`
-	Username     string         `gorm:"unique;size:32" db:"username"`
-	DisplayName  string         `db:"display_name"`
-	PasswordHash string         `db:"password_hash"`
-	Role         Role           `gorm:"type:enum('user', 'admin')" db:"role"`
-	CreatedAt    time.Time      `db:"created_at"`
-	DeletedAt    gorm.DeletedAt `db:"deleted_at"`
+	Username     string         `gorm:"unique;size:32"                                          db:"username"`
+	DisplayName  string         `                                                               db:"display_name"`
+	PasswordHash string         `                                                               db:"password_hash"`
+	Role         Role           `gorm:"type:enum('user', 'admin')"                              db:"role"`
+	CreatedAt    time.Time      `                                                               db:"created_at"`
+	DeletedAt    gorm.DeletedAt `                                                               db:"deleted_at"`
 }
 
 // UserModelSqlx is for sqlx repositories

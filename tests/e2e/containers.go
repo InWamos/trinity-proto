@@ -14,18 +14,20 @@ import (
 )
 
 const (
-	// Match docker-compose.yml versions
+	// Match docker-compose.yml versions.
+
 	PostgresImage = "postgres:18.1-trixie"
 	RedisImage    = "redis:8.4-bookworm"
 	MigrateImage  = "migrate/migrate:v4.19.1"
 
-	// Test database credentials
+	// Test database credentials.
+
 	TestDBName     = "trinity_test"
 	TestDBUser     = "trinity"
 	TestDBPassword = "testpassword"
 )
 
-// TestContainers holds all container instances for E2E tests
+// TestContainers holds all container instances for E2E tests.
 type TestContainers struct {
 	PostgresContainer *postgres.PostgresContainer
 	RedisContainer    *redis.RedisContainer
@@ -37,7 +39,7 @@ type TestContainers struct {
 	RedisPort    string
 }
 
-// SetupContainers initializes all required containers for E2E testing
+// SetupContainers initializes all required containers for E2E testing.
 func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	// Create a shared network
 	network, err := testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
@@ -125,7 +127,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	}, nil
 }
 
-// runMigrations runs database migrations using the migrate container
+// runMigrations runs database migrations using the migrate container.
 func runMigrations(ctx context.Context) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
@@ -174,7 +176,7 @@ func runMigrations(ctx context.Context) error {
 	return nil
 }
 
-// Teardown terminates all containers and cleans up resources
+// Teardown terminates all containers and cleans up resources.
 func (tc *TestContainers) Teardown(ctx context.Context) error {
 	var errs []error
 
@@ -203,7 +205,7 @@ func (tc *TestContainers) Teardown(ctx context.Context) error {
 	return nil
 }
 
-// GetDatabaseConfig returns environment variables for the test database
+// GetDatabaseConfig returns environment variables for the test database.
 func (tc *TestContainers) GetDatabaseConfig() map[string]string {
 	return map[string]string{
 		"DATABASE_ADDRESS":  tc.PostgresHost,
@@ -215,7 +217,7 @@ func (tc *TestContainers) GetDatabaseConfig() map[string]string {
 	}
 }
 
-// GetRedisConfig returns environment variables for the test Redis
+// GetRedisConfig returns environment variables for the test Redis.
 func (tc *TestContainers) GetRedisConfig() map[string]string {
 	return map[string]string{
 		"REDIS_ADDRESS":  tc.RedisHost,

@@ -44,7 +44,13 @@ func TestPromoteUser_Success(t *testing.T) {
 	}
 
 	// Now promote the user with authorization
-	promoteResp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, userID), adminToken, nil)
+	promoteResp := MakeAuthorizedRequest(
+		t,
+		"PATCH",
+		fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, userID),
+		adminToken,
+		nil,
+	)
 	defer promoteResp.Body.Close()
 
 	respBody, err := io.ReadAll(promoteResp.Body)
@@ -84,7 +90,13 @@ func TestPromoteUser_NotFound(t *testing.T) {
 	// Try to promote a non-existent user
 	fakeUserID := "00000000-0000-0000-0000-000000000000"
 
-	resp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, fakeUserID), adminToken, nil)
+	resp := MakeAuthorizedRequest(
+		t,
+		"PATCH",
+		fmt.Sprintf("%s/api/v1/users/%s/promote", baseURL, fakeUserID),
+		adminToken,
+		nil,
+	)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)

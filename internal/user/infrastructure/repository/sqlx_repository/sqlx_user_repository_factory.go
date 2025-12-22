@@ -20,7 +20,9 @@ func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxMapper) repos
 	}
 }
 
-func (surf *SqlxUserRepositoryFactory) CreateUserRepositoryWithTransaction(tm database.TransactionManager) repository.UserRepository {
+func (surf *SqlxUserRepositoryFactory) CreateUserRepositoryWithTransaction(
+	tm database.TransactionManager,
+) repository.UserRepository {
 	// Extract the underlying sqlx transaction
 	tx, ok := tm.GetTransaction().(*sqlx.Tx)
 	if !ok {

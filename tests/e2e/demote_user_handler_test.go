@@ -44,7 +44,13 @@ func TestDemoteUser_Success(t *testing.T) {
 	}
 
 	// Now demote the user with authorization
-	demoteResp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, userID), adminToken, nil)
+	demoteResp := MakeAuthorizedRequest(
+		t,
+		"PATCH",
+		fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, userID),
+		adminToken,
+		nil,
+	)
 	defer demoteResp.Body.Close()
 
 	respBody, err := io.ReadAll(demoteResp.Body)
@@ -84,7 +90,13 @@ func TestDemoteUser_NotFound(t *testing.T) {
 	// Try to demote a non-existent user
 	fakeUserID := "00000000-0000-0000-0000-000000000000"
 
-	resp := MakeAuthorizedRequest(t, "PATCH", fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, fakeUserID), adminToken, nil)
+	resp := MakeAuthorizedRequest(
+		t,
+		"PATCH",
+		fmt.Sprintf("%s/api/v1/users/%s/demote", baseURL, fakeUserID),
+		adminToken,
+		nil,
+	)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)

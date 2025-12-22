@@ -187,7 +187,11 @@ func TestCreateUser_InvalidJSON(t *testing.T) {
 	adminToken := LoginUser(t, baseURL, "admin", "admin123")
 
 	// Send invalid JSON with authorization header
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/users/", baseURL), bytes.NewReader([]byte(`{"username": "test", invalid json}`)))
+	req, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/api/v1/users/", baseURL),
+		bytes.NewReader([]byte(`{"username": "test", invalid json}`)),
+	)
 	if err != nil {
 		t.Fatalf("failed to create request: %v", err)
 	}

@@ -44,7 +44,13 @@ func TestRemoveUser_Success(t *testing.T) {
 	}
 
 	// Now delete the user with authorization
-	deleteResp := MakeAuthorizedRequest(t, "DELETE", fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID), adminToken, nil)
+	deleteResp := MakeAuthorizedRequest(
+		t,
+		"DELETE",
+		fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID),
+		adminToken,
+		nil,
+	)
 	defer deleteResp.Body.Close()
 
 	respBody, err := io.ReadAll(deleteResp.Body)
@@ -111,7 +117,13 @@ func TestRemoveUser_InvalidUUID(t *testing.T) {
 	// Try to delete with an invalid UUID
 	invalidUserID := "not-a-valid-uuid"
 
-	resp := MakeAuthorizedRequest(t, "DELETE", fmt.Sprintf("%s/api/v1/users/%s", baseURL, invalidUserID), adminToken, nil)
+	resp := MakeAuthorizedRequest(
+		t,
+		"DELETE",
+		fmt.Sprintf("%s/api/v1/users/%s", baseURL, invalidUserID),
+		adminToken,
+		nil,
+	)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)

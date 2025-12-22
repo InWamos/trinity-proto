@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
+	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
@@ -47,6 +49,11 @@ func NewGetUserByID(
 
 func (interactor *GetUserByID) Execute(ctx context.Context, input GetUserByIDRequest) (*GetUserByIDResponse, error) {
 	interactor.logger.DebugContext(ctx, "Started GetUserByID execution", slog.String("user_id", input.ID.String()))
+
+	idp := ctx.Value("IdentityProvider").(*client.UserIdentity)
+	if err := service.AuthorizeByRole(idp, domain.RoleUser); err != nil {
+		return nil, ErrInsufficientPrivileges
+	}
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {

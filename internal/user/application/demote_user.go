@@ -6,6 +6,8 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
+	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
@@ -40,6 +42,11 @@ func NewDemoteUser(
 
 func (interactor *DemoteUser) Execute(ctx context.Context, input DemoteUserRequest) error {
 	interactor.logger.DebugContext(ctx, "Started DemoteUser execution", slog.String("user_id", input.ID.String()))
+
+	idp := ctx.Value("IdentityProvider").(*client.UserIdentity)
+	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
+		return ErrInsufficientPrivileges
+	}
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {

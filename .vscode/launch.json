@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Debug main file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/main.go",
+            "envFile": "${workspaceFolder}/.env",
+            "preLaunchTask": "docker-compose-up-migrations"
+        },
+        {
+            "name": "Generate Swagger Docs",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/main.go",
+            "preLaunchTask": "generate-swagger"
+        }
+    ]
+}

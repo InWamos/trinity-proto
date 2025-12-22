@@ -1,0 +1,245 @@
+basePath: /api
+definitions:
+  handlers.CreateUserResponse:
+    description: User creation response with ID
+    properties:
+      id:
+        example: 019b1a49-dbf6-74d6-97bf-2d7e57d30c75
+        type: string
+      message:
+        example: The user has been created. You can login now
+        type: string
+    type: object
+  handlers.ErrorResponse:
+    description: Standard error response
+    properties:
+      error:
+        example: Invalid request body
+        type: string
+    type: object
+  handlers.GetUserResponse:
+    description: User information response
+    properties:
+      created_at:
+        example: "2025-12-14T00:36:46.545Z"
+        type: string
+      display_name:
+        example: John Doe
+        type: string
+      id:
+        example: 019b1a49-dbf6-74d6-97bf-2d7e57d30c75
+        type: string
+      role:
+        enum:
+        - user
+        - admin
+        example: user
+        type: string
+      username:
+        example: johndoe
+        type: string
+    type: object
+  handlers.SuccessResponse:
+    description: Standard success response with message
+    properties:
+      message:
+        example: User promoted to admin successfully
+        type: string
+    type: object
+  handlers.createUserForm:
+    properties:
+      display_name:
+        maxLength: 64
+        minLength: 1
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      role:
+        enum:
+        - user
+        - admin
+        type: string
+      username:
+        maxLength: 32
+        minLength: 2
+        type: string
+    required:
+    - display_name
+    - password
+    - role
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Trinity API schema.
+  license:
+    name: MIT
+  title: Trinity API
+  version: "1.0"
+paths:
+  /v1/users/:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with username, display name, password and role
+      parameters:
+      - description: User creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createUserForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/handlers.CreateUserResponse'
+        "400":
+          description: Invalid request (validation failed)
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /v1/users/{id}:
+    delete:
+      description: Permanently remove a user from the system
+      parameters:
+      - description: User ID (UUID)
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Invalid user ID format
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      description: Retrieve a user's information by their ID
+      parameters:
+      - description: User ID (UUID)
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User found
+          schema:
+            $ref: '#/definitions/handlers.GetUserResponse'
+        "400":
+          description: Invalid user ID format
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get user by ID
+      tags:
+      - users
+  /v1/users/{id}/demote:
+    patch:
+      description: Change a user's role from admin to user
+      parameters:
+      - description: User ID (UUID)
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User demoted successfully
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Invalid user ID format
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Demote user to regular user
+      tags:
+      - users
+  /v1/users/{id}/promote:
+    patch:
+      description: Change a user's role from user to admin
+      parameters:
+      - description: User ID (UUID)
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User promoted successfully
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Invalid user ID format
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Promote user to admin
+      tags:
+      - users
+securityDefinitions:
+  SessionCookie:
+    description: 'Session cookie for authenticated requests. Roles: Admin, User'
+    in: cookie
+    name: session_id
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,11 @@
+{
+    "go.lintTool": "golangci-lint-v2",
+    "go.lintOnSave": "workspace",
+    "go.formatTool": "gofmt",
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    }
+}

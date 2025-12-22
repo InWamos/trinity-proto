@@ -115,17 +115,8 @@ jobs:
           args: >
             --enableExperimental
 
-      - name: List generated files
-        run: |
-          echo "=== Listing current directory ==="
-          ls -la
-          echo "=== Listing reports directory ==="
-          ls -la reports/ || echo "Reports directory not found"
-          echo "=== Finding all SARIF files ==="
-          find . -name "*.sarif" -type f || echo "No SARIF files found"
-
       - name: Upload dependency-check results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'reports/dependency-check-report.sarif'
           category: dependency-check

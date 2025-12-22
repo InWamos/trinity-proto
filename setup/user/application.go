@@ -24,6 +24,8 @@ func NewUserApplicationContainer() fx.Option {
 			application.NewDemoteUser,
 			// Provides RemoveUserInteractor
 			application.NewRemoveUser,
+			// Provides ValidateUserCredentialsInteractor
+			application.NewValidateUserCredentials,
 		),
 	)
 }

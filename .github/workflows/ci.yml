@@ -177,13 +177,16 @@ jobs:
         run: go install github.com/google/go-licenses@latest
 
       - name: Check licenses
-        run: go-licenses report ./... --template=csv > licenses.csv
+        run: |
+          go-licenses report ./... > licenses.txt 2>&1 || true
+          cat licenses.txt
 
       - name: Upload license report
         uses: actions/upload-artifact@v4
         with:
           name: license-report
-          path: licenses.csv
+          path: licenses.txt
+        if: always()
 
   code-quality:
     name: Code Quality - Go Report

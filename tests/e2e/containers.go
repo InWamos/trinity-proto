@@ -150,7 +150,7 @@ func runMigrations(ctx context.Context, pgContainer *postgres.PostgresContainer)
 			Mounts: testcontainers.Mounts(
 				testcontainers.BindMount(migrationsPath, "/migrations"),
 			),
-			Networks: []string{"trinity-test-net"},
+			Networks:   []string{"trinity-test-net"},
 			WaitingFor: wait.ForExit().WithExitTimeout(30 * time.Second),
 		},
 		Started: true,

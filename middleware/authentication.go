@@ -65,7 +65,7 @@ func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Hand
 			slog.String("uri", r.RequestURI))
 
 		// add idp to the context
-		ctx := context.WithValue(r.Context(), "IdentityProvider", userIdentity)
+		ctx := context.WithValue(r.Context(), "IdentityProvider", &userIdentity)
 
 		// Call the next handler with updated context
 		next.ServeHTTP(w, r.WithContext(ctx))

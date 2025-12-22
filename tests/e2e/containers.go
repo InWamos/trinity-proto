@@ -63,6 +63,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 		),
 		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 			ContainerRequest: testcontainers.ContainerRequest{
+				Name:     "postgres",
 				Networks: []string{"trinity-test-net"},
 			},
 		}),
@@ -81,8 +82,8 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 		return nil, fmt.Errorf("failed to get postgres port: %w", err)
 	}
 
-	// Run migrations
-	if err := runMigrations(ctx, pgHost, pgPort.Port()); err != nil {
+	// Run migrations with network configuration
+	if err := runMigrations(ctx, pgContainer); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
@@ -125,15 +126,17 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 }
 
 // runMigrations runs database migrations using the migrate container
-func runMigrations(ctx context.Context, pgHost, pgPort string) error {
+func runMigrations(ctx context.Context, pgContainer *postgres.PostgresContainer) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
 	projectRoot := filepath.Join(filepath.Dir(currentFile), "..", "..")
 	migrationsPath := filepath.Join(projectRoot, "internal", "user", "infrastructure", "migrations")
 
+	// Use container name for internal network communication
+	// PostgreSQL container is named "postgres" on the network
 	dbURL := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		TestDBUser, TestDBPassword, pgHost, pgPort, TestDBName,
+		"postgres://%s:%s@postgres:5432/%s?sslmode=disable",
+		TestDBUser, TestDBPassword, TestDBName,
 	)
 
 	migrateContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -147,6 +150,7 @@ func runMigrations(ctx context.Context, pgHost, pgPort string) error {
 			Mounts: testcontainers.Mounts(
 				testcontainers.BindMount(migrationsPath, "/migrations"),
 			),
+			Networks: []string{"trinity-test-net"},
 			WaitingFor: wait.ForExit().WithExitTimeout(30 * time.Second),
 		},
 		Started: true,

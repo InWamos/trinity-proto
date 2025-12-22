@@ -72,7 +72,7 @@ jobs:
           args: '-no-fail -fmt sarif -out gosec-report.sarif ./...'
 
       - name: Upload Gosec results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: gosec-report.sarif
           category: gosec
@@ -158,7 +158,8 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --timeout=10m
+          skip-cache: true
+          args: --timeout=10m --out-format=colored-line-number
 
   dependency-license-scan:
     name: Dependency License Scan

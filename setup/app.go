@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	_ "net/http/pprof"
-
 	"github.com/InWamos/trinity-proto/config"
 	authV1Mux "github.com/InWamos/trinity-proto/internal/auth/presentation/v1"
 	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"

@@ -204,9 +204,6 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Install gofmt
-        run: go install golang.org/x/tools/cmd/gofmt@latest
-
       - name: Check code formatting
         run: |
           if ! gofmt -l . | grep -q .; then

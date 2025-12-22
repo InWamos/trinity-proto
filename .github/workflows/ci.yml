@@ -113,7 +113,6 @@ jobs:
           format: 'SARIF'
           args: >
             --enableExperimental
-            --enableVulnerability
 
       - name: Upload dependency-check results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2

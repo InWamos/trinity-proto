@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
@@ -54,7 +55,10 @@ func NewCreateUser(
 
 func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) (*CreateUserResponse, error) {
 	interactor.logger.DebugContext(ctx, "Started Create User execution")
-
+	idp := ctx.Value("IdentityProvider").(*client.UserIdentity)
+	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
+		return nil, ErrInsufficientPrivileges
+	}
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")

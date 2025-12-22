@@ -143,24 +143,17 @@ jobs:
           govulncheck ./...
 
   lint:
-    name: Lint - golangci-lint
+    name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
-          skip-cache: true
-          args: --timeout=10m --out-format=colored-line-number
+          version: v2.6
 
   dependency-license-scan:
     name: Dependency License Scan

@@ -3,8 +3,8 @@ package service
 import (
 	"testing"
 
-	"github.com/InWamos/trinity-proto/internal/auth/domain"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
+	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/google/uuid"
 )
 
@@ -12,7 +12,7 @@ func TestAuthorizeByRole(t *testing.T) {
 	tests := []struct {
 		name         string
 		identity     *client.UserIdentity
-		requiredRole domain.UserRole
+		requiredRole domain.Role
 		shouldPass   bool
 	}{
 		{
@@ -21,7 +21,7 @@ func TestAuthorizeByRole(t *testing.T) {
 				UserID:   uuid.New(),
 				UserRole: client.User,
 			},
-			requiredRole: domain.User,
+			requiredRole: domain.RoleUser,
 			shouldPass:   true,
 		},
 		{
@@ -30,7 +30,7 @@ func TestAuthorizeByRole(t *testing.T) {
 				UserID:   uuid.New(),
 				UserRole: client.Admin,
 			},
-			requiredRole: domain.Admin,
+			requiredRole: domain.RoleAdmin,
 			shouldPass:   true,
 		},
 		{
@@ -39,7 +39,7 @@ func TestAuthorizeByRole(t *testing.T) {
 				UserID:   uuid.New(),
 				UserRole: client.Admin,
 			},
-			requiredRole: domain.User,
+			requiredRole: domain.RoleUser,
 			shouldPass:   true,
 		},
 		{
@@ -48,7 +48,7 @@ func TestAuthorizeByRole(t *testing.T) {
 				UserID:   uuid.New(),
 				UserRole: client.User,
 			},
-			requiredRole: domain.Admin,
+			requiredRole: domain.RoleAdmin,
 			shouldPass:   false,
 		},
 	}
@@ -77,7 +77,7 @@ func TestAuthorizeByRoleEdgeCases(t *testing.T) {
 	tests := []struct {
 		name         string
 		identity     *client.UserIdentity
-		requiredRole domain.UserRole
+		requiredRole domain.Role
 		expectError  bool
 	}{
 		{
@@ -90,12 +90,12 @@ func TestAuthorizeByRoleEdgeCases(t *testing.T) {
 			expectError:  true,
 		},
 		{
-			name: "Empty user role with User required role",
+			name: "Empty user role with RoleUser required role",
 			identity: &client.UserIdentity{
 				UserID:   uuid.New(),
 				UserRole: "",
 			},
-			requiredRole: domain.User,
+			requiredRole: domain.RoleUser,
 			expectError:  true,
 		},
 	}

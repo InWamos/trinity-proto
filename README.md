@@ -1,10 +1,30 @@
 # trinity-proto
+
 Proto for the Trinity project
 
+[![CI](https://github.com/InWamos/trinity-proto/actions/workflows/ci.yml/badge.svg)](https://github.com/InWamos/trinity-proto/actions/workflows/ci.yml)
+[![Go Version](https://img.shields.io/badge/Go-1.25-blue.svg)](https://golang.org/dl/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-golangci--lint-blue)](https://golangci-lint.run/)
+[![Security](https://img.shields.io/badge/Security-Gosec-orange)](https://github.com/securego/gosec)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker)](Dockerfile)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18.1-336791.svg?logo=postgresql)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-8.4-DC382D.svg?logo=redis)](https://redis.io/)
+
+## Features
+
+- 🔐 Session-based authentication with Redis
+- 👥 Role-based authorization (User, Admin)
+- 🏗️ Modular monolith architecture
+- 📝 Comprehensive test coverage
+- 🐳 Docker & Docker Compose support
+- 🔍 Multiple security scanning tools
+- 📊 Code quality and linting checks
+
 # TODO
-- [ ] Session-based auth
-- [ ] ABAC authorization
-- [ ] golint and build + tests CI
+- [x] Session-based auth
+- [x] RBAC authorization
+- [x] golint and build + tests CI
 
 # Use Cases
 - User
@@ -15,7 +35,7 @@ Proto for the Trinity project
     - [x] Delete User
 
 - Auth
-    - [ ] Login
+    - [x] Login
     - [ ] Logout
     - [x] Verify
     - [ ] Logout specific session

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
@@ -72,6 +73,15 @@ func (interactor *CreateRandomAdminUser) Execute(
 
 	// Get repository scoped to this transaction
 	userRepository := interactor.userRepositoryFactory.CreateUserRepositoryWithTransaction(transactionManager)
+	// Skip admin account creation if already exists in the database
+	_, err = userRepository.GetUserByUsername(ctx, "admin")
+	if err == nil {
+		interactor.logger.InfoContext(ctx, "Admin user already exists, skipping creation process")
+	}
+	if !errors.Is(err, repository.ErrUserNotFound) {
+		interactor.logger.ErrorContext(ctx, "Unexpected error occured", slog.Any("err", err))
+		return err
+	}
 
 	err = userRepository.CreateUser(ctx, *newUser)
 	if err != nil {

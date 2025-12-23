@@ -76,6 +76,7 @@ services:
       SERVER_ALLOWED_ORIGIN: ${SERVER_ALLOWED_ORIGIN}
     ports:
       - "8080:8080"
+      - "6060:6060"
     networks:
       trinity-net:
         ipv4_address: 172.20.0.5

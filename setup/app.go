@@ -10,6 +10,7 @@ import (
 
 	"github.com/InWamos/trinity-proto/config"
 	authV1Mux "github.com/InWamos/trinity-proto/internal/auth/presentation/v1"
+	"github.com/InWamos/trinity-proto/internal/user/application"
 	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"
 	"github.com/InWamos/trinity-proto/middleware"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
@@ -21,6 +22,22 @@ func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger)
 		logger.Error("Failed to start server", slog.Any("err", err))
 		panic(err)
 	}
+}
+
+func CreateAdminAccountIfNotExists(
+	interactor *application.CreateRandomAdminUser,
+	logger *slog.Logger,
+) {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	logger.Info("Checking for admin account...")
+	if err := interactor.Execute(ctx); err != nil {
+		logger.Error("Failed to create admin account", slog.Any("error", err))
+		panic(err)
+	}
+	logger.Info("Admin account check complete")
 }
 
 func NewHTTPServer(

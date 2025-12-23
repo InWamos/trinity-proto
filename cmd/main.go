@@ -49,6 +49,7 @@ func main() {
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &fxevent.SlogLogger{Logger: logger}
 		}),
+		fx.Invoke(setup.CreateAdminAccountIfNotExists),
 		fx.Invoke(func(*http.Server) {}),
 	).Run()
 }

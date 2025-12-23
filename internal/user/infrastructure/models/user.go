@@ -25,7 +25,7 @@ type UserModel struct {
 	DeletedAt    gorm.DeletedAt `                                                               db:"deleted_at"`
 }
 
-// UserModelSqlx is for sqlx repositories
+// UserModelSqlx is for sqlx repositories.
 type UserModelSqlx struct {
 	ID           uuid.UUID    `db:"id"`
 	Username     string       `db:"username"`

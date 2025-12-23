@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	_ "net/http/pprof"
+
 	"github.com/InWamos/trinity-proto/config"
 	authV1Mux "github.com/InWamos/trinity-proto/internal/auth/presentation/v1"
 	"github.com/InWamos/trinity-proto/internal/user/application"
@@ -20,6 +22,12 @@ import (
 func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {
 	if err := server.Serve(*listener); err != nil && err != http.ErrServerClosed {
 		logger.Error("Failed to start server", slog.Any("err", err))
+		panic(err)
+	}
+}
+func runProfiler(listenAddress string, logger *slog.Logger) {
+	if err := http.ListenAndServe(listenAddress, nil); err != nil {
+		logger.Error("Profiler server error", slog.Any("err", err))
 		panic(err)
 	}
 }
@@ -51,6 +59,11 @@ func NewHTTPServer(
 	authMuxV1 *authV1Mux.AuthMuxV1,
 	logger *slog.Logger,
 ) *http.Server {
+	if serverConfig.Environment == "DEVELOPMENT" {
+		listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, 6060)
+
+		go runProfiler(listenAddress, logger)
+	}
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	masterMux := http.NewServeMux()
 	// /api/v1/users set of handlers - protected with auth middleware

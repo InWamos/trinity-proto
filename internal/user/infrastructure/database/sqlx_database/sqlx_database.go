@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"time"
 
 	"github.com/InWamos/trinity-proto/config"
+	// Postgres driver for sqlx.
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
@@ -43,7 +45,8 @@ func NewSQLXDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*SQLXD
 
 	// Configure connection pool
 	engine.SetMaxOpenConns(25)
-	engine.SetMaxIdleConns(5)
+	engine.SetMaxIdleConns(15)
+	engine.SetConnMaxIdleTime(time.Minute * 5)
 
 	dbLogger.Info("database connection established")
 

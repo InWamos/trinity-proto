@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/InWamos/trinity-proto/config"
+	// Postgres driver for sqlx.
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )

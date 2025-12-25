@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -57,8 +58,8 @@ func NewCreateUserHandler(
 //	@Produce		json
 //	@Param			request	body		createUserForm		true	"User creation request"
 //	@Success		201		{object}	CreateUserResponse	"User created successfully"
-//	@Failure		400		{object}	ErrorResponse		"Invalid request (validation failed)"
-//	@Failure		500		{object}	ErrorResponse		"Server error"
+//	@Failure		400		{object}	ErrorResponse		"Invalid request body"
+//	@Failure		500		{object}	ErrorResponse		"Internal server error"
 //	@Router			/v1/users/ [post]
 func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -79,13 +80,19 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	response, err := handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to call the interactor", slog.Any("err", err))
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).
-			Encode(map[string]string{"error": "The server was unable to complete your request. Please try again later"})
-		return
+		switch {
+		case errors.Is(err, application.ErrInsufficientPrivileges):
+			w.WriteHeader(http.StatusForbidden)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
+			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+			return
+		}
 	}
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"message": "The user has been created. You can login now",
 		"id":      response.UserID.String(),
 	})

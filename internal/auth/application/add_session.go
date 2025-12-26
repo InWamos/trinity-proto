@@ -70,7 +70,6 @@ func (asInteractor *AddSession) Execute(ctx context.Context, input AddSessionReq
 		domain.UserRole(response.UserRole),
 		input.IpAddress,
 		input.UserAgent,
-		"",
 		DefaultSessionDuration,
 	)
 	if err != nil {

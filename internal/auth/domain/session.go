@@ -35,7 +35,6 @@ func NewSession(
 	userRole UserRole,
 	ipAddress string,
 	userAgent string,
-	token string,
 	duration time.Duration,
 ) (*Session, error) {
 	token, err := generateToken(32)

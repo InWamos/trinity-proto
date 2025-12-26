@@ -1,4 +1,4 @@
-package application
+package application //nolint:dupl //Interactors should be nearly the same
 
 import (
 	"context"

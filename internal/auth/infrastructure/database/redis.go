@@ -42,7 +42,7 @@ func NewRedisDatabase(config *config.RedisConfig, logger *slog.Logger) (*RedisDa
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := client.Ping(ctx).Err(); err != nil {
+	if err = client.Ping(ctx).Err(); err != nil {
 		redisLogger.Error("failed to connect to Redis", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}

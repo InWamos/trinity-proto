@@ -1,13 +1,12 @@
 package v1
 
 import (
-	"net/http"
-
 	"github.com/InWamos/trinity-proto/internal/user/presentation/v1/handlers"
+	"github.com/go-chi/chi/v5"
 )
 
 type UserMuxV1 struct {
-	mux *http.ServeMux
+	mux *chi.Mux
 }
 
 func NewUserMuxV1(
@@ -17,19 +16,15 @@ func NewUserMuxV1(
 	demoteUserHandler *handlers.DemoteUserHandler,
 	removeUserHandler *handlers.RemoveUserHandler,
 ) *UserMuxV1 {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("POST /", createUserHandler.ServeHTTP)
-	mux.HandleFunc("GET /{id}", getUserHandler.ServeHTTP)
-	mux.HandleFunc("DELETE /{id}", removeUserHandler.ServeHTTP)
-
-	// User role management
-	mux.HandleFunc("PATCH /{id}/promote", promoteUserHandler.ServeHTTP)
-	mux.HandleFunc("PATCH /{id}/demote", demoteUserHandler.ServeHTTP)
-
+	mux := chi.NewRouter()
+	mux.Post("/", createUserHandler.ServeHTTP)
+	mux.Get("/{id}", getUserHandler.ServeHTTP)
+	mux.Delete("/{id}", removeUserHandler.ServeHTTP)
+	mux.Patch("/{id}/promote", promoteUserHandler.ServeHTTP)
+	mux.Patch("/{id}/demote", demoteUserHandler.ServeHTTP)
 	return &UserMuxV1{mux: mux}
 }
 
-func (um *UserMuxV1) GetMux() *http.ServeMux {
+func (um *UserMuxV1) GetMux() *chi.Mux {
 	return um.mux
 }

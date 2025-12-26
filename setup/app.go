@@ -88,10 +88,6 @@ func NewHTTPServer(
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
 	chiRouter.Mount("/swagger", httpSwagger.WrapHandler)
 
-	// masterHandler := loggingMiddleware.Handler(
-	// 	corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)),
-	// )
-
 	srv := &http.Server{
 		Addr:              listenAddress,
 		Handler:           chiRouter,

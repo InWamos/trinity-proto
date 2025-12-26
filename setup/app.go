@@ -69,7 +69,22 @@ func NewHTTPServer(
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	// masterMux := http.NewServeMux()
 	chiRouter := chi.NewRouter()
-	chiRouter.Use(chiMiddleware.Logger)
+	// Logging
+	chiRouter.Use(loggingMiddleware.Handler)
+	// Only allow json content type
+	chiRouter.Use(chiMiddleware.AllowContentType("application/json"))
+	// Send nocache header to reverse proxy
+	chiRouter.Use(chiMiddleware.NoCache)
+	// Real IP spoofing protection
+	chiRouter.Use(trustedProxyMiddleware.Handler)
+	// Fixes typos in /
+	chiRouter.Use(chiMiddleware.CleanPath)
+	// Recover from panic, log it and return 500
+	chiRouter.Use(chiMiddleware.Recoverer)
+	// Trim slash from the end of uri
+	chiRouter.Use(chiMiddleware.RedirectSlashes)
+	// CORS
+	chiRouter.Use(corsMiddleware.Handler)
 	chiRouter.Mount("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux()))
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
 	chiRouter.Mount("/swagger/", httpSwagger.WrapHandler)

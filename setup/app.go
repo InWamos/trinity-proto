@@ -86,7 +86,7 @@ func NewHTTPServer(
 	chiRouter.Use(corsMiddleware.Handler)
 	chiRouter.Mount("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux()))
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
-	chiRouter.Mount("/swagger/", httpSwagger.WrapHandler)
+	chiRouter.Mount("/swagger", httpSwagger.WrapHandler)
 
 	// masterHandler := loggingMiddleware.Handler(
 	// 	corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)),

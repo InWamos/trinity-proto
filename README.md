@@ -38,7 +38,7 @@ Proto for the Trinity project
     - [x] Login
     - [ ] Logout
     - [x] Verify
-    - [ ] Logout specific session
+    - [x] Logout specific session
 
 # REFACTORING:
 - [ ] Fix interactors (remove transaction logic from query interactors)

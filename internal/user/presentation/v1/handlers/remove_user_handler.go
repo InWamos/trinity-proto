@@ -1,3 +1,4 @@
+//nolint:dupl // Intended to be similar to other handlers
 package handlers
 
 import (

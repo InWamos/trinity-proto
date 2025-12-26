@@ -73,7 +73,7 @@ func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Hand
 }
 
 // extractToken extracts the session token from the Authorization header
-// Expected format: Authorization: Bearer {token}
+// Expected format: Authorization: Bearer {token}.
 func extractToken(r *http.Request) (string, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
@@ -92,7 +92,7 @@ func extractToken(r *http.Request) (string, error) {
 	return parts[1], nil
 }
 
-// JSON error response with WWW-Authenticate header for 401
+// JSON error response with WWW-Authenticate header for 401.
 func respondWithError(w http.ResponseWriter, statusCode int, message string, errorCode string) {
 	w.Header().Set("Content-Type", "application/json")
 

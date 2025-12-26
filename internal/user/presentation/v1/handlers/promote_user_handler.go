@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -76,19 +75,20 @@ func (handler *PromoteUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Requ
 	err = handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {
 		handler.logger.ErrorContext(r.Context(), "failed to promote user", slog.Any("err", err))
-
-		// Check if error is due to user not found
-		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, application.ErrUserNotFound) {
+		switch {
+		case errors.Is(err, application.ErrInsufficientPrivileges):
+			w.WriteHeader(http.StatusForbidden)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
+			return
+		case errors.Is(err, application.ErrUserNotFound):
 			w.WriteHeader(http.StatusNotFound)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "User not found"})
 			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+			return
 		}
-
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(map[string]string{
-			"error": "Failed to promote user",
-		})
-		return
 	}
 
 	w.WriteHeader(http.StatusOK)

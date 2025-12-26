@@ -78,10 +78,10 @@ func (rd *RedisDatabase) HealthCheck(ctx context.Context) error {
 	defer cancel()
 
 	if err := rd.Ping(ctx); err != nil {
-		rd.logger.Error("Redis health check failed", slog.String("err", err.Error()))
+		rd.logger.ErrorContext(ctx, "Redis health check failed", slog.String("err", err.Error()))
 		return err
 	}
 
-	rd.logger.Debug("Redis health check passed")
+	rd.logger.DebugContext(ctx, "Redis health check passed")
 	return nil
 }

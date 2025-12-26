@@ -67,7 +67,6 @@ func NewHTTPServer(
 		go runProfiler(listenAddress, logger)
 	}
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
-	// masterMux := http.NewServeMux()
 	chiRouter := chi.NewRouter()
 	// Logging
 	chiRouter.Use(loggingMiddleware.Handler)
@@ -88,13 +87,6 @@ func NewHTTPServer(
 	chiRouter.Mount("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux()))
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
 	chiRouter.Mount("/swagger/", httpSwagger.WrapHandler)
-	// /api/v1/users set of handlers - protected with auth middleware
-	// masterMux.Handle("/api/v1/users/", http.StripPrefix("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux())))
-	// /api/v1/auth set of handlers
-	// masterMux.Handle("/api/v1/auth/", http.StripPrefix("/api/v1/auth", authMuxV1.GetMux()))
-
-	// Swagger documentation
-	// masterMux.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	// masterHandler := loggingMiddleware.Handler(
 	// 	corsMiddleware.Handler(trustedProxyMiddleware.Handler(masterMux)),

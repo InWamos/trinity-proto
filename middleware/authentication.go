@@ -33,16 +33,16 @@ func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Hand
 		// Validate session token and get user identity
 		userIdentity, err := middleware.authClient.ValidateSession(r.Context(), token)
 		if err != nil {
-			switch err {
-			case client.ErrSessionInvalid:
+			switch {
+			case errors.Is(err, client.ErrSessionInvalid):
 				middleware.logger.WarnContext(r.Context(), "invalid session", slog.String("token", token))
 				respondWithError(w, http.StatusUnauthorized, "invalid session", "invalid_token")
 
-			case client.ErrSessionExpired:
+			case errors.Is(err, client.ErrSessionExpired):
 				middleware.logger.WarnContext(r.Context(), "session expired", slog.String("token", token))
 				respondWithError(w, http.StatusUnauthorized, "session expired", "expired_token")
 
-			case client.ErrSessionRevoked:
+			case errors.Is(err, client.ErrSessionRevoked):
 				middleware.logger.WarnContext(r.Context(), "session revoked", slog.String("token", token))
 				respondWithError(w, http.StatusUnauthorized, "session revoked", "revoked_token")
 

@@ -1,9 +1,11 @@
-package service
+package service_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
+	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/google/uuid"
 )
@@ -55,7 +57,7 @@ func TestAuthorizeByRole(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := AuthorizeByRole(tt.identity, tt.requiredRole)
+			err := service.AuthorizeByRole(tt.identity, tt.requiredRole)
 
 			if tt.shouldPass {
 				if err != nil {
@@ -65,7 +67,7 @@ func TestAuthorizeByRole(t *testing.T) {
 				if err == nil {
 					t.Errorf("expected error, got nil")
 				}
-				if err != ErrInsufficientPrivileges {
+				if !errors.Is(err, service.ErrInsufficientPrivileges) {
 					t.Errorf("expected ErrInsufficientPrivileges, got %v", err)
 				}
 			}

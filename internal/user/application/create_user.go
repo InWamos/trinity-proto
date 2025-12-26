@@ -9,6 +9,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
+	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
 )
 
@@ -56,7 +57,11 @@ func NewCreateUser(
 func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) (*CreateUserResponse, error) {
 	interactor.logger.DebugContext(ctx, "Started Create User execution")
 
-	idp := ctx.Value("IdentityProvider").(*client.UserIdentity)
+	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
+	if !ok || idp == nil {
+		return nil, ErrInsufficientPrivileges
+	}
+
 	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
 		return nil, ErrInsufficientPrivileges
 	}

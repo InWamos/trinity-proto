@@ -20,9 +20,9 @@ func NewRedisDatabase(config *config.RedisConfig, logger *slog.Logger) (*RedisDa
 	redisLogger := logger.With(slog.String("component", "redis_engine"))
 	redisLogger.Debug("The Redis database engine has been invoked")
 
-	dbNumber, err := strconv.Atoi(config.DbNumberAuth)
+	dbNumber, err := strconv.Atoi(config.DBNumberAuth)
 	if err != nil {
-		redisLogger.Error("invalid Redis DB number", slog.String("db", config.DbNumberAuth))
+		redisLogger.Error("invalid Redis DB number", slog.String("db", config.DBNumberAuth))
 		return nil, fmt.Errorf("invalid Redis DB number: %w", err)
 	}
 

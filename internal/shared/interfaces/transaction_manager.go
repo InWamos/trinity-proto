@@ -1,4 +1,4 @@
-package interfaces
+package interfaces //nolint:var-naming // meaningful name
 
 import "context"
 

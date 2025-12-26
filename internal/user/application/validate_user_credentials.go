@@ -75,5 +75,4 @@ func (interactor *ValidateUserCredentials) Execute(
 	}
 	response := ValidateUserCredentialsResponse{UserID: user.ID, UserRole: user.Role}
 	return response, nil
-
 }

@@ -77,7 +77,7 @@ func (handler *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestDTO := application.AddSessionRequest{
 		Username:  form.Username,
 		Password:  form.Password,
-		IpAddress: ipAddress,
+		IPAddress: ipAddress,
 		UserAgent: userAgent,
 	}
 

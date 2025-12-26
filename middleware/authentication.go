@@ -3,12 +3,17 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 )
+
+type contextKey string
+
+const IdentityProviderKey contextKey = "IdentityProvider"
 
 type AuthenticationMiddleware struct {
 	logger     *slog.Logger
@@ -65,7 +70,7 @@ func (middleware *AuthenticationMiddleware) Handler(next http.Handler) http.Hand
 			slog.String("uri", r.RequestURI))
 
 		// add idp to the context
-		ctx := context.WithValue(r.Context(), "IdentityProvider", &userIdentity)
+		ctx := context.WithValue(r.Context(), IdentityProviderKey, &userIdentity)
 
 		// Call the next handler with updated context
 		next.ServeHTTP(w, r.WithContext(ctx))

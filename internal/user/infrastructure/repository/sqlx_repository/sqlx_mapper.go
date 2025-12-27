@@ -24,7 +24,7 @@ func (sm *SqlxMapper) ToDomain(inputModel *models.UserModelSqlx) domain.User {
 }
 
 func (sm *SqlxMapper) ToModel(inputEntity *domain.User) models.UserModelSqlx {
-	deletedAt := sql.NullTime{}
+	deletedAt := sql.NullTime{} //nolint:exhaustruct // Required fields set after
 	if inputEntity.DeletedAt.Valid {
 		deletedAt.Time = inputEntity.DeletedAt.Time
 		deletedAt.Valid = true

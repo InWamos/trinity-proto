@@ -1,4 +1,4 @@
-package application
+package application //nolint:dupl //Interactors should be nearly the same
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
+	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
 )
 
@@ -43,7 +44,10 @@ func NewDemoteUser(
 func (interactor *DemoteUser) Execute(ctx context.Context, input DemoteUserRequest) error {
 	interactor.logger.DebugContext(ctx, "Started DemoteUser execution", slog.String("user_id", input.ID.String()))
 
-	idp := ctx.Value("IdentityProvider").(*client.UserIdentity)
+	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
+	if !ok || idp == nil {
+		return ErrInsufficientPrivileges
+	}
 	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
 		return ErrInsufficientPrivileges
 	}

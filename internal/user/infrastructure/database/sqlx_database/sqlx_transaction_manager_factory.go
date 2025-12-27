@@ -8,7 +8,7 @@ import (
 )
 
 // SQLXTransactionFactory creates request-scoped transactions
-// We need this as we have no scopes in uber-fx apart from the application scope
+// We need this as we have no scopes in uber-fx apart from the application scope.
 type SQLXTransactionFactory struct {
 	db     *SQLXDatabase
 	logger *slog.Logger
@@ -21,7 +21,7 @@ func NewSQLXTransactionFactory(db *SQLXDatabase, logger *slog.Logger) database.T
 	}
 }
 
-// NewTransaction creates a NEW transaction for each request
+// NewTransaction creates a NEW transaction for each request.
 func (f *SQLXTransactionFactory) NewTransaction(ctx context.Context) (database.TransactionManager, error) {
 	tx, err := f.db.engine.BeginTxx(ctx, nil)
 	if err != nil {

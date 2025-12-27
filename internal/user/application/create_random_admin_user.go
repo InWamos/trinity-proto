@@ -2,31 +2,17 @@ package application
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
-	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
-	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
 )
 
-// CreateUserRequest Input DTO for interactor.
-type CreateUserRequest struct {
-	Username    string
-	DisplayName string
-	Password    string
-	Role        domain.Role
-}
-
-// CreateUserResponse Output DTO for interactor.
-type CreateUserResponse struct {
-	UserID uuid.UUID
-}
-
-type CreateUser struct {
+type CreateRandomAdminUser struct {
 	passwordHasher            service.PasswordHasher
 	uuidGenerator             *service.UUIDGenerator
 	transactionManagerFactory database.TransactionManagerFactory
@@ -34,18 +20,18 @@ type CreateUser struct {
 	logger                    *slog.Logger
 }
 
-func NewCreateUser(
+func NewCreateRandomAdminUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator *service.UUIDGenerator,
 	transactionManagerFactory database.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
-) *CreateUser {
+) *CreateRandomAdminUser {
 	culogger := logger.With(
 		slog.String("component", "interactor"),
-		slog.String("name", "create_user"),
+		slog.String("name", "create_random_admin_user"),
 	)
-	return &CreateUser{
+	return &CreateRandomAdminUser{
 		passwordHasher:            passwordHasher,
 		uuidGenerator:             uuidGenerator,
 		transactionManagerFactory: transactionManagerFactory,
@@ -54,41 +40,48 @@ func NewCreateUser(
 	}
 }
 
-func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserRequest) (*CreateUserResponse, error) {
+func (interactor *CreateRandomAdminUser) Execute(
+	ctx context.Context,
+) error {
 	interactor.logger.DebugContext(ctx, "Started Create User execution")
-
-	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
-	if !ok || idp == nil {
-		return nil, ErrInsufficientPrivileges
+	// Generate randomly safe password
+	password, err := service.GenerateSafeRandomString(16)
+	if err != nil {
+		return err
 	}
 
-	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
-		return nil, ErrInsufficientPrivileges
-	}
-
-	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)
+	passwordHashed, err := interactor.passwordHasher.HashPassword(password)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "The password hasher has failed")
-		return nil, ErrHashingFailed
+		return ErrHashingFailed
 	}
 
 	var randomUUID uuid.UUID
 	if randomUUID, err = interactor.uuidGenerator.GetUUIDv7(); err != nil {
 		interactor.logger.ErrorContext(ctx, "The uuid generator has failed")
-		return nil, ErrUUIDGeneration
+		return ErrUUIDGeneration
 	}
 
-	newUser := domain.NewUser(randomUUID, input.Username, input.DisplayName, passwordHashed, input.Role)
+	newUser := domain.NewUser(randomUUID, "admin", "admin", passwordHashed, domain.RoleAdmin)
 
 	// Execute within a transaction managed by the factory
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))
-		return nil, ErrDatabaseFailed
+		return ErrDatabaseFailed
 	}
 
 	// Get repository scoped to this transaction
 	userRepository := interactor.userRepositoryFactory.CreateUserRepositoryWithTransaction(transactionManager)
+	// Skip admin account creation if already exists in the database
+	_, err = userRepository.GetUserByUsername(ctx, "admin")
+	if err == nil {
+		interactor.logger.InfoContext(ctx, "Admin user already exists, skipping creation process")
+	}
+	if !errors.Is(err, repository.ErrUserNotFound) {
+		interactor.logger.ErrorContext(ctx, "Unexpected error occured", slog.Any("err", err))
+		return err
+	}
 
 	err = userRepository.CreateUser(ctx, *newUser)
 	if err != nil {
@@ -96,14 +89,20 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		if rollbackErr := transactionManager.Rollback(ctx); rollbackErr != nil {
 			interactor.logger.ErrorContext(ctx, "failed to rollback transaction", slog.Any("err", rollbackErr))
 		}
-		return nil, ErrDatabaseFailed
+		return ErrDatabaseFailed
 	}
 
 	if err = transactionManager.Commit(ctx); err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
-		return nil, ErrDatabaseFailed
+		return ErrDatabaseFailed
 	}
 
 	interactor.logger.DebugContext(ctx, "Finished Create User execution")
-	return &CreateUserResponse{UserID: randomUUID}, nil
+	interactor.logger.InfoContext(
+		ctx,
+		"New admin user has been created. You can login now. BTW Change the password after you login",
+		slog.String("username", "admin"),
+		slog.String("password", password),
+	)
+	return nil
 }

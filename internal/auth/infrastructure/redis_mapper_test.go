@@ -1,17 +1,18 @@
-package infrastructure
+package infrastructure_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/InWamos/trinity-proto/internal/auth/domain"
+	"github.com/InWamos/trinity-proto/internal/auth/infrastructure"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSessionToMap(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 	sessionID := uuid.New()
 	userID := uuid.New()
 	createdAt := time.Now().UTC()
@@ -43,7 +44,7 @@ func TestSessionToMap(t *testing.T) {
 }
 
 func TestSessionToMapWithRevokedStatus(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 	sessionID := uuid.New()
 	userID := uuid.New()
 	createdAt := time.Now().UTC()
@@ -68,14 +69,14 @@ func TestSessionToMapWithRevokedStatus(t *testing.T) {
 }
 
 func TestMapToSession(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 	sessionID := uuid.New()
 	userID := uuid.New()
 	createdAtUnix := time.Now().UTC().Unix()
 	expiresAtUnix := time.Now().UTC().Add(24 * time.Hour).Unix()
 	token := "test-token-123"
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"id":         sessionID.String(),
 		"user_id":    userID.String(),
 		"user_role":  string(domain.User),
@@ -101,14 +102,14 @@ func TestMapToSession(t *testing.T) {
 }
 
 func TestMapToSessionWithStringTimestamps(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 	sessionID := uuid.New()
 	userID := uuid.New()
 	createdAtUnix := time.Now().UTC().Unix()
 	expiresAtUnix := time.Now().UTC().Add(24 * time.Hour).Unix()
 	token := "revoked-token"
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"id":         sessionID.String(),
 		"user_id":    userID.String(),
 		"user_role":  string(domain.Admin),
@@ -128,9 +129,9 @@ func TestMapToSessionWithStringTimestamps(t *testing.T) {
 }
 
 func TestMapToSessionInvalidSessionID(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"id":         "invalid-uuid",
 		"user_id":    uuid.New().String(),
 		"user_role":  string(domain.User),
@@ -147,9 +148,9 @@ func TestMapToSessionInvalidSessionID(t *testing.T) {
 }
 
 func TestMapToSessionInvalidUserID(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"id":         uuid.New().String(),
 		"user_id":    "invalid-uuid",
 		"user_role":  string(domain.User),
@@ -166,9 +167,9 @@ func TestMapToSessionInvalidUserID(t *testing.T) {
 }
 
 func TestMapToSessionInvalidCreatedAtTimestamp(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"id":         uuid.New().String(),
 		"user_id":    uuid.New().String(),
 		"user_role":  string(domain.User),
@@ -185,7 +186,7 @@ func TestMapToSessionInvalidCreatedAtTimestamp(t *testing.T) {
 }
 
 func TestRoundTrip(t *testing.T) {
-	mapper := &RedisMapper{}
+	mapper := &infrastructure.RedisMapper{}
 	sessionID := uuid.New()
 	userID := uuid.New()
 	createdAt := time.Now().UTC()

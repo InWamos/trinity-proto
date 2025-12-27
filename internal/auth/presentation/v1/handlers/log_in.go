@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -76,7 +77,7 @@ func (handler *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestDTO := application.AddSessionRequest{
 		Username:  form.Username,
 		Password:  form.Password,
-		IpAddress: ipAddress,
+		IPAddress: ipAddress,
 		UserAgent: userAgent,
 	}
 
@@ -84,8 +85,8 @@ func (handler *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to execute login", slog.Any("err", err))
 
-		switch err {
-		case application.ErrInvalidCredentials:
+		switch {
+		case errors.Is(err, application.ErrInvalidCredentials):
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Invalid credentials"})
 		default:
@@ -109,7 +110,7 @@ func (handler *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"message": "Login successful",
 		"token":   response.Session.Token,
 	})

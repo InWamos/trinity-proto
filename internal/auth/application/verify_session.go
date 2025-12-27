@@ -17,7 +17,7 @@ var (
 )
 
 type VerifySessionRequest struct {
-	Session_id string
+	SessionID string
 }
 
 type VerifySessionResponse struct {
@@ -42,7 +42,7 @@ func NewVerifySession(
 
 func (vs *VerifySession) Execute(ctx context.Context, request VerifySessionRequest) (domain.Session, error) {
 	// Retrieve the session from repository
-	session, err := vs.sessionRepository.GetSessionByToken(ctx, request.Session_id)
+	session, err := vs.sessionRepository.GetSessionByToken(ctx, request.SessionID)
 	if err != nil {
 		vs.logger.ErrorContext(ctx, "failed to retrieve session", slog.Any("err", err))
 		return domain.Session{}, ErrSessionNotFound
@@ -50,7 +50,7 @@ func (vs *VerifySession) Execute(ctx context.Context, request VerifySessionReque
 
 	// Check if session was found
 	if session.ID.String() == "" {
-		vs.logger.InfoContext(ctx, "session not found", slog.String("token", request.Session_id))
+		vs.logger.InfoContext(ctx, "session not found", slog.String("token", request.SessionID))
 		return domain.Session{}, ErrSessionNotFound
 	}
 

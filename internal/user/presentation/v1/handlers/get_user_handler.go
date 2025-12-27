@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -77,14 +78,25 @@ func (handler *GetUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	response, err := handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {
-		handler.logger.ErrorContext(r.Context(), "failed to get user", slog.Any("err", err))
-		w.WriteHeader(http.StatusNotFound)
-		_ = json.NewEncoder(w).Encode(map[string]string{"error": "User not found"})
-		return
+		handler.logger.ErrorContext(r.Context(), "failed to get user by ID", slog.Any("err", err))
+		switch {
+		case errors.Is(err, application.ErrInsufficientPrivileges):
+			w.WriteHeader(http.StatusForbidden)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
+			return
+		case errors.Is(err, application.ErrUserNotFound):
+			w.WriteHeader(http.StatusNotFound)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "User not found"})
+			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"id":           response.User.ID,
 		"username":     response.User.Username,
 		"display_name": response.User.DisplayName,

@@ -21,7 +21,7 @@ const DefaultSessionDuration = 24 * time.Hour
 type AddSessionRequest struct {
 	Username  string
 	Password  string
-	IpAddress string
+	IPAddress string
 	UserAgent string
 }
 
@@ -68,9 +68,8 @@ func (asInteractor *AddSession) Execute(ctx context.Context, input AddSessionReq
 	newSession, err := domain.NewSession(
 		response.UserID,
 		domain.UserRole(response.UserRole),
-		input.IpAddress,
+		input.IPAddress,
 		input.UserAgent,
-		"",
 		DefaultSessionDuration,
 	)
 	if err != nil {

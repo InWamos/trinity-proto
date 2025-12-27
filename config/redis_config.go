@@ -6,7 +6,7 @@ type RedisConfig struct {
 	Host         string `mapstructure:"REDIS_ADDRESS"`
 	Port         string `mapstructure:"REDIS_PORT"`
 	Password     string `mapstructure:"REDIS_PASSWORD"`
-	DbNumberAuth string `mapstructure:"REDIS_DB_AUTH"`
+	DBNumberAuth string `mapstructure:"REDIS_DB_AUTH"`
 }
 
 func NewRedisConfig() (*RedisConfig, error) {

@@ -10,6 +10,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
+	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
 )
 
@@ -50,7 +51,11 @@ func NewGetUserByID(
 func (interactor *GetUserByID) Execute(ctx context.Context, input GetUserByIDRequest) (*GetUserByIDResponse, error) {
 	interactor.logger.DebugContext(ctx, "Started GetUserByID execution", slog.String("user_id", input.ID.String()))
 
-	idp := ctx.Value("IdentityProvider").(*client.UserIdentity)
+	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
+	if !ok || idp == nil {
+		return nil, ErrInsufficientPrivileges
+	}
+
 	if err := service.AuthorizeByRole(idp, domain.RoleUser); err != nil {
 		return nil, ErrInsufficientPrivileges
 	}

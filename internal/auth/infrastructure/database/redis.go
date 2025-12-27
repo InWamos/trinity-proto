@@ -20,9 +20,9 @@ func NewRedisDatabase(config *config.RedisConfig, logger *slog.Logger) (*RedisDa
 	redisLogger := logger.With(slog.String("component", "redis_engine"))
 	redisLogger.Debug("The Redis database engine has been invoked")
 
-	dbNumber, err := strconv.Atoi(config.DbNumberAuth)
+	dbNumber, err := strconv.Atoi(config.DBNumberAuth)
 	if err != nil {
-		redisLogger.Error("invalid Redis DB number", slog.String("db", config.DbNumberAuth))
+		redisLogger.Error("invalid Redis DB number", slog.String("db", config.DBNumberAuth))
 		return nil, fmt.Errorf("invalid Redis DB number: %w", err)
 	}
 
@@ -42,7 +42,7 @@ func NewRedisDatabase(config *config.RedisConfig, logger *slog.Logger) (*RedisDa
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := client.Ping(ctx).Err(); err != nil {
+	if err = client.Ping(ctx).Err(); err != nil {
 		redisLogger.Error("failed to connect to Redis", slog.String("err", err.Error()))
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
@@ -78,10 +78,10 @@ func (rd *RedisDatabase) HealthCheck(ctx context.Context) error {
 	defer cancel()
 
 	if err := rd.Ping(ctx); err != nil {
-		rd.logger.Error("Redis health check failed", slog.String("err", err.Error()))
+		rd.logger.ErrorContext(ctx, "Redis health check failed", slog.String("err", err.Error()))
 		return err
 	}
 
-	rd.logger.Debug("Redis health check passed")
+	rd.logger.DebugContext(ctx, "Redis health check passed")
 	return nil
 }

@@ -86,11 +86,13 @@ func StartTestServer(t *testing.T) (baseURL string, cleanup func()) {
 		),
 		user.NewUserModuleContainer(),
 		auth.NewAuthModuleContainer(),
-		fx.Provide(setup.NewHTTPServer),
+		fx.Provide(setup.NewMainHTTPServer),
+		fx.Provide(setup.NewProfilerHTTPServer),
+		fx.Provide(setup.NewHTTPServers),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &VerboseFxLogger{logger: logger}
 		}),
-		fx.Invoke(func(*http.Server) {}),
+		fx.Invoke(func(servers setup.HTTPServers) {}), //nolint:revive //False positive on Fx syntax
 	)
 
 	app.RequireStart()

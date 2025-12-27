@@ -2,7 +2,6 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
 
 	"github.com/InWamos/trinity-proto/config"
 	_ "github.com/InWamos/trinity-proto/docs"
@@ -35,7 +34,8 @@ import (
 
 func main() {
 	fx.New(
-		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig, config.NewRedisConfig),
+		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig,
+			config.NewServerConfig, config.NewRedisConfig),
 		fx.Provide(logger.GetLogger),
 		fx.Provide(
 			middleware.NewGlobalCORSMiddleware,
@@ -45,11 +45,13 @@ func main() {
 		),
 		user.NewUserModuleContainer(),
 		auth.NewAuthModuleContainer(),
-		fx.Provide(setup.NewHTTPServer),
+		fx.Provide(setup.NewMainHTTPServer),
+		fx.Provide(setup.NewProfilerHTTPServer),
+		fx.Provide(setup.NewHTTPServers),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &fxevent.SlogLogger{Logger: logger}
 		}),
 		fx.Invoke(setup.CreateAdminAccountIfNotExists),
-		fx.Invoke(func(*http.Server) {}),
+		fx.Invoke(func(servers setup.HTTPServers) {}), //nolint:revive //False positive on Fx syntax
 	).Run()
 }

@@ -23,7 +23,7 @@ func NewAuthClient(
 }
 
 func (ac *AuthClient) ValidateSession(ctx context.Context, token string) (client.UserIdentity, error) {
-	interactorRequest := application.VerifySessionRequest{Session_id: token}
+	interactorRequest := application.VerifySessionRequest{SessionID: token}
 	session, err := ac.verifySessionInteractor.Execute(ctx, interactorRequest)
 	if err != nil {
 		switch {

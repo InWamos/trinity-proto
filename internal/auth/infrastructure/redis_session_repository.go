@@ -70,9 +70,9 @@ func (repo *RedisSessionRepository) CreateSession(ctx context.Context, session d
 	repo.logger.DebugContext(
 		ctx,
 		"session has been created",
-		slog.String("session_id", data["id"].(string)),
-		slog.String("user_id", data["user_id"].(string)),
-		slog.String("user_role", data["user_role"].(string)),
+		slog.String("session_id", data["id"].(string)),       //nolint:errcheck //unneccesary err check for logs
+		slog.String("user_id", data["user_id"].(string)),     //nolint:errcheck //unneccesary err check for logs
+		slog.String("user_role", data["user_role"].(string)), //nolint:errcheck //unneccesary err check for logs
 	)
 	return nil
 }
@@ -96,7 +96,7 @@ func (repo *RedisSessionRepository) GetAllSessionsByUserID(
 			continue
 		}
 
-		data := make(map[string]interface{})
+		data := make(map[string]any)
 		for k, v := range result {
 			data[k] = v
 		}

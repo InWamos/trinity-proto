@@ -2,13 +2,11 @@ package setup
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"time"
-
-	_ "net/http/pprof"
 
 	"github.com/InWamos/trinity-proto/config"
 	authV1Mux "github.com/InWamos/trinity-proto/internal/auth/presentation/v1"
@@ -21,17 +19,19 @@ import (
 	"go.uber.org/fx"
 )
 
-func runServer(server *http.Server, listener *net.Listener, logger *slog.Logger) {
-	if err := server.Serve(*listener); err != nil && err != http.ErrServerClosed {
-		logger.Error("Failed to start server", slog.Any("err", err))
-		panic(err)
-	}
+var ErrProfilerEnabledInNonDevelopment = errors.New("you MUST disable profiler in non-dev environment")
+
+type MainHTTPServer struct {
+	*http.Server
 }
-func runProfiler(listenAddress string, logger *slog.Logger) {
-	if err := http.ListenAndServe(listenAddress, nil); err != nil {
-		logger.Error("Profiler server error", slog.Any("err", err))
-		panic(err)
-	}
+
+type ProfilerHTTPServer struct {
+	*http.Server
+}
+
+type HTTPServers struct {
+	Main     MainHTTPServer
+	Profiler ProfilerHTTPServer
 }
 
 func CreateAdminAccountIfNotExists(
@@ -50,7 +50,7 @@ func CreateAdminAccountIfNotExists(
 	logger.Info("Admin account check complete")
 }
 
-func NewHTTPServer(
+func NewMainHTTPServer(
 	lc fx.Lifecycle,
 	serverConfig *config.ServerConfig,
 	loggingMiddleware *middleware.LoggingMiddleware,
@@ -60,12 +60,7 @@ func NewHTTPServer(
 	userMuxV1 *userV1Mux.UserMuxV1,
 	authMuxV1 *authV1Mux.AuthMuxV1,
 	logger *slog.Logger,
-) *http.Server {
-	if serverConfig.Environment == "DEVELOPMENT" {
-		listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, 6060)
-
-		go runProfiler(listenAddress, logger)
-	}
+) MainHTTPServer {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
 	chiRouter := chi.NewRouter()
 	// Logging
@@ -88,26 +83,35 @@ func NewHTTPServer(
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
 	chiRouter.Mount("/swagger", httpSwagger.WrapHandler)
 
-	srv := &http.Server{
-		Addr:              listenAddress,
-		Handler:           chiRouter,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      5 * time.Second,
-		MaxHeaderBytes:    1 << 20,
+	srv, hook := getMainServerAndHook(listenAddress, chiRouter, logger)
+	// Add Uber Fx OnStart and OnStop hooks.
+	// Help to organize server startup and shutdown by clear, net/http native startup and shutdown operation.
+	lc.Append(hook)
+	return MainHTTPServer{srv}
+}
+
+// NewProfilerHTTPServer adds a lifecycle for Pprof server on port 6060.
+// Only creates and registers the profiler in development environment.
+// Returns nil in production.
+func NewProfilerHTTPServer(
+	lc fx.Lifecycle,
+	serverConfig *config.ServerConfig,
+	logger *slog.Logger,
+) ProfilerHTTPServer {
+	if serverConfig.Environment != "DEVELOPMENT" {
+		logger.Info("Profiler server disabled in non-development environment")
+		return ProfilerHTTPServer{nil}
 	}
-	listenConfig := &net.ListenConfig{KeepAlive: 3 * time.Minute}
-	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			ln, err := listenConfig.Listen(ctx, "tcp4", srv.Addr)
-			if err != nil {
-				return err
-			}
-			go runServer(srv, &ln, logger)
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			return srv.Shutdown(ctx)
-		},
-	})
-	return srv
+	profilerListenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, 6060)
+	srv, hook := getProfilerServerAndHook(profilerListenAddress, nil, logger)
+	lc.Append(hook)
+	return ProfilerHTTPServer{srv}
+}
+
+// NewHTTPServers provides both main and profiler HTTP servers.
+func NewHTTPServers(main MainHTTPServer, profiler ProfilerHTTPServer) HTTPServers {
+	return HTTPServers{
+		Main:     main,
+		Profiler: profiler,
+	}
 }

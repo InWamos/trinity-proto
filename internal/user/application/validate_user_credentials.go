@@ -67,14 +67,12 @@ func (interactor *ValidateUserCredentials) Execute(
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return ValidateUserCredentialsResponse{}, ErrUsernameAbsent
-		} else {
-			return ValidateUserCredentialsResponse{}, ErrDatabaseFailed
 		}
+		return ValidateUserCredentialsResponse{}, ErrDatabaseFailed
 	}
-	if err := interactor.passwordHasher.CheckPasswordHash(input.Password, user.PasswordHash); err != nil {
+	if err = interactor.passwordHasher.CheckPasswordHash(input.Password, user.PasswordHash); err != nil {
 		return ValidateUserCredentialsResponse{}, ErrPasswordMismatch
-	} else {
-		response := ValidateUserCredentialsResponse{UserID: user.ID, UserRole: user.Role}
-		return response, nil
 	}
+	response := ValidateUserCredentialsResponse{UserID: user.ID, UserRole: user.Role}
+	return response, nil
 }

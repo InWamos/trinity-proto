@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net"
-	_ "net/http/pprof"
+	_ "net/http/pprof" //nolint:gosec //will never start a pprof server in prod environment
 
 	"net/http"
 	"time"

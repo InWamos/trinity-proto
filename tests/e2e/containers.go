@@ -153,7 +153,9 @@ func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error
 	}
 
 	// Attach the migrate container to the network
-	network.WithNetwork([]string{}, net)(&migrateReq)
+	if err := network.WithNetwork([]string{}, net)(&migrateReq); err != nil {
+		return fmt.Errorf("failed to attach migrate container to network: %w", err)
+	}
 
 	migrateContainer, err := testcontainers.GenericContainer(ctx, migrateReq)
 	if err != nil {

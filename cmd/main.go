@@ -35,7 +35,8 @@ import (
 
 func main() {
 	fx.New(
-		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig, config.NewRedisConfig),
+		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig,
+			config.NewServerConfig, config.NewRedisConfig),
 		fx.Provide(logger.GetLogger),
 		fx.Provide(
 			middleware.NewGlobalCORSMiddleware,

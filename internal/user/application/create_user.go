@@ -4,10 +4,10 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
@@ -29,7 +29,7 @@ type CreateUserResponse struct {
 type CreateUser struct {
 	passwordHasher            service.PasswordHasher
 	uuidGenerator             *service.UUIDGenerator
-	transactionManagerFactory database.TransactionManagerFactory
+	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	logger                    *slog.Logger
 }
@@ -37,7 +37,7 @@ type CreateUser struct {
 func NewCreateUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator *service.UUIDGenerator,
-	transactionManagerFactory database.TransactionManagerFactory,
+	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *CreateUser {

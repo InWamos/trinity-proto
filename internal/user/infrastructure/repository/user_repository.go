@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/google/uuid"
 )
 
@@ -23,5 +23,5 @@ type UserRepository interface {
 }
 
 type UserRepositoryFactory interface {
-	CreateUserRepositoryWithTransaction(tm database.TransactionManager) UserRepository
+	CreateUserRepositoryWithTransaction(tm interfaces.TransactionManager) UserRepository
 }

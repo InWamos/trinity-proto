@@ -1,7 +1,7 @@
 package user
 
 import (
-	sqlxdatabase "github.com/InWamos/trinity-proto/internal/user/infrastructure/database/sqlx_database"
+	sqlxdatabase "github.com/InWamos/trinity-proto/internal/shared/infrastructure/database/sqlx_database"
 	sqlxrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/sqlx_repository"
 	"go.uber.org/fx"
 )

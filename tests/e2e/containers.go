@@ -10,6 +10,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/modules/redis"
+	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
@@ -31,7 +32,7 @@ const (
 type TestContainers struct {
 	PostgresContainer *postgres.PostgresContainer
 	RedisContainer    *redis.RedisContainer
-	Network           testcontainers.Network
+	Network           *testcontainers.DockerNetwork
 
 	PostgresHost string
 	PostgresPort string
@@ -42,12 +43,7 @@ type TestContainers struct {
 // SetupContainers initializes all required containers for E2E testing.
 func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	// Create a shared network
-	network, err := testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
-		NetworkRequest: testcontainers.NetworkRequest{
-			Name:   "trinity-test-net",
-			Driver: "bridge",
-		},
-	})
+	net, err := network.New(ctx, network.WithDriver("bridge"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create network: %w", err)
 	}
@@ -65,10 +61,10 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 		),
 		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 			ContainerRequest: testcontainers.ContainerRequest{
-				Name:     "postgres",
-				Networks: []string{"trinity-test-net"},
+				Name: "postgres",
 			},
 		}),
+		network.WithNetwork([]string{"postgres"}, net),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start postgres: %w", err)
@@ -85,7 +81,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	}
 
 	// Run migrations with network configuration
-	if err := runMigrations(ctx); err != nil {
+	if err := runMigrations(ctx, net); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
@@ -96,11 +92,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 			wait.ForLog("Ready to accept connections").
 				WithStartupTimeout(30*time.Second),
 		),
-		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-			ContainerRequest: testcontainers.ContainerRequest{
-				Networks: []string{"trinity-test-net"},
-			},
-		}),
+		network.WithNetwork([]string{"redis"}, net),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start redis: %w", err)
@@ -119,7 +111,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	return &TestContainers{
 		PostgresContainer: pgContainer,
 		RedisContainer:    redisContainer,
-		Network:           network,
+		Network:           net,
 		PostgresHost:      pgHost,
 		PostgresPort:      pgPort.Port(),
 		RedisHost:         redisHost,
@@ -128,7 +120,7 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 }
 
 // runMigrations runs database migrations using the migrate container.
-func runMigrations(ctx context.Context) error {
+func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
 	projectRoot := filepath.Join(filepath.Dir(currentFile), "..", "..")
@@ -141,7 +133,7 @@ func runMigrations(ctx context.Context) error {
 		TestDBUser, TestDBPassword, TestDBName,
 	)
 
-	migrateContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+	migrateReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image: MigrateImage,
 			Cmd: []string{
@@ -149,14 +141,21 @@ func runMigrations(ctx context.Context) error {
 				fmt.Sprintf("-database=%s", dbURL),
 				"up",
 			},
-			Mounts: testcontainers.Mounts(
-				testcontainers.BindMount(migrationsPath, "/migrations"),
-			),
-			Networks:   []string{"trinity-test-net"},
+			Files: []testcontainers.ContainerFile{
+				{
+					HostFilePath:      migrationsPath,
+					ContainerFilePath: "/migrations",
+				},
+			},
 			WaitingFor: wait.ForExit().WithExitTimeout(30 * time.Second),
 		},
 		Started: true,
-	})
+	}
+
+	// Attach the migrate container to the network
+	network.WithNetwork([]string{}, net)(&migrateReq)
+
+	migrateContainer, err := testcontainers.GenericContainer(ctx, migrateReq)
 	if err != nil {
 		return fmt.Errorf("failed to run migrate container: %w", err)
 	}

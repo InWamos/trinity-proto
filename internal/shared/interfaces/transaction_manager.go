@@ -1,4 +1,4 @@
-package interfaces //nolint:revive // meaningful name
+package interfaces //nolint:revive //Meaningful package name for interfaces
 
 import "context"
 

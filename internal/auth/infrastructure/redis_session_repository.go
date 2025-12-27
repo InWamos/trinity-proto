@@ -96,7 +96,7 @@ func (repo *RedisSessionRepository) GetAllSessionsByUserID(
 			continue
 		}
 
-		data := make(map[string]interface{})
+		data := make(map[string]any)
 		for k, v := range result {
 			data[k] = v
 		}

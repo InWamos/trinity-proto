@@ -439,6 +439,10 @@ linters:
   exclusions:
     # Log a warning if an exclusion rule is unused.
     # Default: false
+    paths:
+      - tests/e2e
+      - docs
+
     warn-unused: true
     # Predefined exclusion rules.
     # Default: []

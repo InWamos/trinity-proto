@@ -442,6 +442,8 @@ linters:
     paths:
       - tests/e2e
       - docs
+      # Skips as gives false positive that is impossible to ignore with nolint (Probably a linter bug)
+      - internal/shared/interfaces/transaction_manager.go
 
     warn-unused: true
     # Predefined exclusion rules.

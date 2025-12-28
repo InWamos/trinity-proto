@@ -8,8 +8,9 @@ echo "📦 Updating package manager..."
 sudo apt update
 
 # Install tmux
-echo "📦 Installing tmux..."
+echo "📦 Installing tmux and pipx"
 sudo apt install -y tmux pipx
+echo "Installing sql linter"
 pipx install sqlfluff
 
 # Install golangci-lint

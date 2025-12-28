@@ -10,8 +10,10 @@ sudo apt update
 # Install tmux
 echo "📦 Installing tmux and pipx"
 sudo apt install -y tmux pipx
-echo "Installing sql linter"
+
+echo "Installing sql linters"
 pipx install sqlfluff
+pipx install squawk-cli
 
 # Install golangci-lint
 echo "📦 Installing golangci-lint v2.7.2..."

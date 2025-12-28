@@ -19,7 +19,7 @@ func (sm *SqlxMapper) ToDomain(inputModel *models.UserModelSqlx) domain.User {
 		inputModel.Username,
 		inputModel.DisplayName,
 		inputModel.PasswordHash,
-		domain.Role(inputModel.Role),
+		domain.Role(inputModel.UserRole),
 	)
 }
 
@@ -35,7 +35,7 @@ func (sm *SqlxMapper) ToModel(inputEntity *domain.User) models.UserModelSqlx {
 		Username:     inputEntity.Username,
 		DisplayName:  inputEntity.DisplayName,
 		PasswordHash: inputEntity.PasswordHash,
-		Role:         models.Role(inputEntity.Role),
+		UserRole:     models.UserRole(inputEntity.Role),
 		CreatedAt:    inputEntity.CreatedAt,
 		DeletedAt:    deletedAt,
 	}

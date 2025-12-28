@@ -20,7 +20,7 @@ func TestPromoteUser_Success(t *testing.T) {
 		"username":     "promoteuser1",
 		"display_name": "Promote Test User",
 		"password":     "password123",
-		"role":         "user",
+		"user_role":    "user",
 	}
 
 	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)

@@ -18,7 +18,7 @@ type GetUserResponse struct {
 	ID          string    `json:"id"           example:"019b1a49-dbf6-74d6-97bf-2d7e57d30c75"`
 	Username    string    `json:"username"     example:"johndoe"`
 	DisplayName string    `json:"display_name" example:"John Doe"`
-	Role        string    `json:"role"         example:"user"                                 enums:"user,admin"`
+	UserRole    string    `json:"user_role"    example:"user"                                 enums:"user,admin"`
 	CreatedAt   time.Time `json:"created_at"   example:"2025-12-14T00:36:46.545Z"`
 }
 
@@ -100,7 +100,7 @@ func (handler *GetUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		"id":           response.User.ID,
 		"username":     response.User.Username,
 		"display_name": response.User.DisplayName,
-		"role":         response.User.Role,
+		"user_role":    response.User.Role,
 		"created_at":   response.User.CreatedAt,
 	})
 }

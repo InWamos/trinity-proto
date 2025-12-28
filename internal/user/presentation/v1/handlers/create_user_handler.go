@@ -30,7 +30,7 @@ type createUserForm struct {
 	Username    string `json:"username"     validate:"required,alphanum,min=2,max=32"`
 	DisplayName string `json:"display_name" validate:"required,min=1,max=64"`
 	Password    string `json:"password"     validate:"required,alphanumunicode,min=8,max=64"`
-	Role        string `json:"role"         validate:"required,oneof=user admin"`
+	UserRole    string `json:"user_role"    validate:"required,oneof=user admin"`
 }
 
 type CreateUserHandler struct {
@@ -75,7 +75,7 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		Username:    userForm.Username,
 		DisplayName: userForm.DisplayName,
 		Password:    userForm.Password,
-		Role:        domain.Role(userForm.Role),
+		Role:        domain.Role(userForm.UserRole),
 	}
 	response, err := handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {

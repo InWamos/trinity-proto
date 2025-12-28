@@ -19,8 +19,10 @@ CREATE TABLE IF NOT EXISTS "user"."users" (
 );
 
 -- Create indexes
-CREATE INDEX CONCURRENTLY IF NOT EXISTS
+-- squawk-ignore require-concurrent-index-creation
+CREATE INDEX IF NOT EXISTS
 idx_users_id ON "user".users (id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS
+-- squawk-ignore require-concurrent-index-creation
+CREATE INDEX IF NOT EXISTS
 idx_users_username ON "user".users (username);

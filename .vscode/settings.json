@@ -8,6 +8,7 @@
             "source.organizeImports": "explicit"
         }
     },
+    "squawk.trace.server": "verbose",
     // "sqlfluff.config": "${workspaceFolder}/.sqlfluff",
     "sqlfluff.dialect": "postgres",
     "sqlfluff.env.useDotEnvFile": true,
@@ -32,4 +33,7 @@
     /* Formatter */
     "sqlfluff.format.arguments": ["--FIX-EVEN-UNPARSABLE"],
 "sqlfluff.format.enabled": true,
+"sqlfluff.excludeRules": [
+    "RF06"
+],
 }

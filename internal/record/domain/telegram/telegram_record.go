@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type TelegramRecords struct {
+type TelegramRecord struct {
 	ID          uuid.UUID
 	Author      uuid.UUID
 	MessageText string

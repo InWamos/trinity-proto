@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type TelegramProfilePictures struct {
+type TelegramProfilePicture struct {
 	ID             uuid.UUID
 	UserTelegramID uint64
 	StorageKey     string

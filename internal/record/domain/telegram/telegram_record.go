@@ -7,10 +7,10 @@ import (
 )
 
 type TelegramRecord struct {
-	ID          uuid.UUID
-	Author      uuid.UUID
-	MessageText string
+	ID          uuid.UUID `validate:"required,uuid"`
+	Author      uuid.UUID `validate:"required,uuid"`
+	MessageText string    `validate:"required,min=1,max"`
 	Attachments []uuid.UUID
-	PostedAt    time.Time
-	AddedByUser uuid.UUID
+	PostedAt    time.Time `validate:"required"`
+	AddedByUser uuid.UUID `validate:"required,uuid"`
 }

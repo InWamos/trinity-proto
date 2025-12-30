@@ -19,7 +19,6 @@ type TelegramRecord struct {
 	FromUserTelegramID uint64    `validate:"required,gt=0,lte=300000000000"`
 	InTelegramChatID   int64     `validate:"required"`
 	MessageText        string    `validate:"required,max=4096"`
-	Attachments        []uuid.UUID
 	PostedAt           time.Time `validate:"required"`
 	AddedAt            time.Time `validate:"required"`
 	AddedByUser        uuid.UUID `validate:"required,uuid"`

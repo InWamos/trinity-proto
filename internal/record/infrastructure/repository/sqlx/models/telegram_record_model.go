@@ -1,4 +1,4 @@
-package repository
+package models
 
 import (
 	"time"
@@ -7,11 +7,11 @@ import (
 )
 
 type SQLXTelegramRecordModel struct {
-	ID                 uuid.UUID  `db:"id"`
-	FromUserTelegramID uint64     `db:"from_user_telegram_id"`
-	InTelegramChatID   int64      `db:"in_telegram_chat_id"`
-	MessageText        string     `db:"message_text"`
-	PostedAt           time.Time  `db:"posted_at"`
-	AddedAt            time.Time  `db:"added_at"`
-	AddedByUser        *uuid.UUID `db:"added_by_user"`
+	ID                 uuid.UUID `db:"id"`
+	FromUserTelegramID uint64    `db:"from_user_telegram_id"`
+	InTelegramChatID   int64     `db:"in_telegram_chat_id"`
+	MessageText        string    `db:"message_text"`
+	PostedAt           time.Time `db:"posted_at"`
+	AddedAt            time.Time `db:"added_at"`
+	AddedByUser        uuid.UUID `db:"added_by_user"`
 }

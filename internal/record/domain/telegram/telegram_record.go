@@ -1,9 +1,14 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrRecordAlreadyExists = errors.New("record already exists")
 )
 
 // TelegramRecord to see all possible parseable fields of a message, see

@@ -15,7 +15,7 @@ import (
 
 type SqlxUserRepository struct {
 	session    *sqlx.Tx
-	sqlxMapper *SqlxMapper
+	sqlxMapper *SqlxUserMapper
 	logger     *slog.Logger
 }
 
@@ -26,7 +26,7 @@ func NewSqlxUserRepository(session *sqlx.Tx, logger *slog.Logger) repository.Use
 	)
 	return &SqlxUserRepository{
 		session:    session,
-		sqlxMapper: NewSqlxMapper(),
+		sqlxMapper: NewSqlxUserMapper(),
 		logger:     urlogger,
 	}
 }

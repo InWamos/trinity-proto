@@ -7,13 +7,13 @@ import (
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/models"
 )
 
-type SqlxMapper struct{}
+type SqlxUserMapper struct{}
 
-func NewSqlxMapper() *SqlxMapper {
-	return &SqlxMapper{}
+func NewSqlxUserMapper() *SqlxUserMapper {
+	return &SqlxUserMapper{}
 }
 
-func (sm *SqlxMapper) ToDomain(inputModel *models.UserModelSqlx) domain.User {
+func (sm *SqlxUserMapper) ToDomain(inputModel *models.UserModelSqlx) domain.User {
 	return *domain.NewUser(
 		inputModel.ID,
 		inputModel.Username,
@@ -23,7 +23,7 @@ func (sm *SqlxMapper) ToDomain(inputModel *models.UserModelSqlx) domain.User {
 	)
 }
 
-func (sm *SqlxMapper) ToModel(inputEntity *domain.User) models.UserModelSqlx {
+func (sm *SqlxUserMapper) ToModel(inputEntity *domain.User) models.UserModelSqlx {
 	deletedAt := sql.NullTime{} //nolint:exhaustruct // Required fields set after
 	if inputEntity.DeletedAt.Valid {
 		deletedAt.Time = inputEntity.DeletedAt.Time

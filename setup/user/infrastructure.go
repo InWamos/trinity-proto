@@ -11,7 +11,7 @@ func NewUserInfrastructureContainer() fx.Option {
 		"user_infrastructure",
 		fx.Provide(
 			// Provides Sqlx mapper for repository
-			sqlxrepository.NewSqlxMapper,
+			sqlxrepository.NewSqlxUserMapper,
 			// Provides User repository factory
 			sqlxrepository.NewSqlxUserRepositoryFactory,
 			// Provides GORM sessiona

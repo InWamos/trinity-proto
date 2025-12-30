@@ -10,10 +10,10 @@ import (
 
 type SqlxUserRepositoryFactory struct {
 	logger     *slog.Logger
-	sqlxMapper *SqlxMapper
+	sqlxMapper *SqlxUserMapper
 }
 
-func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxMapper) repository.UserRepositoryFactory {
+func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxUserMapper) repository.UserRepositoryFactory {
 	return &SqlxUserRepositoryFactory{
 		logger:     logger,
 		sqlxMapper: mapper,

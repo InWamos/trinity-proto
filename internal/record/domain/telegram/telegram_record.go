@@ -6,6 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// TelegramRecord to see all possible parseable fields of a message, see
+// this beautiful implementation of MTProto client
+// https://github.com/KurimuzonAkuma/kurigram/blob/dev/pyrogram/types/messages_and_media/message.py
 type TelegramRecord struct {
 	ID          uuid.UUID `validate:"required,uuid"`
 	Author      uuid.UUID `validate:"required,uuid"`

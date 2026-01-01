@@ -8,7 +8,11 @@ import (
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 )
 
-var ErrTelegramRecordCreationFailed = errors.New("failed to save telegram record")
+var (
+	ErrRecordNotFound               = errors.New("failed to get telegram record")
+	ErrTelegramRecordCreationFailed = errors.New("failed to save telegram record")
+	ErrDatabaseFailed               = errors.New("database request has failed")
+)
 
 type TelegramRecordRepository interface {
 	GetLatestTelegramRecordsByUserTelegramID(

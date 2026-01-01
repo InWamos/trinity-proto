@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     from_user_telegram_id BIGINT NOT NULL,
     in_telegram_chat_id BIGINT NOT NULL,
     message_text TEXT,
-    attachments UUID,
     posted_at TIMESTAMP WITH TIME ZONE NOT NULL,
     added_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     added_by_user UUID

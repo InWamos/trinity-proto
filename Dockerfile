@@ -1,4 +1,4 @@
-FROM golang:1.25.2 AS builder
+FROM golang:1.25.5-trixie AS builder
 
 ARG CGO_ENABLED=0
 WORKDIR /app

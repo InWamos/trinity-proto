@@ -17,7 +17,7 @@ type TelegramRecordRepository interface {
 	GetLatestTelegramRecordsByUserTelegramID(
 		ctx context.Context,
 		userTelegramID uint64,
-	) ([]*domain.TelegramRecord, error)
+	) (*[]*domain.TelegramRecord, error)
 	CreateTelegramRecord(ctx context.Context, telegramRecord domain.TelegramRecord) error
 	CreateTelegramRecords(ctx context.Context, telegramRecords []domain.TelegramRecord) error
 }

@@ -38,7 +38,7 @@ func NewSQLXTelegramRecordRepository(
 func (repo *SQLXTelegramRecordRepository) GetLatestTelegramRecordsByUserTelegramID(
 	ctx context.Context,
 	userTelegramID uint64,
-) ([]*domain.TelegramRecord, error) {
+) (*[]*domain.TelegramRecord, error) {
 	repo.logger.DebugContext(ctx, "Started GetLatestTelegramRecordsByUserTelegramID request")
 	var records []models.SQLXTelegramRecordModel
 	query := `SELECT id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user
@@ -47,17 +47,17 @@ func (repo *SQLXTelegramRecordRepository) GetLatestTelegramRecordsByUserTelegram
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			repo.logger.InfoContext(ctx, "Telegram record not found", slog.Uint64("user_telegram_id", userTelegramID))
-			return []*domain.TelegramRecord{}, domain.ErrNoRecordsForThisTelegramID
+			return nil, domain.ErrNoRecordsForThisTelegramID
 		}
 		repo.logger.ErrorContext(ctx, "Telegram record failed", slog.Any("err", err))
-		return []*domain.TelegramRecord{}, repository.ErrDatabaseFailed
+		return nil, repository.ErrDatabaseFailed
 	}
 	domainRecords := make([]*domain.TelegramRecord, len(records))
 	for i, record := range records {
 		domainRecords[i] = repo.sqlxMapper.ToDomain(&record)
 	}
 
-	return domainRecords, nil
+	return &domainRecords, nil
 
 }
 

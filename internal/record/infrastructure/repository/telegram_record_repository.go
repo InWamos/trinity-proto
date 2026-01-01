@@ -9,7 +9,6 @@ import (
 )
 
 var (
-	ErrRecordNotFound               = errors.New("failed to get telegram record")
 	ErrTelegramRecordCreationFailed = errors.New("failed to save telegram record")
 	ErrDatabaseFailed               = errors.New("database request has failed")
 )

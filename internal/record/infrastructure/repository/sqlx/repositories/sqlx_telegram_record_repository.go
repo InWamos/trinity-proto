@@ -47,7 +47,7 @@ func (repo *SQLXTelegramRecordRepository) GetLatestTelegramRecordsByUserTelegram
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			repo.logger.InfoContext(ctx, "Telegram record not found", slog.Uint64("user_telegram_id", userTelegramID))
-			return []*domain.TelegramRecord{}, repository.ErrRecordNotFound
+			return []*domain.TelegramRecord{}, domain.ErrNoRecordsForThisTelegramID
 		}
 		repo.logger.ErrorContext(ctx, "Telegram record failed", slog.Any("err", err))
 		return []*domain.TelegramRecord{}, repository.ErrDatabaseFailed

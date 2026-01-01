@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrRecordAlreadyExists = errors.New("record already exists")
+	ErrRecordAlreadyExists        = errors.New("record already exists")
+	ErrNoRecordsForThisTelegramID = errors.New("no records for this telegram id")
 )
 
 // TelegramRecord to see all possible parseable fields of a message, see

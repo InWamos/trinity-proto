@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
@@ -62,7 +63,7 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 		return nil, ErrInsufficientPrivileges
 	}
 
-	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
+	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
 		return nil, ErrInsufficientPrivileges
 	}
 

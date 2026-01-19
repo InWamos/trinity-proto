@@ -6,9 +6,9 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
-	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/middleware"
@@ -48,7 +48,7 @@ func (interactor *DemoteUser) Execute(ctx context.Context, input DemoteUserReque
 	if !ok || idp == nil {
 		return ErrInsufficientPrivileges
 	}
-	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
+	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
 		return ErrInsufficientPrivileges
 	}
 

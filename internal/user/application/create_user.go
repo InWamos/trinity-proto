@@ -60,11 +60,11 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
-		return nil, ErrInsufficientPrivileges
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
 	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
-		return nil, ErrInsufficientPrivileges
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)

@@ -46,11 +46,11 @@ func (interactor *PromoteUser) Execute(ctx context.Context, input PromoteUserReq
 
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
-		return ErrInsufficientPrivileges
+		return rbac.ErrInsufficientPrivileges
 	}
 
 	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
-		return ErrInsufficientPrivileges
+		return rbac.ErrInsufficientPrivileges
 	}
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)

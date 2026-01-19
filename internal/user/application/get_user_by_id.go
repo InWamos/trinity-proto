@@ -53,11 +53,11 @@ func (interactor *GetUserByID) Execute(ctx context.Context, input GetUserByIDReq
 
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
-		return nil, ErrInsufficientPrivileges
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
 	if err := rbac.AuthorizeByRole(idp, domain.RoleUser); err != nil {
-		return nil, ErrInsufficientPrivileges
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)

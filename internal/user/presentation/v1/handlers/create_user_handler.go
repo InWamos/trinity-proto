@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/user/application"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/presentation/service"
@@ -81,7 +82,7 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to call the interactor", slog.Any("err", err))
 		switch {
-		case errors.Is(err, application.ErrInsufficientPrivileges):
+		case errors.Is(err, rbac.ErrInsufficientPrivileges):
 			w.WriteHeader(http.StatusForbidden)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
 			return

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/user/application"
 	"github.com/google/uuid"
 )
@@ -80,7 +81,7 @@ func (handler *GetUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		handler.logger.ErrorContext(r.Context(), "failed to get user by ID", slog.Any("err", err))
 		switch {
-		case errors.Is(err, application.ErrInsufficientPrivileges):
+		case errors.Is(err, rbac.ErrInsufficientPrivileges):
 			w.WriteHeader(http.StatusForbidden)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
 			return

@@ -14,7 +14,7 @@ type SQLXTelegramRecordRepositoryFactory struct {
 	sqlxMapper *mappers.SqlxTelegramRecordMapper
 }
 
-func (factory *SQLXTelegramRecordRepositoryFactory) NewSqlxUserRepositoryFactory(
+func NewSQLXTelegramRecordRepositoryFactory(
 	logger *slog.Logger,
 	mapper *mappers.SqlxTelegramRecordMapper,
 ) repository.TelegramRecordRepositoryFactory {

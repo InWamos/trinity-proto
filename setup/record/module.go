@@ -6,5 +6,8 @@ func NewRecordModuleContainer() fx.Option {
 	// Module with all auth module's dependencies
 	return fx.Module(
 		"record_module",
+		// TODO: FINISH THE REST CONTAINERS
+		NewRecordInfrastructureContainer(),
+		NewRecordApplicationContainer(),
 	)
 }

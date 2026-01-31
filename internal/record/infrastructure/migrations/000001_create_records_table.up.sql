@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     message_text TEXT,
     posted_at TIMESTAMP WITH TIME ZONE NOT NULL,
     added_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    added_by_user UUID
+    added_by_user UUID NOT NULL
 );
 
 -- squawk-ignore require-concurrent-index-creation

@@ -9,5 +9,6 @@ func NewRecordModuleContainer() fx.Option {
 		// TODO: FINISH THE REST CONTAINERS
 		NewRecordInfrastructureContainer(),
 		NewRecordApplicationContainer(),
+		NewRecordPresentationContainer(),
 	)
 }

@@ -15,6 +15,7 @@ func NewUserInfrastructureContainer() fx.Option {
 			// Provides User repository factory
 			sqlxrepository.NewSqlxUserRepositoryFactory,
 			// Provides SQLx session
+			// TODO: Move to shared
 			sqlxdatabase.NewSQLXTransactionFactory,
 			// Provides SQLx Database
 			sqlxdatabase.NewSQLXDatabase,

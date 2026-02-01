@@ -24,6 +24,7 @@ func NewSQLXTelegramUserRepositoryFactory(
 	}
 }
 
+// TODO: Implement User Telegram identity business logic
 func (factory *SQLXTelegramUserRepositoryFactory) CreateTelegramUserRepositoryWithTransaction(
 	tm interfaces.TransactionManager,
 ) repository.TelegramUserRepository {

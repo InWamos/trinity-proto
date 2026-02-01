@@ -2,7 +2,7 @@ package record
 
 import (
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/mappers"
-	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/repositories"
+	repositories "github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/repositories/telegram_record"
 	"go.uber.org/fx"
 )
 

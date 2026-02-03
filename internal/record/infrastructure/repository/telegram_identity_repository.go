@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrIdentityNotFound    = errors.New("Identity not found")
-	ErrFailedToAddIdentity = errors.New("Failed to add identity to a database")
+	ErrIdentityNotFound    = errors.New("identity not found")
+	ErrFailedToAddIdentity = errors.New("failed to add identity to a database")
 )
 
 type TelegramIdentityRepository interface {

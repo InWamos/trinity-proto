@@ -41,7 +41,7 @@ func (repo *SQLXTelegramUserRepository) GetByTelegramID(
 ) (*domain.TelegramUser, error) {
 	repo.logger.DebugContext(ctx, "Started GetByTelegramID request", slog.Uint64("telegram_id", telegramID))
 	var userModel models.TelegramUserModel
-	query := `SELECT id, telegram_id, telegram_user_identity_id, added_at, added_by_user
+	query := `SELECT id, telegram_id, added_at, added_by_user
 	FROM "records"."telegram_users" WHERE telegram_id = $1`
 	err := repo.session.GetContext(ctx, &userModel, query, telegramID)
 	if err != nil {
@@ -59,12 +59,11 @@ func (repo *SQLXTelegramUserRepository) GetByTelegramID(
 func (repo *SQLXTelegramUserRepository) AddUser(ctx context.Context, user *domain.TelegramUser) error {
 	repo.logger.DebugContext(ctx, "Started AddUser request", slog.String("user_id", user.ID.String()))
 	userModel := repo.sqlxMapper.ToModel(*user)
-	query := `INSERT INTO "records"."telegram_users" (id, telegram_id, telegram_user_identity_id, added_at, added_by_user)
-	VALUES ($1, $2, $3, $4, $5)`
+	query := `INSERT INTO "records"."telegram_users" (id, telegram_id, added_at, added_by_user)
+	VALUES ($1, $2, $3, $4)`
 	_, err := repo.session.ExecContext(ctx, query,
 		userModel.ID,
 		userModel.TelegramID,
-		userModel.TelegramIdentityID,
 		userModel.AddedAt,
 		userModel.AddedByUser,
 	)

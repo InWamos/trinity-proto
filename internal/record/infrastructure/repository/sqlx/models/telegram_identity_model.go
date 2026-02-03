@@ -6,9 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-// TelegramIdentityModel represents the sqlx model for the telegram_user_identities table.
+// TelegramIdentityModel represents the sqlx model for the telegram_identities table.
 type TelegramIdentityModel struct {
 	ID          uuid.UUID `db:"id"`
+	UserID      uuid.UUID `db:"user_id"`
 	FirstName   string    `db:"first_name"`
 	LastName    string    `db:"last_name"`
 	Username    string    `db:"username"`

@@ -27,6 +27,7 @@ func (sm *SqlxTelegramIdentityMapper) ToDomain(inputModel models.TelegramIdentit
 func (sm *SqlxTelegramIdentityMapper) ToModel(inputEntity domain.TelegramIdentity) models.TelegramIdentityModel {
 	return models.TelegramIdentityModel{
 		ID:          inputEntity.ID,
+		UserID:      inputEntity.UserID,
 		FirstName:   inputEntity.FirstName,
 		LastName:    inputEntity.LastName,
 		Username:    inputEntity.Username,

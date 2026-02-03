@@ -13,20 +13,18 @@ func NewSqlxTelegramUserMapper() *SqlxTelegramUserMapper {
 
 func (sm *SqlxTelegramUserMapper) ToDomain(inputModel models.TelegramUserModel) domain.TelegramUser {
 	return domain.TelegramUser{
-		ID:               inputModel.ID,
-		TelegramID:       inputModel.TelegramID,
-		TelegramIdentity: inputModel.TelegramIdentityID,
-		AddedAt:          inputModel.AddedAt,
-		AddedByUser:      inputModel.AddedByUser,
+		ID:          inputModel.ID,
+		TelegramID:  inputModel.TelegramID,
+		AddedAt:     inputModel.AddedAt,
+		AddedByUser: inputModel.AddedByUser,
 	}
 }
 
 func (sm *SqlxTelegramUserMapper) ToModel(inputEntity domain.TelegramUser) models.TelegramUserModel {
 	return models.TelegramUserModel{
-		ID:                 inputEntity.ID,
-		TelegramID:         inputEntity.TelegramID,
-		TelegramIdentityID: inputEntity.TelegramIdentity,
-		AddedAt:            inputEntity.AddedAt,
-		AddedByUser:        inputEntity.AddedByUser,
+		ID:          inputEntity.ID,
+		TelegramID:  inputEntity.TelegramID,
+		AddedAt:     inputEntity.AddedAt,
+		AddedByUser: inputEntity.AddedByUser,
 	}
 }

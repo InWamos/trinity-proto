@@ -8,6 +8,7 @@ import (
 
 type TelegramIdentity struct {
 	ID          uuid.UUID `validate:"required,uuid"`
+	UserID      uuid.UUID `validate:"required,uuid"`
 	Username    string    `validate:"required,min=4,max=32"`
 	FirstName   string    `validate:"required,min=1,max=64"`
 	LastName    string    `validate:"min=0,max=64"`

@@ -58,13 +58,33 @@ func (repo *SQLXTelegramRecordRepository) GetLatestTelegramRecordsByUserTelegram
 	}
 
 	return &domainRecords, nil
-
 }
 
 func (repo *SQLXTelegramRecordRepository) CreateTelegramRecord(
 	ctx context.Context,
 	telegramRecord domain.TelegramRecord,
 ) error {
+	repo.logger.DebugContext(
+		ctx,
+		"Started CreateTelegramRecord request",
+		slog.String("record_id", telegramRecord.ID.String()),
+	)
+	recordModel := repo.sqlxMapper.ToModel(telegramRecord)
+	query := `INSERT INTO "records"."telegram_records" (id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err := repo.session.ExecContext(ctx, query,
+		recordModel.ID,
+		recordModel.FromUserTelegramID,
+		recordModel.InTelegramChatID,
+		recordModel.MessageText,
+		recordModel.PostedAt,
+		recordModel.AddedAt,
+		recordModel.AddedByUser,
+	)
+	if err != nil {
+		repo.logger.ErrorContext(ctx, "Failed to create telegram record", slog.Any("err", err))
+		return repository.ErrDatabaseFailed
+	}
 	return nil
 }
 
@@ -72,5 +92,21 @@ func (repo *SQLXTelegramRecordRepository) CreateTelegramRecords(
 	ctx context.Context,
 	telegramRecords []domain.TelegramRecord,
 ) error {
+	repo.logger.DebugContext(
+		ctx,
+		"Started CreateTelegramRecords request",
+		slog.Int("record_count", len(telegramRecords)),
+	)
+	query := `INSERT INTO "records"."telegram_records" (id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
+	VALUES (:id, :from_user_telegram_id, :in_telegram_chat_id, :message_text, :posted_at, :added_at, :added_by_user)`
+	recordModels := make([]models.SQLXTelegramRecordModel, len(telegramRecords))
+	for i, record := range telegramRecords {
+		recordModels[i] = repo.sqlxMapper.ToModel(record)
+	}
+	_, err := repo.session.NamedExecContext(ctx, query, recordModels)
+	if err != nil {
+		repo.logger.ErrorContext(ctx, "Failed to create telegram records", slog.Any("err", err))
+		return repository.ErrDatabaseFailed
+	}
 	return nil
 }

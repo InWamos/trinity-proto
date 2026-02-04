@@ -1,7 +1,6 @@
 package user
 
 import (
-	sqlxdatabase "github.com/InWamos/trinity-proto/internal/shared/infrastructure/database/sqlx_database"
 	sqlxrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/sqlx_repository"
 	"go.uber.org/fx"
 )
@@ -15,10 +14,6 @@ func NewUserInfrastructureContainer() fx.Option {
 			// Provides User repository factory
 			sqlxrepository.NewSqlxUserRepositoryFactory,
 			// Provides SQLx session
-			// TODO: Move to shared
-			sqlxdatabase.NewSQLXTransactionFactory,
-			// Provides SQLx Database
-			sqlxdatabase.NewSQLXDatabase,
 		),
 	)
 }

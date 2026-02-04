@@ -11,6 +11,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/mappers"
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type SQLXTelegramUserRepository struct {
@@ -68,6 +69,15 @@ func (repo *SQLXTelegramUserRepository) AddUser(ctx context.Context, user *domai
 		userModel.AddedByUser,
 	)
 	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+			repo.logger.InfoContext(
+				ctx,
+				"Telegram user already added by this user",
+				slog.Uint64("telegram_id", user.TelegramID),
+			)
+			return domain.ErrUserAlreadyExists
+		}
 		repo.logger.ErrorContext(ctx, "Failed to add telegram user", slog.Any("err", err))
 		return repository.ErrDatabaseFailed
 	}

@@ -2,7 +2,8 @@ package record
 
 import (
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/mappers"
-	repositories "github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/repositories/telegram_record"
+	SqlxTelegramRecordRepositories "github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/repositories/telegram_record"
+	SqlxTelegramUserRepositories "github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/repositories/telegram_user"
 	"go.uber.org/fx"
 )
 
@@ -11,8 +12,11 @@ func NewRecordInfrastructureContainer() fx.Option {
 		"record_infrastructure",
 		fx.Provide(
 			mappers.NewSqlxTelegramRecordMapper,
-			repositories.NewSQLXTelegramRecordRepository,
-			repositories.NewSQLXTelegramRecordRepositoryFactory,
+			mappers.NewSqlxTelegramUserMapper,
+			SqlxTelegramRecordRepositories.NewSQLXTelegramRecordRepository,
+			SqlxTelegramRecordRepositories.NewSQLXTelegramRecordRepositoryFactory,
+			SqlxTelegramUserRepositories.NewSQLXTelegramUserRepository,
+			SqlxTelegramUserRepositories.NewSQLXTelegramUserRepositoryFactory,
 		),
 	)
 }

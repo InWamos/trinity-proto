@@ -10,6 +10,7 @@ func NewRecordApplicationContainer() fx.Option {
 		"record_application",
 		fx.Provide(
 			application.NewGetLatestTelegramRecordsByUserTelegramID,
+			application.NewAddTelegramUser,
 		),
 	)
 }

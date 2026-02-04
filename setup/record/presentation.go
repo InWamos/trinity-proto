@@ -11,6 +11,7 @@ func NewRecordPresentationContainer() fx.Option {
 		"record_presentation",
 		fx.Provide(
 			handlers.NewGetLatestTelegramRecordsByTelegramID,
+			handlers.NewAddTelegramUserHandler,
 			v1.NewRecordMuxV1,
 		),
 	)

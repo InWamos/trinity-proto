@@ -10,6 +10,7 @@ import (
 
 	"github.com/InWamos/trinity-proto/config"
 	authV1Mux "github.com/InWamos/trinity-proto/internal/auth/presentation/v1"
+	recordV1Mux "github.com/InWamos/trinity-proto/internal/record/presentation/v1"
 	"github.com/InWamos/trinity-proto/internal/user/application"
 	userV1Mux "github.com/InWamos/trinity-proto/internal/user/presentation/v1"
 	"github.com/InWamos/trinity-proto/middleware"
@@ -59,6 +60,7 @@ func NewMainHTTPServer(
 	authMiddleware *middleware.AuthenticationMiddleware,
 	userMuxV1 *userV1Mux.UserMuxV1,
 	authMuxV1 *authV1Mux.AuthMuxV1,
+	recordMuxV1 *recordV1Mux.RecordMuxV1,
 	logger *slog.Logger,
 ) MainHTTPServer {
 	listenAddress := fmt.Sprintf("%s:%d", serverConfig.BindAddress, serverConfig.Port)
@@ -80,6 +82,7 @@ func NewMainHTTPServer(
 	// CORS
 	chiRouter.Use(corsMiddleware.Handler)
 	chiRouter.Mount("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux()))
+	chiRouter.Mount("/api/v1/record", authMiddleware.Handler(recordMuxV1.GetMux()))
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
 	chiRouter.Mount("/swagger", httpSwagger.WrapHandler)
 

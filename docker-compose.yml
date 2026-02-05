@@ -19,9 +19,9 @@ services:
       timeout: 5s
       retries: 5
   
-  migrate:
+  migrate-user:
     image: migrate/migrate:v4.19.1
-    container_name: migrate
+    container_name: migrate-user
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,11 +31,21 @@ services:
     networks:
       trinity-net:
         ipv4_address: 172.20.0.3
-    healthcheck:
-      test: ["CMD", "test", "-f", "/migrations/.migrate-completed"]
-      interval: 5s
-      timeout: 5s
-      retries: 0
+
+  migrate-record:
+    image: migrate/migrate:v4.19.1
+    container_name: migrate-record
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate-user:
+        condition: service_completed_successfully
+    volumes:
+      - ./internal/record/infrastructure/migrations:/migrations
+    command: -path=/migrations -database=postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}?sslmode=disable up
+    networks:
+      trinity-net:
+        ipv4_address: 172.20.0.6
 
   redis:
     image: redis:8.4-bookworm
@@ -85,8 +95,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      migrate:
-        condition: "service_completed_successfully"
+      migrate-user:
+        condition: service_completed_successfully
+      migrate-record:
+        condition: service_completed_successfully
 
 networks:
   trinity-net:

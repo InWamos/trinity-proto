@@ -114,6 +114,10 @@ func (interactor *AddTelegramUser) Execute(
 			return nil, ErrDatabaseFailed
 		}
 	}
+	if err = transactionManager.Commit(ctx); err != nil {
+		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
+		return nil, ErrDatabaseFailed
+	}
 
 	return &AddTelegramUserResponse{
 		UserID: userID.String(),

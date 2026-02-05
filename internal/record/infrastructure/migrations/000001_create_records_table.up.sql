@@ -36,4 +36,4 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_identities" (
 );
 -- squawk-ignore require-concurrent-index-creation
 CREATE INDEX IF NOT EXISTS
-idx_from_user_telegram_id ON "records".telegram_record (from_user_telegram_id);
+idx_from_user_telegram_id ON "records"."telegram_records" (message_id);

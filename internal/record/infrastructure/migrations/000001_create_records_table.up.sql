@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_users" (
 
 CREATE TABLE IF NOT EXISTS "records"."telegram_identities" (
     id UUID PRIMARY KEY NOT NULL,
-    user_id UUID REFERENCES "records"."telegram_users" (id),
+    user_id UUID REFERENCES "records".telegram_users (id),
     first_name TEXT NOT NULL,
     last_name TEXT,
     username TEXT,

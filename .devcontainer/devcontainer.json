@@ -3,7 +3,11 @@
 {
 	"name": "Go",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/go:2-1.25-bookworm",
+	"build": {
+		// This is required here as Javascript retards failed to update the GPG 
+		// key on the Yarn repo and the whole build of a default image would fail as a result
+		"dockerfile": "Dockerfile"
+	},
 	"features": {
 		"ghcr.io/dhoeric/features/act:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}

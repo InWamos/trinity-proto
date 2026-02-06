@@ -11,6 +11,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/mappers"
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/models"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -39,10 +40,11 @@ func NewSQLXTelegramIdentityRepository(
 func (repo *SQLXTelegramIdentityRepository) AddIdentity(ctx context.Context, identity *domain.TelegramIdentity) error {
 	repo.logger.DebugContext(ctx, "Started AddIdentity request", slog.String("identity_id", identity.ID.String()))
 	identityModel := repo.sqlxMapper.ToModel(*identity)
-	query := `INSERT INTO "records"."telegram_user_identities" (id, first_name, last_name, username, phone_number, bio, added_at, added_by_user)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	query := `INSERT INTO "records"."telegram_user_identities" (id, user_id, first_name, last_name, username, phone_number, bio, added_at, added_by_user)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err := repo.session.ExecContext(ctx, query,
 		identityModel.ID,
+		identityModel.UserID,
 		identityModel.FirstName,
 		identityModel.LastName,
 		identityModel.Username,

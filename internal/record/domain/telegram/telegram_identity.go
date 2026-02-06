@@ -1,9 +1,15 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrIdentityNotFound      = errors.New("identity not found")
+	ErrIdentityAlreadyExists = errors.New("identity already exists")
 )
 
 type TelegramIdentity struct {

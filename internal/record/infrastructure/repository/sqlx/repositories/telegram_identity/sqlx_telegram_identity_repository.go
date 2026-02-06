@@ -54,6 +54,27 @@ func (repo *SQLXTelegramIdentityRepository) AddIdentity(ctx context.Context, ide
 		identityModel.AddedByUser,
 	)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			switch pgErr.ConstraintName {
+			case "fk_telegram_identities_user":
+				repo.logger.InfoContext(
+					ctx,
+					"Telegram user with that user id not found",
+					slog.String("telegram_user_id", identityModel.UserID.String()),
+					slog.String("constraint_name", pgErr.ConstraintName),
+				)
+				return domain.ErrUnexistentTelegramUserReferenced
+			case "unique_telegram_identity_per_user":
+				repo.logger.InfoContext(
+					ctx,
+					"This identity already exists",
+					slog.String("telegram_user_id", identityModel.ID.String()),
+					slog.String("constraint_name", pgErr.ConstraintName),
+				)
+				return domain.ErrIdentityAlreadyExists
+			}
+		}
 		repo.logger.ErrorContext(ctx, "Failed to add telegram identity", slog.Any("err", err))
 		return repository.ErrDatabaseFailed
 	}

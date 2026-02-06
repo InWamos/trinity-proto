@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	ErrIdentityNotFound      = errors.New("identity not found")
-	ErrIdentityAlreadyExists = errors.New("identity already exists")
+	ErrIdentityNotFound                 = errors.New("identity not found")
+	ErrIdentityAlreadyExists            = errors.New("identity already exists")
+	ErrUnexistentTelegramUserReferenced = errors.New("telegram user ID does not exist")
 )
 
 type TelegramIdentity struct {

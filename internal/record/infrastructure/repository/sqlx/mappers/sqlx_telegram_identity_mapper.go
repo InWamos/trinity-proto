@@ -14,6 +14,7 @@ func NewSqlxTelegramIdentityMapper() *SqlxTelegramIdentityMapper {
 func (sm *SqlxTelegramIdentityMapper) ToDomain(inputModel models.TelegramIdentityModel) domain.TelegramIdentity {
 	return domain.TelegramIdentity{
 		ID:          inputModel.ID,
+		UserID:      inputModel.UserID,
 		FirstName:   inputModel.FirstName,
 		LastName:    inputModel.LastName,
 		Username:    inputModel.Username,

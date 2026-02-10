@@ -18,7 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type AddTelegramIdentityUserRequest struct {
+type AddTelegramIdentityRequest struct {
 	UserID      uuid.UUID
 	Username    string
 	FirstName   string
@@ -27,7 +27,7 @@ type AddTelegramIdentityUserRequest struct {
 	PhoneNumber string
 }
 
-type AddTelegramIdentityUserResponse struct {
+type AddTelegramIdentityResponse struct {
 	ID uuid.UUID
 }
 
@@ -58,8 +58,8 @@ func NewAddTelegramIdentity(
 
 func (interactor *AddTelegramIdentity) Execute(
 	ctx context.Context,
-	input AddTelegramIdentityUserRequest,
-) (*AddTelegramIdentityUserResponse, error) {
+	input AddTelegramIdentityRequest,
+) (*AddTelegramIdentityResponse, error) {
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
 		return nil, rbac.ErrInsufficientPrivileges
@@ -142,7 +142,7 @@ func (interactor *AddTelegramIdentity) Execute(
 		return nil, application.ErrDatabaseFailed
 	}
 
-	return &AddTelegramIdentityUserResponse{
+	return &AddTelegramIdentityResponse{
 		ID: identityID,
 	}, nil
 }

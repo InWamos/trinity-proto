@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	application "github.com/InWamos/trinity-proto/internal/record/application/telegram"
 	domain "github.com/InWamos/trinity-proto/internal/record/domain/telegram"
 	"github.com/InWamos/trinity-proto/internal/record/domain/telegram/service"
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository"
@@ -99,7 +100,7 @@ func (interactor *AddTelegramIdentity) Execute(
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))
-		return nil, ErrDatabaseFailed
+		return nil, application.ErrDatabaseFailed
 	}
 
 	telegramIdentityRepository := interactor.telegramIdentityFactory.CreateTelegramIdentityRepositoryWithTransaction(
@@ -132,13 +133,13 @@ func (interactor *AddTelegramIdentity) Execute(
 				slog.String("identity_id", identityID.String()),
 				slog.Any("err", err),
 			)
-			return nil, ErrDatabaseFailed
+			return nil, application.ErrDatabaseFailed
 		}
 	}
 
 	if err = transactionManager.Commit(ctx); err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to commit", slog.Any("err", err))
-		return nil, ErrDatabaseFailed
+		return nil, application.ErrDatabaseFailed
 	}
 
 	return &AddTelegramIdentityUserResponse{

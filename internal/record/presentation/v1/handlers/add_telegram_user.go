@@ -60,6 +60,14 @@ func (handler *AddTelegramUserHandler) ServeHTTP(w http.ResponseWriter, r *http.
 			handler.logger.DebugContext(r.Context(), "This user is already added", slog.Any("err", err))
 			http.Error(w, "You have already added this user", http.StatusConflict)
 			return
+		case errors.Is(err, domain.ErrValidationFailed):
+			handler.logger.DebugContext(
+				r.Context(),
+				"Validation has failed",
+				slog.Any("err", err),
+			)
+			http.Error(w, "This user contains unprocessable fields", http.StatusUnprocessableEntity)
+			return
 		default:
 			handler.logger.DebugContext(r.Context(), "Database error", slog.Any("err", err))
 			http.Error(w, "Internal Error", http.StatusInternalServerError)

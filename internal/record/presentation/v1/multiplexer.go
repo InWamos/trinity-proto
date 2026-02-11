@@ -12,9 +12,11 @@ type RecordMuxV1 struct {
 func NewRecordMuxV1(
 	getLatestTelegramRecordsByTelegramID *handlers.GetLatestTelegramRecordsByTelegramIDHandler,
 	addTelegramUser *handlers.AddTelegramUserHandler,
+	addTelegramIdentity *handlers.AddTelegramIdentityHandler,
 ) *RecordMuxV1 {
 	mux := chi.NewRouter()
 	mux.Get("/telegram/{telegram_id}/records", getLatestTelegramRecordsByTelegramID.ServeHTTP)
+	mux.Post("/telegram/identity", addTelegramIdentity.ServeHTTP)
 	mux.Post("/telegram/user", addTelegramUser.ServeHTTP)
 	return &RecordMuxV1{
 		mux: mux,

@@ -13,7 +13,7 @@ import (
 )
 
 type AddTelegramIdentityRequest struct {
-	UserID      uuid.UUID `json:"telegram_id"           example:"28736582143"`
+	UserID      uuid.UUID `json:"telegram_id"           example:"20d8a06c-2fac-4643-ba78-7da267a7fe51"`
 	Username    string    `json:"telegram_username"     example:"user1235"`
 	FirstName   string    `json:"telegram_first_name"   example:"John"`
 	LastName    string    `json:"telegram_last_name"    example:"Doe"`

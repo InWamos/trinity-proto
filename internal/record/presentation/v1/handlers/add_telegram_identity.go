@@ -81,6 +81,14 @@ func (handler *AddTelegramIdentityHandler) ServeHTTP(w http.ResponseWriter, r *h
 			)
 			http.Error(w, "This identity references user that hasn't been added yet", http.StatusConflict)
 			return
+		case errors.Is(err, domain.ErrValidationFailed):
+			handler.logger.DebugContext(
+				r.Context(),
+				"Validation has failed",
+				slog.Any("err", err),
+			)
+			http.Error(w, "This identity contains unprocessable fields", http.StatusUnprocessableEntity)
+			return
 		default:
 			handler.logger.DebugContext(r.Context(), "Database error", slog.Any("err", err))
 			http.Error(w, "Internal Error", http.StatusInternalServerError)

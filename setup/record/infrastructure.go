@@ -14,6 +14,7 @@ func NewRecordInfrastructureContainer() fx.Option {
 		fx.Provide(
 			mappers.NewSqlxTelegramRecordMapper,
 			mappers.NewSqlxTelegramUserMapper,
+			mappers.NewSqlxTelegramIdentityMapper,
 			SqlxTelegramRecordRepositories.NewSQLXTelegramRecordRepository,
 			SqlxTelegramRecordRepositories.NewSQLXTelegramRecordRepositoryFactory,
 			SqlxTelegramUserRepositories.NewSQLXTelegramUserRepository,

@@ -40,7 +40,7 @@ func NewSQLXTelegramIdentityRepository(
 func (repo *SQLXTelegramIdentityRepository) AddIdentity(ctx context.Context, identity *domain.TelegramIdentity) error {
 	repo.logger.DebugContext(ctx, "Started AddIdentity request", slog.String("identity_id", identity.ID.String()))
 	identityModel := repo.sqlxMapper.ToModel(*identity)
-	query := `INSERT INTO "records"."telegram_user_identities" (id, user_id, first_name, last_name, username, phone_number, bio, added_at, added_by_user)
+	query := `INSERT INTO "records"."telegram_identities" (id, user_id, first_name, last_name, username, phone_number, bio, added_at, added_by_user)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err := repo.session.ExecContext(ctx, query,
 		identityModel.ID,
@@ -83,7 +83,7 @@ func (repo *SQLXTelegramIdentityRepository) AddIdentity(ctx context.Context, ide
 
 func (repo *SQLXTelegramIdentityRepository) RemoveIdentityByID(ctx context.Context, identityID uuid.UUID) error {
 	repo.logger.DebugContext(ctx, "Started RemoveIdentityByID request", slog.String("identity_id", identityID.String()))
-	query := `DELETE FROM "records"."telegram_user_identities" WHERE id = $1`
+	query := `DELETE FROM "records"."telegram_identities" WHERE id = $1`
 	result, err := repo.session.ExecContext(ctx, query, identityID)
 	if err != nil {
 		repo.logger.ErrorContext(ctx, "Failed to delete telegram identity", slog.Any("err", err))
@@ -112,7 +112,7 @@ func (repo *SQLXTelegramIdentityRepository) GetIdentityByID(
 	repo.logger.DebugContext(ctx, "Started GetIdentityByID request", slog.String("identity_id", identityID.String()))
 	var identityModel models.TelegramIdentityModel
 	query := `SELECT id, first_name, last_name, username, phone_number, bio, added_at, added_by_user
-	FROM "records"."telegram_user_identities" WHERE id = $1`
+	FROM "records"."telegram_identities" WHERE id = $1`
 	err := repo.session.GetContext(ctx, &identityModel, query, identityID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

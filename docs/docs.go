@@ -187,6 +187,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/record/telegram/{telegram_id}/records": {
+            "get": {
+                "description": "Get the latest Telegram records for a specific Telegram user ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "record"
+                ],
+                "summary": "Get latest Telegram records",
+                "parameters": [
+                    {
+                        "description": "Telegram ID request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GetLatestTelegramRecordsByTelegramIDRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Latest records retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GetLatestTelegramRecordsByTelegramIDResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid telegram ID format"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    },
+                    "404": {
+                        "description": "Telegram ID not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/v1/users/": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
@@ -419,6 +465,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.TelegramRecord": {
+            "type": "object",
+            "required": [
+                "addedAt",
+                "addedByUser",
+                "fromUserTelegramID",
+                "id",
+                "inTelegramChatID",
+                "messageText",
+                "postedAt"
+            ],
+            "properties": {
+                "addedAt": {
+                    "type": "string"
+                },
+                "addedByUser": {
+                    "type": "string"
+                },
+                "fromUserTelegramID": {
+                    "type": "integer",
+                    "maximum": 300000000000
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inTelegramChatID": {
+                    "type": "integer"
+                },
+                "messageText": {
+                    "type": "string",
+                    "maxLength": 4096
+                },
+                "postedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.AddTelegramIdentityRequest": {
             "type": "object",
             "properties": {
@@ -486,6 +569,31 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "The user has been created. You can login now"
+                }
+            }
+        },
+        "handlers.GetLatestTelegramRecordsByTelegramIDRequest": {
+            "type": "object",
+            "properties": {
+                "telegram_id": {
+                    "type": "integer",
+                    "example": 28736582143
+                }
+            }
+        },
+        "handlers.GetLatestTelegramRecordsByTelegramIDResponse": {
+            "description": "information response",
+            "type": "object",
+            "properties": {
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.TelegramRecord"
+                    }
+                },
+                "telegram_id": {
+                    "type": "integer",
+                    "example": 428736582143
                 }
             }
         },

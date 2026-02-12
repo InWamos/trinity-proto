@@ -1,5 +1,32 @@
 basePath: /api
 definitions:
+  domain.TelegramRecord:
+    properties:
+      addedAt:
+        type: string
+      addedByUser:
+        type: string
+      fromUserTelegramID:
+        maximum: 300000000000
+        type: integer
+      id:
+        type: string
+      inTelegramChatID:
+        type: integer
+      messageText:
+        maxLength: 4096
+        type: string
+      postedAt:
+        type: string
+    required:
+    - addedAt
+    - addedByUser
+    - fromUserTelegramID
+    - id
+    - inTelegramChatID
+    - messageText
+    - postedAt
+    type: object
   handlers.AddTelegramIdentityRequest:
     properties:
       telegram_bio:
@@ -48,6 +75,23 @@ definitions:
       message:
         example: The user has been created. You can login now
         type: string
+    type: object
+  handlers.GetLatestTelegramRecordsByTelegramIDRequest:
+    properties:
+      telegram_id:
+        example: 28736582143
+        type: integer
+    type: object
+  handlers.GetLatestTelegramRecordsByTelegramIDResponse:
+    description: information response
+    properties:
+      records:
+        items:
+          $ref: '#/definitions/domain.TelegramRecord'
+        type: array
+      telegram_id:
+        example: 428736582143
+        type: integer
     type: object
   handlers.GetUserResponse:
     description: User information response
@@ -188,6 +232,36 @@ paths:
       summary: User login
       tags:
       - auth
+  /v1/record/telegram/{telegram_id}/records:
+    get:
+      consumes:
+      - application/json
+      description: Get the latest Telegram records for a specific Telegram user ID.
+      parameters:
+      - description: Telegram ID request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.GetLatestTelegramRecordsByTelegramIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Latest records retrieved successfully
+          schema:
+            $ref: '#/definitions/handlers.GetLatestTelegramRecordsByTelegramIDResponse'
+        "400":
+          description: Invalid telegram ID format
+        "403":
+          description: Insufficient privileges
+        "404":
+          description: Telegram ID not found
+        "500":
+          description: Internal server error
+      summary: Get latest Telegram records
+      tags:
+      - record
   /v1/record/telegram/identity:
     post:
       consumes:

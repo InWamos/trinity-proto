@@ -42,6 +42,20 @@ func NewGetLatestTelegramRecordsByTelegramID(
 	}
 }
 
+// ServeHTTP handles an HTTP request to get the latest Telegram records by Telegram ID.
+//
+//	@Summary		Get latest Telegram records
+//	@Description	Get the latest Telegram records for a specific Telegram user ID.
+//	@Tags			record
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		GetLatestTelegramRecordsByTelegramIDRequest		true	"Telegram ID request"
+//	@Success		200		{object}	GetLatestTelegramRecordsByTelegramIDResponse	"Latest records retrieved successfully"
+//	@Failure		400		"Invalid telegram ID format"
+//	@Failure		403		"Insufficient privileges"
+//	@Failure		404		"Telegram ID not found"
+//	@Failure		500		"Internal server error"
+//	@Router			/v1/record/telegram/{telegram_id}/records [get]
 func (handler *GetLatestTelegramRecordsByTelegramIDHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req GetLatestTelegramRecordsByTelegramIDRequest
 	dec := json.NewDecoder(r.Body)

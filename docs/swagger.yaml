@@ -27,6 +27,18 @@ definitions:
         example: "28736582143"
         type: string
     type: object
+  handlers.AddTelegramUserRequest:
+    properties:
+      telegram_id:
+        example: 28736582143
+        type: integer
+    type: object
+  handlers.AddTelegramUserResponse:
+    properties:
+      record_id:
+        example: "28736582143"
+        type: string
+    type: object
   handlers.CreateUserResponse:
     description: User creation response with ID
     properties:
@@ -216,6 +228,39 @@ paths:
           schema:
             type: string
       summary: Add new telegram identity
+      tags:
+      - record
+  /v1/record/telegram/user:
+    post:
+      consumes:
+      - application/json
+      description: Add a new Telegram user by Telegram ID. This creates a record linking
+        a Telegram user to the system.
+      parameters:
+      - description: Telegram user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddTelegramUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Telegram user added successfully
+          schema:
+            $ref: '#/definitions/handlers.AddTelegramUserResponse'
+        "400":
+          description: Invalid request format
+        "403":
+          description: Insufficient privileges
+        "409":
+          description: You have already added this user
+        "422":
+          description: This user contains unprocessable fields
+        "500":
+          description: Internal server error
+      summary: Add a new Telegram user
       tags:
       - record
   /v1/users/:

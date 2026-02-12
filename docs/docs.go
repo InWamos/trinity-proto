@@ -138,6 +138,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/record/telegram/user": {
+            "post": {
+                "description": "Add a new Telegram user by Telegram ID. This creates a record linking a Telegram user to the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "record"
+                ],
+                "summary": "Add a new Telegram user",
+                "parameters": [
+                    {
+                        "description": "Telegram user request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Telegram user added successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    },
+                    "409": {
+                        "description": "You have already added this user"
+                    },
+                    "422": {
+                        "description": "This user contains unprocessable fields"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/v1/users/": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
@@ -400,6 +449,24 @@ const docTemplate = `{
             }
         },
         "handlers.AddTelegramIdentityResponse": {
+            "type": "object",
+            "properties": {
+                "record_id": {
+                    "type": "string",
+                    "example": "28736582143"
+                }
+            }
+        },
+        "handlers.AddTelegramUserRequest": {
+            "type": "object",
+            "properties": {
+                "telegram_id": {
+                    "type": "integer",
+                    "example": 28736582143
+                }
+            }
+        },
+        "handlers.AddTelegramUserResponse": {
             "type": "object",
             "properties": {
                 "record_id": {

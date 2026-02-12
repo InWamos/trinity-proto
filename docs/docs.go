@@ -22,6 +22,122 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/auth/login": {
+            "post": {
+                "description": "Authenticate a user with username and password, returns session token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (validation failed)",
+                        "schema": {
+                            "$ref": "#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/record/telegram/identity": {
+            "post": {
+                "description": "Create a new user with username, display name, password and role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "record"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "Identity creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramIdentityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Identity created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramIdentityResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient privileges",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "You have already added this identity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/users/": {
             "post": {
                 "description": "Create a new user with username, display name, password and role",
@@ -54,15 +170,15 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request (validation failed)",
+                        "description": "Invalid request body",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -98,13 +214,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid user ID format",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -138,19 +254,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid user ID format",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -186,19 +302,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid user ID format",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -234,19 +350,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid user ID format",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_presentation_v1_handlers.ErrorResponse"
                         }
                     }
                 }
@@ -254,6 +370,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.AddTelegramIdentityRequest": {
+            "type": "object",
+            "properties": {
+                "telegram_bio": {
+                    "type": "string",
+                    "example": "Hi! I am using Whatsapp"
+                },
+                "telegram_first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "telegram_id": {
+                    "type": "string",
+                    "example": "20d8a06c-2fac-4643-ba78-7da267a7fe51"
+                },
+                "telegram_last_name": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "telegram_phone_number": {
+                    "type": "string",
+                    "example": "+11234567890 (Use e164 format)"
+                },
+                "telegram_username": {
+                    "type": "string",
+                    "example": "user1235"
+                }
+            }
+        },
+        "handlers.AddTelegramIdentityResponse": {
+            "type": "object",
+            "properties": {
+                "record_id": {
+                    "type": "string",
+                    "example": "28736582143"
+                }
+            }
+        },
         "handlers.CreateUserResponse": {
             "description": "User creation response with ID",
             "type": "object",
@@ -265,16 +419,6 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "The user has been created. You can login now"
-                }
-            }
-        },
-        "handlers.ErrorResponse": {
-            "description": "Standard error response",
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Invalid request body"
                 }
             }
         },
@@ -294,7 +438,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "019b1a49-dbf6-74d6-97bf-2d7e57d30c75"
                 },
-                "role": {
+                "user_role": {
                     "type": "string",
                     "enum": [
                         "user",
@@ -305,6 +449,20 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "johndoe"
+                }
+            }
+        },
+        "handlers.LoginResponse": {
+            "description": "Login response with session token",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "dGVzdC10b2tlbi0xMjM0NTY3ODkw"
                 }
             }
         },
@@ -323,7 +481,7 @@ const docTemplate = `{
             "required": [
                 "display_name",
                 "password",
-                "role",
+                "user_role",
                 "username"
             ],
             "properties": {
@@ -337,7 +495,7 @@ const docTemplate = `{
                     "maxLength": 64,
                     "minLength": 8
                 },
-                "role": {
+                "user_role": {
                     "type": "string",
                     "enum": [
                         "user",
@@ -348,6 +506,45 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 2
+                }
+            }
+        },
+        "handlers.loginForm": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 8
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 2
+                }
+            }
+        },
+        "internal_auth_presentation_v1_handlers.ErrorResponse": {
+            "description": "Standard error response",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid credentials"
+                }
+            }
+        },
+        "internal_user_presentation_v1_handlers.ErrorResponse": {
+            "description": "Standard error response",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request body"
                 }
             }
         }

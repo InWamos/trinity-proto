@@ -45,6 +45,22 @@ func NewAddTelegramIdentityHandler(
 	}
 }
 
+// ServeHTTP handles an HTTP request to create a user.
+//
+//	@Summary		Create a new user
+//	@Description	Create a new user with username, display name, password and role
+//	@Tags			record
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		AddTelegramIdentityRequest	true	"Identity creation request"
+//	@Success		201		{object}	AddTelegramIdentityResponse	"Identity created successfully"
+//	@Failure		400		string								"Invalid request format"
+//	@Failure		403		string								"Insufficient privileges"
+//	@Failure		409		string								"This identity references user that hasn't been added yet"
+//	@Failure		409		string								"You have already added this identity"
+//	@Failure		422		string								"Invalid request body"
+//	@Failure		500		string								"Internal server error"
+//	@Router			/v1/record/telegram/identity [post]
 func (handler *AddTelegramIdentityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req AddTelegramIdentityRequest
 	dec := json.NewDecoder(r.Body)

@@ -1,5 +1,32 @@
 basePath: /api
 definitions:
+  handlers.AddTelegramIdentityRequest:
+    properties:
+      telegram_bio:
+        example: Hi! I am using Whatsapp
+        type: string
+      telegram_first_name:
+        example: John
+        type: string
+      telegram_id:
+        example: 20d8a06c-2fac-4643-ba78-7da267a7fe51
+        type: string
+      telegram_last_name:
+        example: Doe
+        type: string
+      telegram_phone_number:
+        example: +11234567890 (Use e164 format)
+        type: string
+      telegram_username:
+        example: user1235
+        type: string
+    type: object
+  handlers.AddTelegramIdentityResponse:
+    properties:
+      record_id:
+        example: "28736582143"
+        type: string
+    type: object
   handlers.CreateUserResponse:
     description: User creation response with ID
     properties:
@@ -8,13 +35,6 @@ definitions:
         type: string
       message:
         example: The user has been created. You can login now
-        type: string
-    type: object
-  handlers.ErrorResponse:
-    description: Standard error response
-    properties:
-      error:
-        example: Invalid request body
         type: string
     type: object
   handlers.GetUserResponse:
@@ -29,7 +49,7 @@ definitions:
       id:
         example: 019b1a49-dbf6-74d6-97bf-2d7e57d30c75
         type: string
-      role:
+      user_role:
         enum:
         - user
         - admin
@@ -37,6 +57,16 @@ definitions:
         type: string
       username:
         example: johndoe
+        type: string
+    type: object
+  handlers.LoginResponse:
+    description: Login response with session token
+    properties:
+      message:
+        example: Login successful
+        type: string
+      token:
+        example: dGVzdC10b2tlbi0xMjM0NTY3ODkw
         type: string
     type: object
   handlers.SuccessResponse:
@@ -56,7 +86,7 @@ definitions:
         maxLength: 64
         minLength: 8
         type: string
-      role:
+      user_role:
         enum:
         - user
         - admin
@@ -68,8 +98,36 @@ definitions:
     required:
     - display_name
     - password
-    - role
+    - user_role
     - username
+    type: object
+  handlers.loginForm:
+    properties:
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      username:
+        maxLength: 32
+        minLength: 2
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  internal_auth_presentation_v1_handlers.ErrorResponse:
+    description: Standard error response
+    properties:
+      error:
+        example: Invalid credentials
+        type: string
+    type: object
+  internal_user_presentation_v1_handlers.ErrorResponse:
+    description: Standard error response
+    properties:
+      error:
+        example: Invalid request body
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -83,6 +141,83 @@ info:
   title: Trinity API
   version: "1.0"
 paths:
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user with username and password, returns session
+        token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.loginForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/handlers.LoginResponse'
+        "400":
+          description: Invalid request (validation failed)
+          schema:
+            $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
+      summary: User login
+      tags:
+      - auth
+  /v1/record/telegram/identity:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with username, display name, password and role
+      parameters:
+      - description: Identity creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddTelegramIdentityRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Identity created successfully
+          schema:
+            $ref: '#/definitions/handlers.AddTelegramIdentityResponse'
+        "400":
+          description: Invalid request format
+          schema:
+            type: string
+        "403":
+          description: Insufficient privileges
+          schema:
+            type: string
+        "409":
+          description: You have already added this identity
+          schema:
+            type: string
+        "422":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a new user
+      tags:
+      - record
   /v1/users/:
     post:
       consumes:
@@ -103,13 +238,13 @@ paths:
           schema:
             $ref: '#/definitions/handlers.CreateUserResponse'
         "400":
-          description: Invalid request (validation failed)
+          description: Invalid request body
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "500":
-          description: Server error
+          description: Internal server error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
       summary: Create a new user
       tags:
       - users
@@ -133,15 +268,15 @@ paths:
         "400":
           description: Invalid user ID format
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
       summary: Delete a user
       tags:
       - users
@@ -164,11 +299,11 @@ paths:
         "400":
           description: Invalid user ID format
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
       summary: Get user by ID
       tags:
       - users
@@ -192,15 +327,15 @@ paths:
         "400":
           description: Invalid user ID format
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
       summary: Demote user to regular user
       tags:
       - users
@@ -224,15 +359,15 @@ paths:
         "400":
           description: Invalid user ID format
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_user_presentation_v1_handlers.ErrorResponse'
       summary: Promote user to admin
       tags:
       - users

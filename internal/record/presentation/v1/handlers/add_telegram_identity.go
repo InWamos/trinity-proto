@@ -45,7 +45,7 @@ func NewAddTelegramIdentityHandler(
 	}
 }
 
-// ServeHTTP handles an HTTP request to create a user.
+// ServeHTTP handles an HTTP request to add telegram identity.
 //
 //	@Summary		Add new telegram identity
 //	@Description	Add new telegram identity

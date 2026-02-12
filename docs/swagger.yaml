@@ -180,7 +180,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user with username, display name, password and role
+      description: Add new telegram identity
       parameters:
       - description: Identity creation request
         in: body
@@ -215,7 +215,7 @@ paths:
           description: Internal server error
           schema:
             type: string
-      summary: Create a new user
+      summary: Add new telegram identity
       tags:
       - record
   /v1/users/:

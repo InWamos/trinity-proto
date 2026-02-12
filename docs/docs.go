@@ -76,7 +76,7 @@ const docTemplate = `{
         },
         "/v1/record/telegram/identity": {
             "post": {
-                "description": "Create a new user with username, display name, password and role",
+                "description": "Add new telegram identity",
                 "consumes": [
                     "application/json"
                 ],
@@ -86,7 +86,7 @@ const docTemplate = `{
                 "tags": [
                     "record"
                 ],
-                "summary": "Create a new user",
+                "summary": "Add new telegram identity",
                 "parameters": [
                     {
                         "description": "Identity creation request",

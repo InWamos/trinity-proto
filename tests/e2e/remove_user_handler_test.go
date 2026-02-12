@@ -20,7 +20,7 @@ func TestRemoveUser_Success(t *testing.T) {
 		"username":     "deleteuser1",
 		"display_name": "Delete Test User",
 		"password":     "password123",
-		"role":         "user",
+		"user_role":    "user",
 	}
 
 	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)

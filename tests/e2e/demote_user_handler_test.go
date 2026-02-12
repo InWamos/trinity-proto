@@ -20,7 +20,7 @@ func TestDemoteUser_Success(t *testing.T) {
 		"username":     "demoteuser1",
 		"display_name": "Demote Test Admin",
 		"password":     "password123",
-		"role":         "admin",
+		"user_role":    "admin",
 	}
 
 	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)

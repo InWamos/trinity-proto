@@ -3,17 +3,17 @@ package sqlxrepository
 import (
 	"log/slog"
 
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/jmoiron/sqlx"
 )
 
 type SqlxUserRepositoryFactory struct {
 	logger     *slog.Logger
-	sqlxMapper *SqlxMapper
+	sqlxMapper *SqlxUserMapper
 }
 
-func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxMapper) repository.UserRepositoryFactory {
+func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxUserMapper) repository.UserRepositoryFactory {
 	return &SqlxUserRepositoryFactory{
 		logger:     logger,
 		sqlxMapper: mapper,
@@ -21,7 +21,7 @@ func NewSqlxUserRepositoryFactory(logger *slog.Logger, mapper *SqlxMapper) repos
 }
 
 func (surf *SqlxUserRepositoryFactory) CreateUserRepositoryWithTransaction(
-	tm database.TransactionManager,
+	tm interfaces.TransactionManager,
 ) repository.UserRepository {
 	// Extract the underlying sqlx transaction
 	tx, ok := tm.GetTransaction().(*sqlx.Tx)

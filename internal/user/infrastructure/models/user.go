@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type Role string
+type UserRole string
 
 const (
-	RoleUser  Role = "user"
-	RoleAdmin Role = "admin"
+	RoleUser  UserRole = "user"
+	RoleAdmin UserRole = "admin"
 )
 
 // UserModelSqlx is for sqlx repositories.
@@ -20,7 +20,7 @@ type UserModelSqlx struct {
 	Username     string       `db:"username"`
 	DisplayName  string       `db:"display_name"`
 	PasswordHash string       `db:"password_hash"`
-	Role         Role         `db:"role"`
+	UserRole     UserRole     `db:"user_role"`
 	CreatedAt    time.Time    `db:"created_at"`
 	DeletedAt    sql.NullTime `db:"deleted_at"`
 }

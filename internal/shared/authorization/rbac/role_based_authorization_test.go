@@ -1,11 +1,11 @@
-package service_test
+package rbac_test
 
 import (
 	"errors"
 	"testing"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
-	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/google/uuid"
 )
@@ -57,7 +57,7 @@ func TestAuthorizeByRole(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := service.AuthorizeByRole(tt.identity, tt.requiredRole)
+			err := rbac.AuthorizeByRole(tt.identity, tt.requiredRole)
 
 			if tt.shouldPass {
 				if err != nil {
@@ -67,7 +67,7 @@ func TestAuthorizeByRole(t *testing.T) {
 				if err == nil {
 					t.Errorf("expected error, got nil")
 				}
-				if !errors.Is(err, service.ErrInsufficientPrivileges) {
+				if !errors.Is(err, rbac.ErrInsufficientPrivileges) {
 					t.Errorf("expected ErrInsufficientPrivileges, got %v", err)
 				}
 			}
@@ -104,7 +104,7 @@ func TestAuthorizeByRoleEdgeCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := service.AuthorizeByRole(tt.identity, tt.requiredRole)
+			err := rbac.AuthorizeByRole(tt.identity, tt.requiredRole)
 
 			if tt.expectError {
 				if err == nil {

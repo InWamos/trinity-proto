@@ -23,7 +23,7 @@ func TestCreateUser_Success(t *testing.T) {
 		"username":     uniqueUsername,
 		"display_name": "Test User",
 		"password":     "password123",
-		"role":         "user",
+		"user_role":    "user",
 	}
 	_, err := json.Marshal(reqBody)
 	if err != nil {
@@ -69,7 +69,7 @@ func TestCreateUser_InvalidUsername_TooShort(t *testing.T) {
 		"username":     "a", // min is 2
 		"display_name": "Test User",
 		"password":     "password123",
-		"role":         "user",
+		"user_role":    "user",
 	}
 
 	// Make authorized request
@@ -100,7 +100,7 @@ func TestCreateUser_InvalidPassword_TooShort(t *testing.T) {
 		"username":     "testuser2",
 		"display_name": "Test User",
 		"password":     "short", // min is 8
-		"role":         "user",
+		"user_role":    "user",
 	}
 
 	// Make authorized request
@@ -131,7 +131,7 @@ func TestCreateUser_InvalidRole(t *testing.T) {
 		"username":     "testuser3",
 		"display_name": "Test User",
 		"password":     "password123",
-		"role":         "superadmin", // only "user" or "admin" allowed
+		"user_role":    "superadmin", // only "user" or "admin" allowed
 	}
 
 	// Make authorized request
@@ -230,7 +230,7 @@ func TestCreateUser_AdminRole(t *testing.T) {
 		"username":     uniqueUsername,
 		"display_name": "Admin User",
 		"password":     "adminpass123",
-		"role":         "admin",
+		"user_role":    "admin",
 	}
 
 	// Make authorized request

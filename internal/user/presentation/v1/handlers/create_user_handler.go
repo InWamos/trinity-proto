@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/user/application"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
 	"github.com/InWamos/trinity-proto/internal/user/presentation/service"
@@ -30,7 +31,7 @@ type createUserForm struct {
 	Username    string `json:"username"     validate:"required,alphanum,min=2,max=32"`
 	DisplayName string `json:"display_name" validate:"required,min=1,max=64"`
 	Password    string `json:"password"     validate:"required,alphanumunicode,min=8,max=64"`
-	Role        string `json:"role"         validate:"required,oneof=user admin"`
+	UserRole    string `json:"user_role"    validate:"required,oneof=user admin"`
 }
 
 type CreateUserHandler struct {
@@ -75,13 +76,13 @@ func (handler *CreateUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		Username:    userForm.Username,
 		DisplayName: userForm.DisplayName,
 		Password:    userForm.Password,
-		Role:        domain.Role(userForm.Role),
+		Role:        domain.Role(userForm.UserRole),
 	}
 	response, err := handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {
 		handler.logger.DebugContext(r.Context(), "failed to call the interactor", slog.Any("err", err))
 		switch {
-		case errors.Is(err, application.ErrInsufficientPrivileges):
+		case errors.Is(err, rbac.ErrInsufficientPrivileges):
 			w.WriteHeader(http.StatusForbidden)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
 			return

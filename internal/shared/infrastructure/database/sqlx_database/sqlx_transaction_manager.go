@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -13,7 +13,7 @@ type SQLXTransactionManager struct {
 	logger      *slog.Logger
 }
 
-func NewSQLXTransactionManager(transaction *sqlx.Tx, logger *slog.Logger) database.TransactionManager {
+func NewSQLXTransactionManager(transaction *sqlx.Tx, logger *slog.Logger) interfaces.TransactionManager {
 	stmLogger := logger.With("component", "sqlx_transaction_manager")
 	return &SQLXTransactionManager{transaction: transaction, logger: stmLogger}
 }

@@ -15,7 +15,7 @@ import (
 
 type SqlxUserRepository struct {
 	session    *sqlx.Tx
-	sqlxMapper *SqlxMapper
+	sqlxMapper *SqlxUserMapper
 	logger     *slog.Logger
 }
 
@@ -26,7 +26,7 @@ func NewSqlxUserRepository(session *sqlx.Tx, logger *slog.Logger) repository.Use
 	)
 	return &SqlxUserRepository{
 		session:    session,
-		sqlxMapper: NewSqlxMapper(),
+		sqlxMapper: NewSqlxUserMapper(),
 		logger:     urlogger,
 	}
 }
@@ -35,7 +35,7 @@ func (ur *SqlxUserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (do
 	ur.logger.DebugContext(ctx, "Started GetUserByID request")
 
 	var user models.UserModelSqlx
-	query := `SELECT id, username, display_name, password_hash, role, created_at, deleted_at 
+	query := `SELECT id, username, display_name, password_hash, user_role, created_at, deleted_at 
 			  FROM "user".users WHERE id = $1 AND deleted_at IS NULL`
 
 	err := ur.session.GetContext(ctx, &user, query, id)
@@ -62,7 +62,7 @@ func (ur *SqlxUserRepository) GetUserByUsername(ctx context.Context, username st
 	ur.logger.DebugContext(ctx, "Started GetUserByUsername request")
 
 	var user models.UserModelSqlx
-	query := `SELECT id, username, display_name, password_hash, role, created_at, deleted_at 
+	query := `SELECT id, username, display_name, password_hash, user_role, created_at, deleted_at 
 			  FROM "user".users WHERE username = $1 AND deleted_at IS NULL`
 
 	err := ur.session.GetContext(ctx, &user, query, username)
@@ -127,7 +127,7 @@ func (ur *SqlxUserRepository) RemoveUserByID(ctx context.Context, id uuid.UUID) 
 func (ur *SqlxUserRepository) ChangeUserRoleByID(ctx context.Context, id uuid.UUID, changeToRole domain.Role) error {
 	ur.logger.DebugContext(ctx, "Started ChangeUserRoleByID request")
 
-	query := `UPDATE "user".users SET role = $2 WHERE id = $1 AND deleted_at IS NULL`
+	query := `UPDATE "user".users SET user_role = $2 WHERE id = $1 AND deleted_at IS NULL`
 	result, err := ur.session.ExecContext(ctx, query, id, changeToRole)
 
 	ur.logger.DebugContext(ctx, "Finished ChangeUserRoleByID request")
@@ -166,7 +166,7 @@ func (ur *SqlxUserRepository) CreateUser(ctx context.Context, user domain.User) 
 	ur.logger.DebugContext(ctx, "Started CreateUser request")
 
 	userModel := ur.sqlxMapper.ToModel(&user)
-	query := `INSERT INTO "user".users (id, username, display_name, password_hash, role, created_at) 
+	query := `INSERT INTO "user".users (id, username, display_name, password_hash, user_role, created_at) 
 			  VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := ur.session.ExecContext(
@@ -176,7 +176,7 @@ func (ur *SqlxUserRepository) CreateUser(ctx context.Context, user domain.User) 
 		userModel.Username,
 		userModel.DisplayName,
 		userModel.PasswordHash,
-		userModel.Role,
+		userModel.UserRole,
 		userModel.CreatedAt,
 	)
 

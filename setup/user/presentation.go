@@ -1,3 +1,4 @@
+//nolint:revive //meaningful name
 package user
 
 import (

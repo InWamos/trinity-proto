@@ -112,7 +112,7 @@ func initializeTestUsers(tc *TestContainers) error {
 	// Insert admin user
 	adminID := uuid.New()
 	adminQuery := `
-		INSERT INTO "user".users (id, username, display_name, password_hash, role)
+		INSERT INTO "user".users (id, username, display_name, password_hash, user_role)
 		VALUES ($1, $2, $3, $4, $5)
 		ON CONFLICT (username) DO NOTHING
 	`
@@ -123,7 +123,7 @@ func initializeTestUsers(tc *TestContainers) error {
 	// Insert regular user
 	userID := uuid.New()
 	userQuery := `
-		INSERT INTO "user".users (id, username, display_name, password_hash, role)
+		INSERT INTO "user".users (id, username, display_name, password_hash, user_role)
 		VALUES ($1, $2, $3, $4, $5)
 		ON CONFLICT (username) DO NOTHING
 	`

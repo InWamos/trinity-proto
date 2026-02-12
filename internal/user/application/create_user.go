@@ -4,10 +4,11 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
@@ -29,7 +30,7 @@ type CreateUserResponse struct {
 type CreateUser struct {
 	passwordHasher            service.PasswordHasher
 	uuidGenerator             *service.UUIDGenerator
-	transactionManagerFactory database.TransactionManagerFactory
+	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	logger                    *slog.Logger
 }
@@ -37,7 +38,7 @@ type CreateUser struct {
 func NewCreateUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator *service.UUIDGenerator,
-	transactionManagerFactory database.TransactionManagerFactory,
+	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *CreateUser {
@@ -59,11 +60,11 @@ func (interactor *CreateUser) Execute(ctx context.Context, input CreateUserReque
 
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
-		return nil, ErrInsufficientPrivileges
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
-	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
-		return nil, ErrInsufficientPrivileges
+	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
 	passwordHashed, err := interactor.passwordHasher.HashPassword(input.Password)

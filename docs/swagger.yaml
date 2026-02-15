@@ -22,6 +22,70 @@ definitions:
     properties:
       record_id:
         example: 550e8400-e29b-41d4-a716-446655440000
+  domain.TelegramRecord:
+    properties:
+      addedAt:
+        type: string
+      addedByUser:
+        type: string
+      fromUserTelegramID:
+        maximum: 300000000000
+        type: integer
+      id:
+        type: string
+      inTelegramChatID:
+        type: integer
+      messageText:
+        maxLength: 4096
+        type: string
+      postedAt:
+        type: string
+    required:
+    - addedAt
+    - addedByUser
+    - fromUserTelegramID
+    - id
+    - inTelegramChatID
+    - messageText
+    - postedAt
+    type: object
+  handlers.AddTelegramIdentityRequest:
+    properties:
+      telegram_bio:
+        example: Hi! I am using Whatsapp
+        type: string
+      telegram_first_name:
+        example: John
+        type: string
+      telegram_id:
+        example: 20d8a06c-2fac-4643-ba78-7da267a7fe51
+        type: string
+      telegram_last_name:
+        example: Doe
+        type: string
+      telegram_phone_number:
+        example: +11234567890 (Use e164 format)
+        type: string
+      telegram_username:
+        example: user1235
+        type: string
+    type: object
+  handlers.AddTelegramIdentityResponse:
+    properties:
+      record_id:
+        example: "28736582143"
+        type: string
+    type: object
+  handlers.AddTelegramUserRequest:
+    properties:
+      telegram_id:
+        example: 28736582143
+        type: integer
+    type: object
+  handlers.AddTelegramUserResponse:
+    properties:
+      record_id:
+        example: "28736582143"
         type: string
     type: object
   handlers.CreateUserResponse:
@@ -33,6 +97,23 @@ definitions:
       message:
         example: The user has been created. You can login now
         type: string
+    type: object
+  handlers.GetLatestTelegramRecordsByTelegramIDRequest:
+    properties:
+      telegram_id:
+        example: 28736582143
+        type: integer
+    type: object
+  handlers.GetLatestTelegramRecordsByTelegramIDResponse:
+    description: information response
+    properties:
+      records:
+        items:
+          $ref: '#/definitions/domain.TelegramRecord'
+        type: array
+      telegram_id:
+        example: 428736582143
+        type: integer
     type: object
   handlers.GetUserResponse:
     description: User information response
@@ -96,6 +177,22 @@ definitions:
     - display_name
     - password
     - user_role
+    - username
+    type: object
+  handlers.loginForm:
+    properties:
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      username:
+        maxLength: 32
+        minLength: 2
+        type: string
+    required:
+    - password
+    - username
+    type: object
     - username
     type: object
   handlers.loginForm:
@@ -180,11 +277,49 @@ paths:
       description: Creates a new telegram record with the provided message details
       parameters:
       - description: Record details
+  /v1/record/telegram/{telegram_id}/records:
+    get:
+      consumes:
+      - application/json
+      description: Get the latest Telegram records for a specific Telegram user ID.
+      parameters:
+      - description: Telegram ID request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.GetLatestTelegramRecordsByTelegramIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Latest records retrieved successfully
+          schema:
+            $ref: '#/definitions/handlers.GetLatestTelegramRecordsByTelegramIDResponse'
+        "400":
+          description: Invalid telegram ID format
+        "403":
+          description: Insufficient privileges
+        "404":
+          description: Telegram ID not found
+        "500":
+          description: Internal server error
+      summary: Get latest Telegram records
+      tags:
+      - record
+  /v1/record/telegram/identity:
+    post:
+      consumes:
+      - application/json
+      description: Add new telegram identity
+      parameters:
+      - description: Identity creation request
         in: body
         name: request
         required: true
         schema:
           $ref: '#/definitions/handlers.AddTelegramRecordRequest'
+          $ref: '#/definitions/handlers.AddTelegramIdentityRequest'
       produces:
       - application/json
       responses:
@@ -192,6 +327,9 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/handlers.AddTelegramRecordResponse'
+          description: Identity created successfully
+          schema:
+            $ref: '#/definitions/handlers.AddTelegramIdentityResponse'
         "400":
           description: Invalid request format
           schema:
@@ -206,6 +344,11 @@ paths:
             type: string
         "422":
           description: Record contains unprocessable fields
+          description: You have already added this identity
+          schema:
+            type: string
+        "422":
+          description: Invalid request body
           schema:
             type: string
         "500":
@@ -217,6 +360,42 @@ paths:
       summary: Add a new telegram record
       tags:
       - records
+      summary: Add new telegram identity
+      tags:
+      - record
+  /v1/record/telegram/user:
+    post:
+      consumes:
+      - application/json
+      description: Add a new Telegram user by Telegram ID. This creates a record linking
+        a Telegram user to the system.
+      parameters:
+      - description: Telegram user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddTelegramUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Telegram user added successfully
+          schema:
+            $ref: '#/definitions/handlers.AddTelegramUserResponse'
+        "400":
+          description: Invalid request format
+        "403":
+          description: Insufficient privileges
+        "409":
+          description: You have already added this user
+        "422":
+          description: This user contains unprocessable fields
+        "500":
+          description: Internal server error
+      summary: Add a new Telegram user
+      tags:
+      - record
   /v1/users/:
     post:
       consumes:

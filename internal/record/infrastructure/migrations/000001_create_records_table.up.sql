@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_users" (
 
 CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     id UUID PRIMARY KEY NOT NULL,
-    message_id BIGINT NOT NULL,
+    message_telegram_id BIGINT NOT NULL,
     from_telegram_user_id UUID CONSTRAINT "fk_telegram_records_user"
     REFERENCES "records".telegram_users (id),
     in_telegram_chat_id BIGINT NOT NULL,
@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     posted_at TIMESTAMP WITH TIME ZONE NOT NULL,
     added_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     added_by_user UUID NOT NULL,
-    CONSTRAINT "unique_telegram_message_id" UNIQUE (message_id, added_by_user)
+    CONSTRAINT "unique_telegram_message_id" UNIQUE (
+        message_telegram_id, added_by_user
+    )
 );
 
 CREATE TABLE IF NOT EXISTS "records"."telegram_identities" (

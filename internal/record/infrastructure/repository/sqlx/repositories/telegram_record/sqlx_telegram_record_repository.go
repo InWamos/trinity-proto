@@ -71,11 +71,12 @@ func (repo *SQLXTelegramRecordRepository) CreateTelegramRecord(
 		slog.String("record_id", telegramRecord.ID.String()),
 	)
 	recordModel := repo.sqlxMapper.ToModel(telegramRecord)
-	query := `INSERT INTO "records"."telegram_records" (id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
-	VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	query := `INSERT INTO "records"."telegram_records" (id, message_telegram_id, from_telegram_user_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := repo.session.ExecContext(ctx, query,
 		recordModel.ID,
-		recordModel.FromUserTelegramID,
+		recordModel.MessageTelegramID,
+		recordModel.FromTelegramUserID,
 		recordModel.InTelegramChatID,
 		recordModel.MessageText,
 		recordModel.PostedAt,
@@ -90,7 +91,7 @@ func (repo *SQLXTelegramRecordRepository) CreateTelegramRecord(
 				repo.logger.InfoContext(
 					ctx,
 					"User with this telegram id doesn't exist",
-					slog.Uint64("user_telegram_id", telegramRecord.FromUserTelegramID),
+					slog.String("user_telegram_id", telegramRecord.FromTelegramUserID.String()),
 				)
 				return domain.ErrUnexistentTelegramUserReferenced
 			case "unique_telegram_message_id":
@@ -118,8 +119,8 @@ func (repo *SQLXTelegramRecordRepository) CreateTelegramRecords(
 		"Started CreateTelegramRecords request",
 		slog.Int("record_count", len(telegramRecords)),
 	)
-	query := `INSERT INTO "records"."telegram_records" (id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
-	VALUES (:id, :from_user_telegram_id, :in_telegram_chat_id, :message_text, :posted_at, :added_at, :added_by_user)`
+	query := `INSERT INTO "records"."telegram_records" (id, message_telegram_id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
+	VALUES (:id, :message_telegram_id, :from_user_telegram_id, :in_telegram_chat_id, :message_text, :posted_at, :added_at, :added_by_user)`
 	recordModels := make([]models.SQLXTelegramRecordModel, len(telegramRecords))
 	for i, record := range telegramRecords {
 		recordModels[i] = repo.sqlxMapper.ToModel(record)

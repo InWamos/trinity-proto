@@ -10,6 +10,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/mappers"
 	"github.com/InWamos/trinity-proto/internal/record/infrastructure/repository/sqlx/models"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -82,6 +83,26 @@ func (repo *SQLXTelegramRecordRepository) CreateTelegramRecord(
 		recordModel.AddedByUser,
 	)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			switch pgErr.ConstraintName {
+			case "fk_telegram_records_user":
+				repo.logger.InfoContext(
+					ctx,
+					"User with this telegram id doesn't exist",
+					slog.Uint64("user_telegram_id", telegramRecord.FromUserTelegramID),
+				)
+				return domain.ErrUnexistentTelegramUserReferenced
+			case "unique_telegram_message_id":
+				repo.logger.InfoContext(
+					ctx,
+					"This user has already been added this message",
+					slog.Uint64("telegram_message_id", telegramRecord.MessageTelegramID),
+					slog.String("added_by_user_id", telegramRecord.AddedByUser.String()),
+				)
+				return domain.ErrRecordAlreadyExists
+			}
+		}
 		repo.logger.ErrorContext(ctx, "Failed to create telegram record", slog.Any("err", err))
 		return repository.ErrDatabaseFailed
 	}

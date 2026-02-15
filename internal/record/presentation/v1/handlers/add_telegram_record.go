@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// AddTelegramRecordRequest represents the request payload for adding a new telegram record.
 type AddTelegramRecordRequest struct {
 	MessageTelegramID  uint64    `json:"message_telegram_id"   example:"28736582143"`
 	FromUserTelegramID uuid.UUID `json:"from_user_telegram_id" example:"cf6e273b-ac6e-43f1-abba-d8009ffc1b3f"`
@@ -21,15 +22,18 @@ type AddTelegramRecordRequest struct {
 	PostedAt           time.Time `json:"posted_at"             example:"2024-01-15T10:30:00Z"`
 }
 
+// AddTelegramRecordResponse represents the response payload after successfully adding a telegram record.
 type AddTelegramRecordResponse struct {
 	RecordID string `json:"record_id" example:"550e8400-e29b-41d4-a716-446655440000"`
 }
 
+// AddTelegramRecordHandler handles HTTP requests for adding telegram records.
 type AddTelegramRecordHandler struct {
 	interactor *application.AddTelegramRecord
 	logger     *slog.Logger
 }
 
+// NewAddTelegramRecordHandler creates a new instance of AddTelegramRecordHandler.
 func NewAddTelegramRecordHandler(
 	interactor *application.AddTelegramRecord,
 	logger *slog.Logger,
@@ -45,6 +49,22 @@ func NewAddTelegramRecordHandler(
 	}
 }
 
+// ServeHTTP handles POST requests to add a new telegram record.
+//
+//	@Summary		Add a new telegram record
+//	@Description	Creates a new telegram record with the provided message details
+//	@Tags			records
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		AddTelegramRecordRequest	true	"Record details"
+//	@Success		201		{object}	AddTelegramRecordResponse
+//	@Failure		400		{string}	string	"Invalid request format"
+//	@Failure		403		{string}	string	"Insufficient privileges"
+//	@Failure		409		{string}	string	"Record already exists or user not found"
+//	@Failure		422		{string}	string	"Record contains unprocessable fields"
+//	@Failure		500		{string}	string	"Internal server error"
+//	@Router			/v1/records/telegram [post]
+//	@Security		Bearer
 func (handler *AddTelegramRecordHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req AddTelegramRecordRequest
 	dec := json.NewDecoder(r.Body)

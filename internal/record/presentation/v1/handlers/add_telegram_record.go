@@ -53,7 +53,7 @@ func NewAddTelegramRecordHandler(
 //
 //	@Summary		Add a new telegram record
 //	@Description	Creates a new telegram record with the provided message details
-//	@Tags			records
+//	@Tags			record
 //	@Accept			json
 //	@Produce		json
 //	@Param			request	body		AddTelegramRecordRequest	true	"Record details"
@@ -63,7 +63,7 @@ func NewAddTelegramRecordHandler(
 //	@Failure		409		{string}	string	"Record already exists or user not found"
 //	@Failure		422		{string}	string	"Record contains unprocessable fields"
 //	@Failure		500		{string}	string	"Internal server error"
-//	@Router			/v1/records/telegram [post]
+//	@Router			/v1/record/telegram [post]
 //	@Security		Bearer
 func (handler *AddTelegramRecordHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req AddTelegramRecordRequest

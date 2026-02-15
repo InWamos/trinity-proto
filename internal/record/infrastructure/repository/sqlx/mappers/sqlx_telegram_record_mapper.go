@@ -15,7 +15,7 @@ func (sm *SqlxTelegramRecordMapper) ToDomain(inputModel models.SQLXTelegramRecor
 	return domain.TelegramRecord{
 		ID:                 inputModel.ID,
 		MessageTelegramID:  inputModel.MessageTelegramID,
-		FromUserTelegramID: inputModel.FromUserTelegramID,
+		FromTelegramUserID: inputModel.FromTelegramUserID,
 		InTelegramChatID:   inputModel.InTelegramChatID,
 		MessageText:        inputModel.MessageText,
 		PostedAt:           inputModel.PostedAt,
@@ -28,7 +28,7 @@ func (sm *SqlxTelegramRecordMapper) ToModel(inputEntity domain.TelegramRecord) m
 	return models.SQLXTelegramRecordModel{
 		ID:                 inputEntity.ID,
 		MessageTelegramID:  inputEntity.MessageTelegramID,
-		FromUserTelegramID: inputEntity.FromUserTelegramID,
+		FromTelegramUserID: inputEntity.FromTelegramUserID,
 		InTelegramChatID:   inputEntity.InTelegramChatID,
 		MessageText:        inputEntity.MessageText,
 		PostedAt:           inputEntity.PostedAt,

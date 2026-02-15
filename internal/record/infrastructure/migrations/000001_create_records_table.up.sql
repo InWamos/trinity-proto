@@ -25,7 +25,10 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
 
 CREATE TABLE IF NOT EXISTS "records"."telegram_identities" (
     id UUID PRIMARY KEY NOT NULL,
-    user_id UUID CONSTRAINT "fk_telegram_identities_user" REFERENCES "records".telegram_users (id),
+    user_id UUID CONSTRAINT "fk_telegram_identities_user"
+    REFERENCES "records".telegram_users (
+        id
+    ),
     first_name TEXT NOT NULL,
     last_name TEXT,
     username TEXT,

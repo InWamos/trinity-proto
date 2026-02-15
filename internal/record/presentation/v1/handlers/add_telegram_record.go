@@ -10,11 +10,12 @@ import (
 	application "github.com/InWamos/trinity-proto/internal/record/application/telegram/record"
 	domain "github.com/InWamos/trinity-proto/internal/record/domain/telegram"
 	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
+	"github.com/google/uuid"
 )
 
 type AddTelegramRecordRequest struct {
 	MessageTelegramID  uint64    `json:"message_telegram_id"   example:"28736582143"`
-	FromUserTelegramID uint64    `json:"from_user_telegram_id" example:"28736582143"`
+	FromUserTelegramID uuid.UUID `json:"from_user_telegram_id" example:"cf6e273b-ac6e-43f1-abba-d8009ffc1b3f"`
 	InTelegramChatID   int64     `json:"in_telegram_chat_id"   example:"123456789"`
 	MessageText        string    `json:"message_text"          example:"Hello world!"`
 	PostedAt           time.Time `json:"posted_at"             example:"2024-01-15T10:30:00Z"`

@@ -18,7 +18,7 @@ var (
 type TelegramRecord struct {
 	ID                 uuid.UUID `validate:"required,uuid"`
 	MessageTelegramID  uint64    `validate:"required,gt=0"`
-	FromUserTelegramID uint64    `validate:"required,gt=0,lte=300000000000"`
+	FromTelegramUserID uuid.UUID `validate:"required,uuid"`
 	InTelegramChatID   int64     `validate:"required"`
 	MessageText        string    `validate:"required,max=4096"`
 	PostedAt           time.Time `validate:"required"`

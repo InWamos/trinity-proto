@@ -19,7 +19,7 @@ import (
 
 type AddTelegramRecordRequest struct {
 	MessageTelegramID  uint64
-	FromUserTelegramID uint64
+	FromUserTelegramID uuid.UUID
 	InTelegramChatID   int64
 	MessageText        string
 	PostedAt           time.Time
@@ -80,7 +80,7 @@ func (interactor *AddTelegramRecord) Execute(
 	telegramRecord := domain.TelegramRecord{
 		ID:                 recordID,
 		MessageTelegramID:  input.MessageTelegramID,
-		FromUserTelegramID: input.FromUserTelegramID,
+		FromTelegramUserID: input.FromUserTelegramID,
 		InTelegramChatID:   input.InTelegramChatID,
 		MessageText:        input.MessageText,
 		PostedAt:           input.PostedAt,

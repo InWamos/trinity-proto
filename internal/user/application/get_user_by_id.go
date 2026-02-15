@@ -5,10 +5,10 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
-	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
@@ -27,13 +27,13 @@ type GetUserByIDResponse struct {
 }
 
 type GetUserByID struct {
-	transactionManagerFactory database.TransactionManagerFactory
+	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	logger                    *slog.Logger
 }
 
 func NewGetUserByID(
-	transactionManagerFactory database.TransactionManagerFactory,
+	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *GetUserByID {
@@ -53,11 +53,11 @@ func (interactor *GetUserByID) Execute(ctx context.Context, input GetUserByIDReq
 
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
-		return nil, ErrInsufficientPrivileges
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
-	if err := service.AuthorizeByRole(idp, domain.RoleUser); err != nil {
-		return nil, ErrInsufficientPrivileges
+	if err := rbac.AuthorizeByRole(idp, domain.RoleUser); err != nil {
+		return nil, rbac.ErrInsufficientPrivileges
 	}
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)

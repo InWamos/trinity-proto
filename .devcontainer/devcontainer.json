@@ -3,13 +3,17 @@
 {
 	"name": "Go",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/go:2-1.25-bookworm",
+	"build": {
+		// This is required here as Javascript retards failed to update the GPG 
+		// key on the Yarn repo and the whole build of a default image would fail as a result
+		"dockerfile": "Dockerfile"
+	},
 	"features": {
 		"ghcr.io/dhoeric/features/act:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo apt update && sudo apt install -y tmux && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.7.2"
+	"postCreateCommand": "sh .devcontainer/post-create.sh"
 	// Configure tool-specific properties.
 	// "customizations": {},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

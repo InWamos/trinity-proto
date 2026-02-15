@@ -21,7 +21,7 @@ func TestGetUserByID_Success(t *testing.T) {
 		"username":     "getuser1",
 		"display_name": "Get User Test",
 		"password":     "password123",
-		"role":         "user",
+		"user_role":    "user",
 	}
 
 	createResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/users/", baseURL), adminToken, reqBody)
@@ -70,8 +70,8 @@ func TestGetUserByID_Success(t *testing.T) {
 	if getUserResponse["display_name"] != reqBody["display_name"] {
 		t.Errorf("expected display_name %q, got %q", reqBody["display_name"], getUserResponse["display_name"])
 	}
-	if getUserResponse["role"] != reqBody["role"] {
-		t.Errorf("expected role %q, got %q", reqBody["role"], getUserResponse["role"])
+	if getUserResponse["user_role"] != reqBody["user_role"] {
+		t.Errorf("expected role %q, got %q", reqBody["user_role"], getUserResponse["user_role"])
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 )
 
 // SQLXTransactionFactory creates request-scoped transactions
@@ -14,7 +14,7 @@ type SQLXTransactionFactory struct {
 	logger *slog.Logger
 }
 
-func NewSQLXTransactionFactory(db *SQLXDatabase, logger *slog.Logger) database.TransactionManagerFactory {
+func NewSQLXTransactionFactory(db *SQLXDatabase, logger *slog.Logger) interfaces.TransactionManagerFactory {
 	return &SQLXTransactionFactory{
 		db:     db,
 		logger: logger.With(slog.String("component", "transaction_factory")),
@@ -22,7 +22,7 @@ func NewSQLXTransactionFactory(db *SQLXDatabase, logger *slog.Logger) database.T
 }
 
 // NewTransaction creates a NEW transaction for each request.
-func (f *SQLXTransactionFactory) NewTransaction(ctx context.Context) (database.TransactionManager, error) {
+func (f *SQLXTransactionFactory) NewTransaction(ctx context.Context) (interfaces.TransactionManager, error) {
 	tx, err := f.db.engine.BeginTxx(ctx, nil)
 	if err != nil {
 		f.logger.ErrorContext(ctx, "failed to begin transaction", slog.Any("error", err))

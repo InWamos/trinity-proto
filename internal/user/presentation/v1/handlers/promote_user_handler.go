@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
 	"github.com/InWamos/trinity-proto/internal/user/application"
 	"github.com/google/uuid"
 )
@@ -77,7 +78,7 @@ func (handler *PromoteUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		handler.logger.ErrorContext(r.Context(), "failed to promote user", slog.Any("err", err))
 		switch {
-		case errors.Is(err, application.ErrInsufficientPrivileges):
+		case errors.Is(err, rbac.ErrInsufficientPrivileges):
 			w.WriteHeader(http.StatusForbidden)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "Insufficient privileges"})
 			return

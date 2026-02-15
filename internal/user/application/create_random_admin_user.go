@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
 )
@@ -15,7 +15,7 @@ import (
 type CreateRandomAdminUser struct {
 	passwordHasher            service.PasswordHasher
 	uuidGenerator             *service.UUIDGenerator
-	transactionManagerFactory database.TransactionManagerFactory
+	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	logger                    *slog.Logger
 }
@@ -23,7 +23,7 @@ type CreateRandomAdminUser struct {
 func NewCreateRandomAdminUser(
 	passwordHasher service.PasswordHasher,
 	uuidGenerator *service.UUIDGenerator,
-	transactionManagerFactory database.TransactionManagerFactory,
+	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *CreateRandomAdminUser {

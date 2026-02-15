@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/google/uuid"
 )
@@ -23,14 +23,14 @@ type ValidateUserCredentialsResponse struct {
 }
 
 type ValidateUserCredentials struct {
-	transactionManagerFactory database.TransactionManagerFactory
+	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	passwordHasher            service.PasswordHasher
 	logger                    *slog.Logger
 }
 
 func NewValidateUserCredentials(
-	transactionManagerFactory database.TransactionManagerFactory,
+	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	passwordHasher service.PasswordHasher,
 	logger *slog.Logger,

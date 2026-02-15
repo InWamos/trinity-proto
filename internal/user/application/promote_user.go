@@ -6,10 +6,10 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/InWamos/trinity-proto/internal/shared/authorization/rbac"
+	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
-	"github.com/InWamos/trinity-proto/internal/user/application/service"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
-	"github.com/InWamos/trinity-proto/internal/user/infrastructure/database"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
@@ -20,13 +20,13 @@ type PromoteUserRequest struct {
 }
 
 type PromoteUser struct {
-	transactionManagerFactory database.TransactionManagerFactory
+	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
 	logger                    *slog.Logger
 }
 
 func NewPromoteUser(
-	transactionManagerFactory database.TransactionManagerFactory,
+	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
 	logger *slog.Logger,
 ) *PromoteUser {
@@ -46,11 +46,11 @@ func (interactor *PromoteUser) Execute(ctx context.Context, input PromoteUserReq
 
 	idp, ok := ctx.Value(middleware.IdentityProviderKey).(*client.UserIdentity)
 	if !ok || idp == nil {
-		return ErrInsufficientPrivileges
+		return rbac.ErrInsufficientPrivileges
 	}
 
-	if err := service.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
-		return ErrInsufficientPrivileges
+	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
+		return rbac.ErrInsufficientPrivileges
 	}
 
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)

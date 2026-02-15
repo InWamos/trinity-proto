@@ -9,6 +9,8 @@ import (
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/InWamos/trinity-proto/setup"
 	"github.com/InWamos/trinity-proto/setup/auth"
+	"github.com/InWamos/trinity-proto/setup/record"
+	"github.com/InWamos/trinity-proto/setup/shared"
 	"github.com/InWamos/trinity-proto/setup/user"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -45,6 +47,8 @@ func main() {
 		),
 		user.NewUserModuleContainer(),
 		auth.NewAuthModuleContainer(),
+		record.NewRecordModuleContainer(),
+		shared.NewSharedModuleContainer(),
 		fx.Provide(setup.NewMainHTTPServer),
 		fx.Provide(setup.NewProfilerHTTPServer),
 		fx.Provide(setup.NewHTTPServers),

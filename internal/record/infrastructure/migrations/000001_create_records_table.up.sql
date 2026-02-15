@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_users" (
 
 CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     id UUID PRIMARY KEY NOT NULL,
-    message_id BIGINT NOT NULL CONSTRAINT "unique_telegram_message_id" UNIQUE,
-    from_telegram_user_id UUID
+    message_id BIGINT NOT NULL,
+    from_telegram_user_id UUID CONSTRAINT "fk_telegram_records_user"
     REFERENCES "records".telegram_users (id),
     in_telegram_chat_id BIGINT NOT NULL,
     message_text TEXT,

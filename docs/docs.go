@@ -74,7 +74,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/records/telegram": {
+        "/v1/record/telegram": {
             "post": {
                 "security": [
                     {
@@ -82,6 +82,67 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Creates a new telegram record with the provided message details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "record"
+                ],
+                "summary": "Add a new telegram record",
+                "parameters": [
+                    {
+                        "description": "Record details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramRecordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramRecordResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient privileges",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Record already exists or user not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Record contains unprocessable fields",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/record/telegram/identity": {
             "post": {
                 "description": "Add new telegram identity",
@@ -92,12 +153,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "records"
-                ],
-                "summary": "Add a new telegram record",
-                "parameters": [
-                    {
-                        "description": "Record details",
                     "record"
                 ],
                 "summary": "Add new telegram identity",
@@ -108,16 +163,12 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.AddTelegramRecordRequest"
                             "$ref": "#/definitions/handlers.AddTelegramIdentityRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.AddTelegramRecordResponse"
                         "description": "Identity created successfully",
                         "schema": {
                             "$ref": "#/definitions/handlers.AddTelegramIdentityResponse"
@@ -136,14 +187,12 @@ const docTemplate = `{
                         }
                     },
                     "409": {
-                        "description": "Record already exists or user not found",
                         "description": "You have already added this identity",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "422": {
-                        "description": "Record contains unprocessable fields",
                         "description": "Invalid request body",
                         "schema": {
                             "type": "string"
@@ -485,15 +534,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.AddTelegramRecordRequest": {
         "domain.TelegramRecord": {
             "type": "object",
             "required": [
                 "addedAt",
                 "addedByUser",
-                "fromUserTelegramID",
+                "fromTelegramUserID",
                 "id",
                 "inTelegramChatID",
+                "messageTelegramID",
                 "messageText",
                 "postedAt"
             ],
@@ -504,14 +553,16 @@ const docTemplate = `{
                 "addedByUser": {
                     "type": "string"
                 },
-                "fromUserTelegramID": {
-                    "type": "integer",
-                    "maximum": 300000000000
+                "fromTelegramUserID": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
                 "inTelegramChatID": {
+                    "type": "integer"
+                },
+                "messageTelegramID": {
                     "type": "integer"
                 },
                 "messageText": {
@@ -561,26 +612,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.AddTelegramUserRequest": {
-            "type": "object",
-            "properties": {
-                "telegram_id": {
-                    "type": "integer",
-                    "example": 28736582143
-                }
-            }
-        },
-        "handlers.AddTelegramUserResponse": {
-            "type": "object",
-            "properties": {
-                "record_id": {
-                    "type": "string",
-                    "example": "28736582143"
-                }
-            }
-        },
-        "handlers.CreateUserResponse": {
-            "description": "User creation response with ID",
+        "handlers.AddTelegramRecordRequest": {
             "type": "object",
             "properties": {
                 "from_user_telegram_id": {
@@ -614,6 +646,24 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.AddTelegramUserRequest": {
+            "type": "object",
+            "properties": {
+                "telegram_id": {
+                    "type": "integer",
+                    "example": 28736582143
+                }
+            }
+        },
+        "handlers.AddTelegramUserResponse": {
+            "type": "object",
+            "properties": {
+                "record_id": {
+                    "type": "string",
+                    "example": "28736582143"
+                }
+            }
+        },
         "handlers.CreateUserResponse": {
             "description": "User creation response with ID",
             "type": "object",
@@ -625,6 +675,9 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "The user has been created. You can login now"
+                }
+            }
+        },
         "handlers.GetLatestTelegramRecordsByTelegramIDRequest": {
             "type": "object",
             "properties": {

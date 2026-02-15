@@ -39,6 +39,21 @@ func NewAddTelegramUserHandler(
 	}
 }
 
+// ServeHTTP handles an HTTP request to add a Telegram user.
+//
+//	@Summary		Add a new Telegram user
+//	@Description	Add a new Telegram user by Telegram ID. This creates a record linking a Telegram user to the system.
+//	@Tags			record
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		AddTelegramUserRequest	true	"Telegram user request"
+//	@Success		201		{object}	AddTelegramUserResponse	"Telegram user added successfully"
+//	@Failure		400		"Invalid request format"
+//	@Failure		403		"Insufficient privileges"
+//	@Failure		409		"You have already added this user"
+//	@Failure		422		"This user contains unprocessable fields"
+//	@Failure		500		"Internal server error"
+//	@Router			/v1/record/telegram/user [post]
 func (handler *AddTelegramUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req AddTelegramUserRequest
 	dec := json.NewDecoder(r.Body)

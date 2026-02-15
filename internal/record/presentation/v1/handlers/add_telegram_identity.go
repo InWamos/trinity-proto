@@ -79,7 +79,7 @@ func (handler *AddTelegramIdentityHandler) ServeHTTP(w http.ResponseWriter, r *h
 		PhoneNumber: req.PhoneNumber,
 	}
 	resp, err := handler.interactor.Execute(r.Context(), requestDTO)
-	if err != nil {
+	if err != nil { //nolint: dupl //Has to be a duplicate
 		switch {
 		case errors.Is(err, rbac.ErrInsufficientPrivileges):
 			handler.logger.DebugContext(r.Context(), "Auth error", slog.Any("err", err))

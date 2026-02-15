@@ -1,5 +1,27 @@
 basePath: /api
 definitions:
+  handlers.AddTelegramRecordRequest:
+    properties:
+      from_user_telegram_id:
+        example: cf6e273b-ac6e-43f1-abba-d8009ffc1b3f
+        type: string
+      in_telegram_chat_id:
+        example: 123456789
+        type: integer
+      message_telegram_id:
+        example: 28736582143
+        type: integer
+      message_text:
+        example: Hello world!
+        type: string
+      posted_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  handlers.AddTelegramRecordResponse:
+    properties:
+      record_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
   domain.TelegramRecord:
     properties:
       addedAt:
@@ -171,6 +193,22 @@ definitions:
     - password
     - username
     type: object
+    - username
+    type: object
+  handlers.loginForm:
+    properties:
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      username:
+        maxLength: 32
+        minLength: 2
+        type: string
+    required:
+    - password
+    - username
+    type: object
   internal_auth_presentation_v1_handlers.ErrorResponse:
     description: Standard error response
     properties:
@@ -232,6 +270,13 @@ paths:
       summary: User login
       tags:
       - auth
+  /v1/records/telegram:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new telegram record with the provided message details
+      parameters:
+      - description: Record details
   /v1/record/telegram/{telegram_id}/records:
     get:
       consumes:
@@ -273,11 +318,15 @@ paths:
         name: request
         required: true
         schema:
+          $ref: '#/definitions/handlers.AddTelegramRecordRequest'
           $ref: '#/definitions/handlers.AddTelegramIdentityRequest'
       produces:
       - application/json
       responses:
         "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.AddTelegramRecordResponse'
           description: Identity created successfully
           schema:
             $ref: '#/definitions/handlers.AddTelegramIdentityResponse'
@@ -290,6 +339,11 @@ paths:
           schema:
             type: string
         "409":
+          description: Record already exists or user not found
+          schema:
+            type: string
+        "422":
+          description: Record contains unprocessable fields
           description: You have already added this identity
           schema:
             type: string
@@ -301,6 +355,11 @@ paths:
           description: Internal server error
           schema:
             type: string
+      security:
+      - Bearer: []
+      summary: Add a new telegram record
+      tags:
+      - records
       summary: Add new telegram identity
       tags:
       - record

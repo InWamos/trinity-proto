@@ -74,6 +74,14 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/records/telegram": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Creates a new telegram record with the provided message details",
         "/v1/record/telegram/identity": {
             "post": {
                 "description": "Add new telegram identity",
@@ -84,6 +92,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
+                    "records"
+                ],
+                "summary": "Add a new telegram record",
+                "parameters": [
+                    {
+                        "description": "Record details",
                     "record"
                 ],
                 "summary": "Add new telegram identity",
@@ -94,12 +108,16 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramRecordRequest"
                             "$ref": "#/definitions/handlers.AddTelegramIdentityRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AddTelegramRecordResponse"
                         "description": "Identity created successfully",
                         "schema": {
                             "$ref": "#/definitions/handlers.AddTelegramIdentityResponse"
@@ -118,12 +136,14 @@ const docTemplate = `{
                         }
                     },
                     "409": {
+                        "description": "Record already exists or user not found",
                         "description": "You have already added this identity",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "422": {
+                        "description": "Record contains unprocessable fields",
                         "description": "Invalid request body",
                         "schema": {
                             "type": "string"
@@ -465,6 +485,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.AddTelegramRecordRequest": {
         "domain.TelegramRecord": {
             "type": "object",
             "required": [
@@ -562,6 +583,41 @@ const docTemplate = `{
             "description": "User creation response with ID",
             "type": "object",
             "properties": {
+                "from_user_telegram_id": {
+                    "type": "string",
+                    "example": "cf6e273b-ac6e-43f1-abba-d8009ffc1b3f"
+                },
+                "in_telegram_chat_id": {
+                    "type": "integer",
+                    "example": 123456789
+                },
+                "message_telegram_id": {
+                    "type": "integer",
+                    "example": 28736582143
+                },
+                "message_text": {
+                    "type": "string",
+                    "example": "Hello world!"
+                },
+                "posted_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "handlers.AddTelegramRecordResponse": {
+            "type": "object",
+            "properties": {
+                "record_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "handlers.CreateUserResponse": {
+            "description": "User creation response with ID",
+            "type": "object",
+            "properties": {
                 "id": {
                     "type": "string",
                     "example": "019b1a49-dbf6-74d6-97bf-2d7e57d30c75"
@@ -569,9 +625,6 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "The user has been created. You can login now"
-                }
-            }
-        },
         "handlers.GetLatestTelegramRecordsByTelegramIDRequest": {
             "type": "object",
             "properties": {

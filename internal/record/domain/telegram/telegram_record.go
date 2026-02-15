@@ -17,7 +17,8 @@ var (
 // https://github.com/KurimuzonAkuma/kurigram/blob/dev/pyrogram/types/messages_and_media/message.py
 type TelegramRecord struct {
 	ID                 uuid.UUID `validate:"required,uuid"`
-	FromUserTelegramID uint64    `validate:"required,gt=0,lte=300000000000"`
+	MessageTelegramID  uint64    `validate:"required,gt=0"`
+	FromTelegramUserID uuid.UUID `validate:"required,uuid"`
 	InTelegramChatID   int64     `validate:"required"`
 	MessageText        string    `validate:"required,max=4096"`
 	PostedAt           time.Time `validate:"required"`

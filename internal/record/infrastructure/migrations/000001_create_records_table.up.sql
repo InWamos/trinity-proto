@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     message_text TEXT,
     posted_at TIMESTAMP WITH TIME ZONE NOT NULL,
     added_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    added_by_user UUID NOT NULL
+    added_by_user UUID NOT NULL,
+    CONSTRAINT "unique_telegram_message_id" UNIQUE (message_id, added_by_user)
 );
 
 CREATE TABLE IF NOT EXISTS "records"."telegram_identities" (

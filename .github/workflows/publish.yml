@@ -6,6 +6,8 @@ on:
       - dev
       - release
       - master
+    tags:
+      - 'v*'
 
 env:
   GO_VERSION: '1.25.7'

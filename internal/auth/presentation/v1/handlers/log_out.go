@@ -59,7 +59,7 @@ func (handler *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	// Revoke the session
 	requestDTO := application.RemoveSessionRequest{
-		Token: cookie.Raw,
+		Token: cookie.Value,
 	}
 	err = handler.interactor.Execute(r.Context(), requestDTO)
 	if err != nil {

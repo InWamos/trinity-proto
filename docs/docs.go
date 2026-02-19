@@ -74,6 +74,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/auth/logout": {
+            "post": {
+                "description": "Revoke the current session token and clear the session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LogoutResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid request (no active session)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/record/telegram": {
             "post": {
                 "security": [
@@ -744,6 +779,16 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "example": "dGVzdC10b2tlbi0xMjM0NTY3ODkw"
+                }
+            }
+        },
+        "handlers.LogoutResponse": {
+            "description": "Logout response with the message",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Logout successful"
                 }
             }
         },

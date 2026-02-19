@@ -151,6 +151,13 @@ definitions:
         example: dGVzdC10b2tlbi0xMjM0NTY3ODkw
         type: string
     type: object
+  handlers.LogoutResponse:
+    description: Logout response with the message
+    properties:
+      message:
+        example: Logout successful
+        type: string
+    type: object
   handlers.SuccessResponse:
     description: Standard success response with message
     properties:
@@ -256,6 +263,29 @@ paths:
           schema:
             $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
       summary: User login
+      tags:
+      - auth
+  /v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revoke the current session token and clear the session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/handlers.LogoutResponse'
+        "401":
+          description: Invalid request (no active session)
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: User logout
       tags:
       - auth
   /v1/record/telegram:

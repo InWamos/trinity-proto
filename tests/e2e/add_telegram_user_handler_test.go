@@ -94,7 +94,12 @@ func TestAddTelegramUser_InvalidTelegramID_Zero(t *testing.T) {
 
 	// Assert unprocessable entity
 	if resp.StatusCode != http.StatusUnprocessableEntity {
-		t.Errorf("expected status %d, got %d. Response: %s", http.StatusUnprocessableEntity, resp.StatusCode, string(respBody))
+		t.Errorf(
+			"expected status %d, got %d. Response: %s",
+			http.StatusUnprocessableEntity,
+			resp.StatusCode,
+			string(respBody),
+		)
 	}
 }
 
@@ -116,7 +121,12 @@ func TestAddTelegramUser_InvalidTelegramID_TooLarge(t *testing.T) {
 
 	// Assert unprocessable entity
 	if resp.StatusCode != http.StatusUnprocessableEntity {
-		t.Errorf("expected status %d, got %d. Response: %s", http.StatusUnprocessableEntity, resp.StatusCode, string(respBody))
+		t.Errorf(
+			"expected status %d, got %d. Response: %s",
+			http.StatusUnprocessableEntity,
+			resp.StatusCode,
+			string(respBody),
+		)
 	}
 }
 

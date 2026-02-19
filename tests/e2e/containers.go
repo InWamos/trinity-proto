@@ -148,7 +148,11 @@ func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error
 }
 
 // runModuleMigrations runs migrations for a specific module.
-func runModuleMigrations(ctx context.Context, net *testcontainers.DockerNetwork, migrationsPath, dbURL, moduleName string) error {
+func runModuleMigrations(
+	ctx context.Context,
+	net *testcontainers.DockerNetwork,
+	migrationsPath, dbURL, moduleName string,
+) error {
 	migrateReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image: MigrateImage,

@@ -21,7 +21,13 @@ func TestGetLatestTelegramRecordsByTelegramID_Success(t *testing.T) {
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": telegramID,
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userRespBody, _ := io.ReadAll(userResp.Body)
 	userResp.Body.Close()
 
@@ -42,7 +48,13 @@ func TestGetLatestTelegramRecordsByTelegramID_Success(t *testing.T) {
 			"message_text":          fmt.Sprintf("Test message %d", i),
 			"posted_at":             time.Now().Add(time.Duration(i) * time.Minute).Format(time.RFC3339),
 		}
-		recordResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/record", baseURL), token, recordReq)
+		recordResp := MakeAuthorizedRequest(
+			t,
+			"POST",
+			fmt.Sprintf("%s/api/v1/record/telegram/record", baseURL),
+			token,
+			recordReq,
+		)
 		recordResp.Body.Close()
 
 		if recordResp.StatusCode != http.StatusCreated {
@@ -55,7 +67,13 @@ func TestGetLatestTelegramRecordsByTelegramID_Success(t *testing.T) {
 		"telegram_id": telegramID,
 	}
 
-	resp := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID), token, getReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"GET",
+		fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID),
+		token,
+		getReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -102,7 +120,13 @@ func TestGetLatestTelegramRecordsByTelegramID_NoRecords(t *testing.T) {
 		"telegram_id": telegramID,
 	}
 
-	resp := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID), token, getReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"GET",
+		fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID),
+		token,
+		getReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
@@ -124,7 +148,13 @@ func TestGetLatestTelegramRecordsByTelegramID_UserExistsNoRecords(t *testing.T) 
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": telegramID,
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userResp.Body.Close()
 
 	if userResp.StatusCode != http.StatusCreated {
@@ -136,7 +166,13 @@ func TestGetLatestTelegramRecordsByTelegramID_UserExistsNoRecords(t *testing.T) 
 		"telegram_id": telegramID,
 	}
 
-	resp := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID), token, getReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"GET",
+		fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID),
+		token,
+		getReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
@@ -159,7 +195,11 @@ func TestGetLatestTelegramRecordsByTelegramID_Unauthorized(t *testing.T) {
 	}
 	bodyJSON, _ := json.Marshal(reqBody)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID), bytes.NewReader(bodyJSON))
+	req, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID),
+		bytes.NewReader(bodyJSON),
+	)
 	if err != nil {
 		t.Fatalf("failed to create request: %v", err)
 	}
@@ -214,7 +254,13 @@ func TestGetLatestTelegramRecordsByTelegramID_MultipleUsers(t *testing.T) {
 	user1Req := map[string]interface{}{
 		"telegram_id": telegramID1,
 	}
-	user1Resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, user1Req)
+	user1Resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		user1Req,
+	)
 	user1RespBody, _ := io.ReadAll(user1Resp.Body)
 	user1Resp.Body.Close()
 
@@ -230,7 +276,13 @@ func TestGetLatestTelegramRecordsByTelegramID_MultipleUsers(t *testing.T) {
 		"message_text":          "User 1 message",
 		"posted_at":             time.Now().Format(time.RFC3339),
 	}
-	record1Resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/record", baseURL), token, record1Req)
+	record1Resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/record", baseURL),
+		token,
+		record1Req,
+	)
 	record1Resp.Body.Close()
 
 	// Add second telegram user and records
@@ -238,7 +290,13 @@ func TestGetLatestTelegramRecordsByTelegramID_MultipleUsers(t *testing.T) {
 	user2Req := map[string]interface{}{
 		"telegram_id": telegramID2,
 	}
-	user2Resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, user2Req)
+	user2Resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		user2Req,
+	)
 	user2RespBody, _ := io.ReadAll(user2Resp.Body)
 	user2Resp.Body.Close()
 
@@ -255,7 +313,13 @@ func TestGetLatestTelegramRecordsByTelegramID_MultipleUsers(t *testing.T) {
 			"message_text":          fmt.Sprintf("User 2 message %d", i),
 			"posted_at":             time.Now().Add(time.Duration(i) * time.Minute).Format(time.RFC3339),
 		}
-		record2Resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/record", baseURL), token, record2Req)
+		record2Resp := MakeAuthorizedRequest(
+			t,
+			"POST",
+			fmt.Sprintf("%s/api/v1/record/telegram/record", baseURL),
+			token,
+			record2Req,
+		)
 		record2Resp.Body.Close()
 	}
 
@@ -263,7 +327,13 @@ func TestGetLatestTelegramRecordsByTelegramID_MultipleUsers(t *testing.T) {
 	get1Req := map[string]interface{}{
 		"telegram_id": telegramID1,
 	}
-	resp1 := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID1), token, get1Req)
+	resp1 := MakeAuthorizedRequest(
+		t,
+		"GET",
+		fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID1),
+		token,
+		get1Req,
+	)
 	defer resp1.Body.Close()
 
 	resp1Body, _ := io.ReadAll(resp1.Body)
@@ -279,7 +349,13 @@ func TestGetLatestTelegramRecordsByTelegramID_MultipleUsers(t *testing.T) {
 	get2Req := map[string]interface{}{
 		"telegram_id": telegramID2,
 	}
-	resp2 := MakeAuthorizedRequest(t, "GET", fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID2), token, get2Req)
+	resp2 := MakeAuthorizedRequest(
+		t,
+		"GET",
+		fmt.Sprintf("%s/api/v1/record/telegram/%d/records", baseURL, telegramID2),
+		token,
+		get2Req,
+	)
 	defer resp2.Body.Close()
 
 	resp2Body, _ := io.ReadAll(resp2.Body)

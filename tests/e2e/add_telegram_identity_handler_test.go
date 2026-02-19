@@ -20,7 +20,13 @@ func TestAddTelegramIdentity_Success(t *testing.T) {
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": uint64(55555555555),
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userRespBody, _ := io.ReadAll(userResp.Body)
 	userResp.Body.Close()
 
@@ -46,7 +52,13 @@ func TestAddTelegramIdentity_Success(t *testing.T) {
 		"telegram_phone_number": "+12025550123",
 	}
 
-	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -88,7 +100,13 @@ func TestAddTelegramIdentity_NonexistentUser(t *testing.T) {
 		"telegram_phone_number": "+12025550124",
 	}
 
-	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
@@ -109,7 +127,13 @@ func TestAddTelegramIdentity_Duplicate(t *testing.T) {
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": uint64(66666666666),
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userRespBody, _ := io.ReadAll(userResp.Body)
 	userResp.Body.Close()
 
@@ -127,7 +151,13 @@ func TestAddTelegramIdentity_Duplicate(t *testing.T) {
 		"telegram_phone_number": "+12025550125",
 	}
 
-	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
@@ -135,7 +165,13 @@ func TestAddTelegramIdentity_Duplicate(t *testing.T) {
 	}
 
 	// Try to add the same identity again
-	resp = MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp = MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
@@ -156,7 +192,13 @@ func TestAddTelegramIdentity_InvalidUsername_TooShort(t *testing.T) {
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": uint64(77777777777),
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userRespBody, _ := io.ReadAll(userResp.Body)
 	userResp.Body.Close()
 
@@ -174,14 +216,25 @@ func TestAddTelegramIdentity_InvalidUsername_TooShort(t *testing.T) {
 		"telegram_phone_number": "+12025550126",
 	}
 
-	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
 
 	// Assert unprocessable entity
 	if resp.StatusCode != http.StatusUnprocessableEntity {
-		t.Errorf("expected status %d, got %d. Response: %s", http.StatusUnprocessableEntity, resp.StatusCode, string(respBody))
+		t.Errorf(
+			"expected status %d, got %d. Response: %s",
+			http.StatusUnprocessableEntity,
+			resp.StatusCode,
+			string(respBody),
+		)
 	}
 }
 
@@ -195,7 +248,13 @@ func TestAddTelegramIdentity_InvalidPhoneNumber(t *testing.T) {
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": uint64(88888888888),
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userRespBody, _ := io.ReadAll(userResp.Body)
 	userResp.Body.Close()
 
@@ -213,14 +272,25 @@ func TestAddTelegramIdentity_InvalidPhoneNumber(t *testing.T) {
 		"telegram_phone_number": "123456", // Invalid format
 	}
 
-	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
 
 	// Assert unprocessable entity
 	if resp.StatusCode != http.StatusUnprocessableEntity {
-		t.Errorf("expected status %d, got %d. Response: %s", http.StatusUnprocessableEntity, resp.StatusCode, string(respBody))
+		t.Errorf(
+			"expected status %d, got %d. Response: %s",
+			http.StatusUnprocessableEntity,
+			resp.StatusCode,
+			string(respBody),
+		)
 	}
 }
 
@@ -234,7 +304,13 @@ func TestAddTelegramIdentity_EmptyFirstName(t *testing.T) {
 	telegramUserReq := map[string]interface{}{
 		"telegram_id": uint64(99999999999),
 	}
-	userResp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL), token, telegramUserReq)
+	userResp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/user", baseURL),
+		token,
+		telegramUserReq,
+	)
 	userRespBody, _ := io.ReadAll(userResp.Body)
 	userResp.Body.Close()
 
@@ -252,14 +328,25 @@ func TestAddTelegramIdentity_EmptyFirstName(t *testing.T) {
 		"telegram_phone_number": "+12025550127",
 	}
 
-	resp := MakeAuthorizedRequest(t, "POST", fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL), token, identityReq)
+	resp := MakeAuthorizedRequest(
+		t,
+		"POST",
+		fmt.Sprintf("%s/api/v1/record/telegram/identity", baseURL),
+		token,
+		identityReq,
+	)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
 
 	// Assert unprocessable entity
 	if resp.StatusCode != http.StatusUnprocessableEntity {
-		t.Errorf("expected status %d, got %d. Response: %s", http.StatusUnprocessableEntity, resp.StatusCode, string(respBody))
+		t.Errorf(
+			"expected status %d, got %d. Response: %s",
+			http.StatusUnprocessableEntity,
+			resp.StatusCode,
+			string(respBody),
+		)
 	}
 }
 

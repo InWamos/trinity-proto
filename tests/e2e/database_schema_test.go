@@ -33,7 +33,8 @@ func TestDatabaseSchemaExists(t *testing.T) {
 
 	// Check if records schema exists
 	var schemaExists bool
-	err = db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name = 'records')").Scan(&schemaExists)
+	err = db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name = 'records')").
+		Scan(&schemaExists)
 	if err != nil {
 		t.Fatalf("failed to check schema: %v", err)
 	}
@@ -45,7 +46,8 @@ func TestDatabaseSchemaExists(t *testing.T) {
 
 	// Check if telegram_users table exists
 	var tableExists bool
-	err = db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema = 'records' AND table_name = 'telegram_users')").Scan(&tableExists)
+	err = db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema = 'records' AND table_name = 'telegram_users')").
+		Scan(&tableExists)
 	if err != nil {
 		t.Fatalf("failed to check table: %v", err)
 	}

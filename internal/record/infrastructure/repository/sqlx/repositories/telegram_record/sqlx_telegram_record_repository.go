@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"log/slog"
 
@@ -42,17 +41,24 @@ func (repo *SQLXTelegramRecordRepository) GetLatestTelegramRecordsByUserTelegram
 ) (*[]domain.TelegramRecord, error) {
 	repo.logger.DebugContext(ctx, "Started GetLatestTelegramRecordsByUserTelegramID request")
 	var records []models.SQLXTelegramRecordModel
-	query := `SELECT id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user
-	FROM "records"."telegram_records" WHERE from_user_telegram_id = $1 LIMIT 5`
+	query := `SELECT tr.id, tr.message_telegram_id, tr.from_user_telegram_id, tr.in_telegram_chat_id, tr.message_text, tr.posted_at, tr.added_at, tr.added_by_user
+	FROM "records"."telegram_records" tr
+	JOIN "records"."telegram_users" tu ON tr.from_user_telegram_id = tu.id
+	WHERE tu.telegram_id = $1 
+	ORDER BY tr.posted_at DESC
+	LIMIT 5`
 	err := repo.session.SelectContext(ctx, &records, query, userTelegramID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			repo.logger.InfoContext(ctx, "Telegram record not found", slog.Uint64("user_telegram_id", userTelegramID))
-			return nil, domain.ErrNoRecordsForThisTelegramID
-		}
-		repo.logger.ErrorContext(ctx, "Telegram record failed", slog.Any("err", err))
+		repo.logger.ErrorContext(ctx, "Telegram record query failed", slog.Any("err", err))
 		return nil, repository.ErrDatabaseFailed
 	}
+
+	// Check if no records were found
+	if len(records) == 0 {
+		repo.logger.InfoContext(ctx, "No telegram records found", slog.Uint64("user_telegram_id", userTelegramID))
+		return nil, domain.ErrNoRecordsForThisTelegramID
+	}
+
 	domainRecords := make([]domain.TelegramRecord, len(records))
 	for i, record := range records {
 		domainRecords[i] = repo.sqlxMapper.ToDomain(record)
@@ -71,7 +77,7 @@ func (repo *SQLXTelegramRecordRepository) CreateTelegramRecord(
 		slog.String("record_id", telegramRecord.ID.String()),
 	)
 	recordModel := repo.sqlxMapper.ToModel(telegramRecord)
-	query := `INSERT INTO "records"."telegram_records" (id, message_telegram_id, from_telegram_user_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
+	query := `INSERT INTO "records"."telegram_records" (id, message_telegram_id, from_user_telegram_id, in_telegram_chat_id, message_text, posted_at, added_at, added_by_user)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := repo.session.ExecContext(ctx, query,
 		recordModel.ID,

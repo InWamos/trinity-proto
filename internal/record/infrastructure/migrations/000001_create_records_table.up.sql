@@ -1,4 +1,4 @@
--- Create schema for user module
+-- Create schema for record module
 SET statement_timeout = '5s';
 SET lock_timeout = '1s';
 CREATE SCHEMA IF NOT EXISTS "records";
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS "records"."telegram_users" (
 CREATE TABLE IF NOT EXISTS "records"."telegram_records" (
     id UUID PRIMARY KEY NOT NULL,
     message_telegram_id BIGINT NOT NULL,
-    from_telegram_user_id UUID CONSTRAINT "fk_telegram_records_user"
+    from_user_telegram_id UUID CONSTRAINT "fk_telegram_records_user"
     REFERENCES "records".telegram_users (id),
     in_telegram_chat_id BIGINT NOT NULL,
     message_text TEXT,

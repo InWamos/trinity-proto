@@ -118,3 +118,62 @@ func (repo *RedisSessionRepository) GetAllSessionsByUserID(
 
 	return sessions, nil
 }
+
+func (repo *RedisSessionRepository) RevokeAllSessionsByUserID(
+	ctx context.Context,
+	userID uuid.UUID,
+) error {
+	pattern := "session:*"
+	var keysToDelete []string
+
+	iter := repo.redisClient.Scan(ctx, 0, pattern, 0).Iterator()
+
+	for iter.Next(ctx) {
+		key := iter.Val()
+		// Extract token from key (format: "session:TOKEN")
+		token := key[8:] // Skip "session:" prefix
+
+		result, err := repo.redisClient.HGetAll(ctx, key).Result()
+		if err != nil {
+			continue
+		}
+
+		data := make(map[string]any)
+		for k, v := range result {
+			data[k] = v
+		}
+
+		session, err := repo.redisMapper.MapToSession(data, token)
+		if err != nil {
+			continue
+		}
+
+		if session.UserID == userID {
+			keysToDelete = append(keysToDelete, key)
+		}
+	}
+
+	if err := iter.Err(); err != nil {
+		repo.logger.ErrorContext(ctx, "error scanning sessions for revocation", slog.Any("err", err))
+		return err
+	}
+
+	if len(keysToDelete) == 0 {
+		repo.logger.DebugContext(ctx, "no sessions found to revoke for user", slog.String("user_id", userID.String()))
+		return nil
+	}
+
+	keysAffected, err := repo.redisClient.Del(ctx, keysToDelete...).Result()
+	if err != nil {
+		repo.logger.ErrorContext(ctx, "failed to revoke all sessions by user ID", slog.String("err", err.Error()))
+		return ErrInternal
+	}
+
+	repo.logger.DebugContext(
+		ctx,
+		"revoked all sessions for user",
+		slog.String("user_id", userID.String()),
+		slog.Int64("keys affected", keysAffected),
+	)
+	return nil
+}

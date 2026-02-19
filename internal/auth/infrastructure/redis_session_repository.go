@@ -52,6 +52,9 @@ func (repo *RedisSessionRepository) RevokeSessionByToken(ctx context.Context, to
 		repo.logger.ErrorContext(ctx, "failed to revoke session by token", slog.String("err", err.Error()))
 		return ErrInternal
 	}
+	if keysAffected == 0 {
+		return domain.ErrSessionNotFound
+	}
 	repo.logger.DebugContext(ctx, "revoked session", slog.Int64("keys affected", keysAffected))
 	return nil
 }

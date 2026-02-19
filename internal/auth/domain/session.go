@@ -13,7 +13,7 @@ type SessionStatus string
 type UserRole string
 
 var (
-	ErrSessionNotFound = errors.New("No session matching the criteria")
+	ErrSessionNotFound = errors.New("no session matching the criteria")
 )
 
 const (

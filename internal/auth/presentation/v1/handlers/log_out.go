@@ -10,6 +10,13 @@ import (
 	"github.com/InWamos/trinity-proto/internal/auth/domain"
 )
 
+// LogoutResponse represents the response from the Logout endpoint
+//
+//	@Description	Logout response with the message
+type LogoutResponse struct {
+	Message string `json:"message" example:"Logout successful"`
+}
+
 type LogoutHandler struct {
 	interactor *application.RemoveSession
 	logger     *slog.Logger
@@ -34,9 +41,9 @@ func NewLogoutHandler(
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Success		200		{object}	LogoutResponse	"Logout successful"
-//	@Failure		401		{object}	ErrorResponse	"Invalid request (no active session)"
-//	@Failure		500		{object}	ErrorResponse	"Server error"
+//	@Success		200	{object}	LogoutResponse	"Logout successful"
+//	@Failure		401	string		"Invalid request (no active session)"
+//	@Failure		500	string		"Server error"
 //	@Router			/v1/auth/logout [post]
 func (handler *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

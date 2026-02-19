@@ -34,8 +34,6 @@ func (rsInteractor *RemoveSession) Execute(ctx context.Context, input RemoveSess
 		rsInteractor.logger.ErrorContext(ctx, "Failed to revoke session", slog.Any("err", err))
 		return domain.ErrSessionNotFound
 	}
-
 	rsInteractor.logger.DebugContext(ctx, "Session revoked successfully")
-
 	return nil
 }

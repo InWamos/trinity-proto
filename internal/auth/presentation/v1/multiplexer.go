@@ -11,9 +11,11 @@ type AuthMuxV1 struct {
 
 func NewAuthMuxV1(
 	loginHandler *handlers.LoginHandler,
+	logoutHandler *handlers.LogoutHandler,
 ) *AuthMuxV1 {
 	mux := chi.NewRouter()
 	mux.Post("/login", loginHandler.ServeHTTP)
+	mux.Post("/logout", logoutHandler.ServeHTTP)
 	return &AuthMuxV1{mux: mux}
 }
 

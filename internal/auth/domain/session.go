@@ -3,6 +3,7 @@ package domain
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,6 +11,10 @@ import (
 
 type SessionStatus string
 type UserRole string
+
+var (
+	ErrSessionNotFound = errors.New("No session matching the criteria")
+)
 
 const (
 	Active  SessionStatus = "active"

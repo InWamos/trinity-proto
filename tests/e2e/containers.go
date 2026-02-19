@@ -59,11 +59,6 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 				WithOccurrence(2).
 				WithStartupTimeout(60*time.Second),
 		),
-		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-			ContainerRequest: testcontainers.ContainerRequest{
-				Name: "postgres",
-			},
-		}),
 		network.WithNetwork([]string{"postgres"}, net),
 	)
 	if err != nil {
@@ -124,15 +119,36 @@ func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
 	projectRoot := filepath.Join(filepath.Dir(currentFile), "..", "..")
-	migrationsPath := filepath.Join(projectRoot, "internal", "user", "infrastructure", "migrations")
 
 	// Use container name for internal network communication
 	// PostgreSQL container is named "postgres" on the network
-	dbURL := fmt.Sprintf(
-		"postgres://%s:%s@postgres:5432/%s?sslmode=disable",
+	// Each module uses a separate migrations table to track versions independently
+	userDBURL := fmt.Sprintf(
+		"postgres://%s:%s@postgres:5432/%s?sslmode=disable&x-migrations-table=schema_migrations_user",
+		TestDBUser, TestDBPassword, TestDBName,
+	)
+	recordDBURL := fmt.Sprintf(
+		"postgres://%s:%s@postgres:5432/%s?sslmode=disable&x-migrations-table=schema_migrations_record",
 		TestDBUser, TestDBPassword, TestDBName,
 	)
 
+	// Run user module migrations
+	userMigrationsPath := filepath.Join(projectRoot, "internal", "user", "infrastructure", "migrations")
+	if err := runModuleMigrations(ctx, net, userMigrationsPath, userDBURL, "user"); err != nil {
+		return err
+	}
+
+	// Run record module migrations
+	recordMigrationsPath := filepath.Join(projectRoot, "internal", "record", "infrastructure", "migrations")
+	if err := runModuleMigrations(ctx, net, recordMigrationsPath, recordDBURL, "record"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// runModuleMigrations runs migrations for a specific module.
+func runModuleMigrations(ctx context.Context, net *testcontainers.DockerNetwork, migrationsPath, dbURL, moduleName string) error {
 	migrateReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image: MigrateImage,
@@ -154,26 +170,46 @@ func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error
 
 	// Attach the migrate container to the network
 	if err := network.WithNetwork([]string{}, net)(&migrateReq); err != nil {
-		return fmt.Errorf("failed to attach migrate container to network: %w", err)
+		return fmt.Errorf("failed to attach %s migrate container to network: %w", moduleName, err)
 	}
 
 	migrateContainer, err := testcontainers.GenericContainer(ctx, migrateReq)
 	if err != nil {
-		return fmt.Errorf("failed to run migrate container: %w", err)
+		return fmt.Errorf("failed to run %s migrate container: %w", moduleName, err)
 	}
 	defer migrateContainer.Terminate(ctx)
+
+	// Get logs before checking exit code
+	logs, logsErr := migrateContainer.Logs(ctx)
+	if logsErr != nil {
+		fmt.Printf("Warning: failed to get %s migration logs: %v\n", moduleName, logsErr)
+	} else {
+		fmt.Printf("=== %s migration logs ===\n", moduleName)
+		// Read and print logs
+		buf := make([]byte, 4096)
+		for {
+			n, err := logs.Read(buf)
+			if n > 0 {
+				fmt.Print(string(buf[:n]))
+			}
+			if err != nil {
+				break
+			}
+		}
+		fmt.Printf("=== end %s migration logs ===\n", moduleName)
+	}
 
 	// Check exit code
 	state, err := migrateContainer.State(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get migrate container state: %w", err)
+		return fmt.Errorf("failed to get %s migrate container state: %w", moduleName, err)
 	}
 
 	if state.ExitCode != 0 {
-		logs, _ := migrateContainer.Logs(ctx)
-		return fmt.Errorf("migrations failed with exit code %d, logs: %v", state.ExitCode, logs)
+		return fmt.Errorf("%s migrations failed with exit code %d", moduleName, state.ExitCode)
 	}
 
+	fmt.Printf("✓ %s module migrations completed successfully\n", moduleName)
 	return nil
 }
 

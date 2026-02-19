@@ -35,7 +35,7 @@ func NewLogoutHandler(
 //	@Accept			json
 //	@Produce		json
 //	@Success		200		{object}	LogoutResponse	"Logout successful"
-//	@Failure		400		{object}	ErrorResponse	"Invalid request (no active session)"
+//	@Failure		401		{object}	ErrorResponse	"Invalid request (no active session)"
 //	@Failure		500		{object}	ErrorResponse	"Server error"
 //	@Router			/v1/auth/logout [post]
 func (handler *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

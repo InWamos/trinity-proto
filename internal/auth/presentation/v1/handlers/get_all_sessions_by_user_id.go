@@ -44,7 +44,7 @@ func NewGetAllSessionsByUserIDHandler(
 //	@Success		200	{object}	GetAllSessionsByUserIDResponse	"Sessions retrieved successfully"
 //	@Failure		401	{object}	ErrorResponse					"Unauthorized (no valid session)"
 //	@Failure		500	{object}	ErrorResponse					"Server error"
-//	@Router			/v1/auth/sessions [get]
+//	@Router			/v1/session [get]
 func (handler *GetAllSessionsByUserIDHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

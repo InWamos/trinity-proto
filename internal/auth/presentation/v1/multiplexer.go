@@ -31,7 +31,7 @@ func NewSessionManagementMuxV1(
 	getAllSessionsByUserIDHandler *handlers.GetAllSessionsByUserIDHandler,
 ) *SessionManagementMuxV1 {
 	mux := chi.NewRouter()
-	mux.Get("/sessions", getAllSessionsByUserIDHandler.ServeHTTP)
+	mux.Get("/", getAllSessionsByUserIDHandler.ServeHTTP)
 	return &SessionManagementMuxV1{mux: mux}
 }
 

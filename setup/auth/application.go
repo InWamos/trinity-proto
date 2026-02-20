@@ -14,6 +14,7 @@ func NewAuthApplicationContainer() fx.Option {
 			// Provides VerifySession interactor
 			application.NewVerifySession,
 			application.NewRemoveSession,
+			application.NewGetAllSessionsByUserID,
 		),
 	)
 }

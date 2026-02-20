@@ -1,4 +1,4 @@
-package shared //nolint:revive //meaningful package name
+package shared
 
 import (
 	"github.com/InWamos/trinity-proto/setup/shared/infrastructure/database"

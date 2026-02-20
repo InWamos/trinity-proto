@@ -56,6 +56,6 @@ func main() {
 			return &fxevent.SlogLogger{Logger: logger}
 		}),
 		fx.Invoke(setup.CreateAdminAccountIfNotExists),
-		fx.Invoke(func(servers setup.HTTPServers) {}), //nolint:revive //False positive on Fx syntax
+		fx.Invoke(func(servers setup.HTTPServers) {}),
 	).Run()
 }

@@ -38,7 +38,7 @@ Proto for the Trinity project
     - [x] Login
     - [x] Logout
     - [x] Verify
-    - [ ] Get All User's sessions
+    - [x] Get All User's sessions
     - [ ] Logout specific session
 
 # REFACTORING:

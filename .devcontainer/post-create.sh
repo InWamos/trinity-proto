@@ -35,4 +35,7 @@ pipx install squawk-cli
 echo "📦 Installing golangci-lint"
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.9.0
 
+# Install swag
+go install github.com/swaggo/swag/cmd/swag@latest
+
 echo "✅ Development environment setup complete!"

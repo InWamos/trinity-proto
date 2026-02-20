@@ -43,7 +43,7 @@ Proto for the Trinity project
 
 # REFACTORING:
 - [ ] Fix interactors (remove transaction logic from query interactors)
-- [ ] Fix linter Errors
+- [x] Fix linter Errors
 - [x] Rely on chi router
 
 # Talking with the outside 

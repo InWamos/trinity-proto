@@ -60,6 +60,7 @@ func NewMainHTTPServer(
 	authMiddleware *middleware.AuthenticationMiddleware,
 	userMuxV1 *userV1Mux.UserMuxV1,
 	authMuxV1 *authV1Mux.AuthMuxV1,
+	sessionManagementMuxV1 *authV1Mux.SessionManagementMuxV1,
 	recordMuxV1 *recordV1Mux.RecordMuxV1,
 	logger *slog.Logger,
 ) MainHTTPServer {
@@ -84,6 +85,7 @@ func NewMainHTTPServer(
 	chiRouter.Mount("/api/v1/users", authMiddleware.Handler(userMuxV1.GetMux()))
 	chiRouter.Mount("/api/v1/record", authMiddleware.Handler(recordMuxV1.GetMux()))
 	chiRouter.Mount("/api/v1/auth", authMuxV1.GetMux())
+	chiRouter.Mount("/api/v1/session", authMiddleware.Handler(sessionManagementMuxV1.GetMux()))
 	chiRouter.Mount("/swagger", httpSwagger.WrapHandler)
 
 	srv, hook := getMainServerAndHook(listenAddress, chiRouter, logger)

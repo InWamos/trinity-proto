@@ -391,6 +391,11 @@ linters:
       patterns:
         - ".*"
 
+    revive:
+      rules:
+        - name: var-naming
+          disabled: true
+
     rowserrcheck:
       # database/sql is always checked.
       # Default: []

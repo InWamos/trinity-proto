@@ -22,3 +22,19 @@ func NewAuthMuxV1(
 func (am *AuthMuxV1) GetMux() *chi.Mux {
 	return am.mux
 }
+
+type SessionManagementMuxV1 struct {
+	mux *chi.Mux
+}
+
+func NewSessionManagementMuxV1(
+	getAllSessionsByUserIDHandler *handlers.GetAllSessionsByUserIDHandler,
+) *SessionManagementMuxV1 {
+	mux := chi.NewRouter()
+	mux.Get("/sessions", getAllSessionsByUserIDHandler.ServeHTTP)
+	return &SessionManagementMuxV1{mux: mux}
+}
+
+func (smm *SessionManagementMuxV1) GetMux() *chi.Mux {
+	return smm.mux
+}

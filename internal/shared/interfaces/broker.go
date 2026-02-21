@@ -3,6 +3,6 @@ package interfaces
 import "context"
 
 type Broker interface {
-	GetSyncUserProducer() (any, error)
+	GetSyncUserProducer() any
 	Dispose(ctx context.Context) error
 }

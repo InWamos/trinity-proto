@@ -38,17 +38,9 @@ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install
 # Install swag
 go install github.com/swaggo/swag/cmd/swag@latest
 
-# Set up protoc architecture (different naming than Go)
-case "$(uname -m)" in
-  x86_64)   PB_ARCH="amd64" ;;
-  aarch64)  PB_ARCH="aarch64" ;;
-  armv7l)   PB_ARCH="armv7" ;;
-  *)        echo "Unsupported architecture for protobuf"; exit 1 ;;
-esac
-
-PB_REL="https://github.com/protocolbuffers/protobuf/releases"
-curl -LO $PB_REL/download/v33.5/protoc-33.5-linux-${PB_ARCH}.zip
-unzip protoc-33.5-linux-${PB_ARCH}.zip -d $HOME/.local
-export PATH="$PATH:$HOME/.local/bin"
+# Install protobuf compiler
+echo "📦 Installing protobuf compiler"
+sudo apt install -y protobuf-compiler
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 echo "✅ Development environment setup complete!"

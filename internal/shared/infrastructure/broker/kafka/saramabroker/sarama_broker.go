@@ -8,6 +8,7 @@ import (
 	"github.com/InWamos/trinity-proto/config"
 )
 
+// UserSyncProducer We need custom types here for Uber FX.
 type UserSyncProducer sarama.SyncProducer
 
 func unmarshalBrokersSeparatedByComma(brokers string) []string {

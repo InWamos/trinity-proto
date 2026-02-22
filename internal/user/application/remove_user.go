@@ -10,6 +10,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces"
 	"github.com/InWamos/trinity-proto/internal/shared/interfaces/auth/client"
 	"github.com/InWamos/trinity-proto/internal/user/domain"
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/messagebroker"
 	"github.com/InWamos/trinity-proto/internal/user/infrastructure/repository"
 	"github.com/InWamos/trinity-proto/middleware"
 	"github.com/google/uuid"
@@ -22,12 +23,14 @@ type RemoveUserRequest struct {
 type RemoveUser struct {
 	transactionManagerFactory interfaces.TransactionManagerFactory
 	userRepositoryFactory     repository.UserRepositoryFactory
+	userMessageBroker         messagebroker.UserMessageBroker
 	logger                    *slog.Logger
 }
 
 func NewRemoveUser(
 	transactionManagerFactory interfaces.TransactionManagerFactory,
 	userRepositoryFactory repository.UserRepositoryFactory,
+	userMessageBroker messagebroker.UserMessageBroker,
 	logger *slog.Logger,
 ) *RemoveUser {
 	rulogger := logger.With(
@@ -37,6 +40,7 @@ func NewRemoveUser(
 	return &RemoveUser{
 		transactionManagerFactory: transactionManagerFactory,
 		userRepositoryFactory:     userRepositoryFactory,
+		userMessageBroker:         userMessageBroker,
 		logger:                    rulogger,
 	}
 }
@@ -52,7 +56,15 @@ func (interactor *RemoveUser) Execute(ctx context.Context, input RemoveUserReque
 	if err := rbac.AuthorizeByRole(idp, domain.RoleAdmin); err != nil {
 		return rbac.ErrInsufficientPrivileges
 	}
-
+	if err := interactor.userMessageBroker.PostUserRemovedMessage(input.ID); err != nil {
+		interactor.logger.ErrorContext(
+			ctx,
+			"failed to notify message broker about User Removed event",
+			slog.String("user_id", input.ID.String()),
+			slog.Any("err", err),
+		)
+		return ErrMessageBrokerFailed
+	}
 	transactionManager, err := interactor.transactionManagerFactory.NewTransaction(ctx)
 	if err != nil {
 		interactor.logger.ErrorContext(ctx, "failed to create transaction", slog.Any("err", err))

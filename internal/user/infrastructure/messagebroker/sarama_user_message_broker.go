@@ -65,7 +65,7 @@ func (broker *SaramaUserMessageBroker) PostUserRemovedMessage(userID uuid.UUID) 
 		return err
 	}
 
-	broker.logger.Info("UserRemovedEvent sent to Kafka",
+	broker.logger.Debug("UserRemovedEvent sent to Kafka",
 		slog.String("user_id", userID.String()),
 		slog.Int64("partition", int64(partition)),
 		slog.Int64("offset", offset))

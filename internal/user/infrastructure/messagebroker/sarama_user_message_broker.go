@@ -1,7 +1,6 @@
 package messagebroker
 
 import (
-	"context"
 	"log/slog"
 	"time"
 
@@ -28,14 +27,14 @@ func NewSaramaUserMessageBroker(
 	}
 }
 
-func (broker *SaramaUserMessageBroker) PostUserRemovedMessage(ctx context.Context, userID uuid.UUID) error {
+func (broker *SaramaUserMessageBroker) PostUserRemovedMessage(userID uuid.UUID) error {
 	event := &pb.UserRemovedEvent{
 		UserId:    userID.String(),
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
 	serialized, err := proto.Marshal(event)
 	if err != nil {
-		broker.logger.ErrorContext(ctx, "failed to serialize UserRemovedEvent", slog.Any("err", err))
+		broker.logger.Error("failed to serialize UserRemovedEvent", slog.Any("err", err))
 		return err
 	}
 
@@ -60,13 +59,13 @@ func (broker *SaramaUserMessageBroker) PostUserRemovedMessage(ctx context.Contex
 	}
 	partition, offset, err := broker.userSyncProducer.SendMessage(message)
 	if err != nil {
-		broker.logger.ErrorContext(ctx, "failed to send UserRemovedEvent to Kafka",
+		broker.logger.Error("failed to send UserRemovedEvent to Kafka",
 			slog.String("user_id", userID.String()),
 			slog.Any("err", err))
 		return err
 	}
 
-	broker.logger.InfoContext(ctx, "UserRemovedEvent sent to Kafka",
+	broker.logger.Info("UserRemovedEvent sent to Kafka",
 		slog.String("user_id", userID.String()),
 		slog.Int64("partition", int64(partition)),
 		slog.Int64("offset", offset))

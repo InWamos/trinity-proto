@@ -10,6 +10,7 @@ import (
 
 // UserSyncProducer We need custom types here for Uber FX.
 type UserSyncProducer sarama.SyncProducer
+type AuthConsumer sarama.ConsumerGroup
 
 func unmarshalBrokersSeparatedByComma(brokers string) []string {
 	if brokers == "" {
@@ -28,8 +29,9 @@ func unmarshalBrokersSeparatedByComma(brokers string) []string {
 }
 
 type SaramaBroker struct {
-	userSyncProducer UserSyncProducer
-	logger           *slog.Logger
+	userSyncProducer  UserSyncProducer
+	authConsumerGroup AuthConsumer
+	logger            *slog.Logger
 }
 
 func NewSaramaBroker(config *config.KafkaConfig, logger *slog.Logger) *SaramaBroker {
@@ -40,17 +42,30 @@ func NewSaramaBroker(config *config.KafkaConfig, logger *slog.Logger) *SaramaBro
 	configKafka.Producer.RequiredAcks = sarama.WaitForAll
 	configKafka.Producer.Retry.Max = 5
 	configKafka.Producer.Return.Successes = true
-	userBrokers := unmarshalBrokersSeparatedByComma(config.Brokers)
-	userSyncProducer, err := sarama.NewSyncProducer(userBrokers, configKafka)
+	configKafka.Consumer.Offsets.Initial = sarama.OffsetOldest
+
+	brokers := unmarshalBrokersSeparatedByComma(config.Brokers)
+	userSyncProducer, err := sarama.NewSyncProducer(brokers, configKafka)
 	if err != nil {
 		brokerLogger.Error("Could not connect to user sync producer", slog.Any("err", err))
 		panic(err)
 	}
 	defer userSyncProducer.Close()
 
-	return &SaramaBroker{userSyncProducer: userSyncProducer, logger: brokerLogger}
+	authConsumerGroup, err := sarama.NewConsumerGroup(brokers, "auth-service-group", configKafka)
+	if err != nil {
+		brokerLogger.Error("Could not connect to auth consumer group", slog.Any("err", err))
+		panic(err)
+	}
+	defer authConsumerGroup.Close()
+
+	return &SaramaBroker{userSyncProducer: userSyncProducer, authConsumerGroup: authConsumerGroup, logger: brokerLogger}
 }
 
 func (sb *SaramaBroker) GetSyncUserProducer() UserSyncProducer {
 	return sb.userSyncProducer
+}
+
+func (sb *SaramaBroker) GetAuthConsumerGroup() AuthConsumer {
+	return sb.authConsumerGroup
 }

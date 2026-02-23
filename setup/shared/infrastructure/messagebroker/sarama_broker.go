@@ -5,7 +5,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewSqlxDatabaseContainer() fx.Option {
+func NewSaramaBrokerContainer() fx.Option {
 	return fx.Module(
 		"sarama_broker",
 		fx.Provide(

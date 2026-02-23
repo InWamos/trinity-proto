@@ -13,5 +13,8 @@ func NewSqlxDatabaseContainer() fx.Option {
 			func(broker *saramabroker.SaramaBroker) saramabroker.UserSyncProducer {
 				return broker.GetSyncUserProducer()
 			},
+			func(broker *saramabroker.SaramaBroker) saramabroker.AuthConsumer {
+				return broker.GetAuthConsumerGroup()
+			},
 		))
 }

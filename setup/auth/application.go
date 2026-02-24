@@ -15,6 +15,7 @@ func NewAuthApplicationContainer() fx.Option {
 			application.NewVerifySession,
 			application.NewRemoveSession,
 			application.NewGetAllSessionsByUserID,
+			application.NewRemoveAllSessionsByUserID,
 		),
 	)
 }

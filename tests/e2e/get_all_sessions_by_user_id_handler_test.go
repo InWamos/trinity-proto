@@ -47,7 +47,16 @@ func TestGetAllSessionsByUserID_Success(t *testing.T) {
 
 	// Verify session structure
 	firstSession := sessions[0].(map[string]interface{})
-	expectedFields := []string{"id", "user_id", "user_role", "ip_address", "user_agent", "created_at", "expires_at", "status"}
+	expectedFields := []string{
+		"id",
+		"user_id",
+		"user_role",
+		"ip_address",
+		"user_agent",
+		"created_at",
+		"expires_at",
+		"status",
+	}
 	for _, field := range expectedFields {
 		if value, ok := firstSession[field]; !ok || value == nil {
 			t.Errorf("expected field %q in session response (got: %v)", field, value)

@@ -38,4 +38,9 @@ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install
 # Install swag
 go install github.com/swaggo/swag/cmd/swag@latest
 
+# Install protobuf compiler
+echo "📦 Installing protobuf compiler"
+sudo apt install -y protobuf-compiler
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+
 echo "✅ Development environment setup complete!"

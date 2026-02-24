@@ -102,6 +102,15 @@ definitions:
         example: The user has been created. You can login now
         type: string
     type: object
+  handlers.GetAllSessionsByUserIDResponse:
+    description: Response with a list of sessions
+    properties:
+      sessions:
+        items:
+          additionalProperties: {}
+          type: object
+        type: array
+    type: object
   handlers.GetLatestTelegramRecordsByTelegramIDRequest:
     properties:
       telegram_id:
@@ -149,6 +158,13 @@ definitions:
         type: string
       token:
         example: dGVzdC10b2tlbi0xMjM0NTY3ODkw
+        type: string
+    type: object
+  handlers.LogoutResponse:
+    description: Logout response with the message
+    properties:
+      message:
+        example: Logout successful
         type: string
     type: object
   handlers.SuccessResponse:
@@ -256,6 +272,29 @@ paths:
           schema:
             $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
       summary: User login
+      tags:
+      - auth
+  /v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revoke the current session token and clear the session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/handlers.LogoutResponse'
+        "401":
+          description: Invalid request (no active session)
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: User logout
       tags:
       - auth
   /v1/record/telegram:
@@ -407,6 +446,29 @@ paths:
       summary: Add a new Telegram user
       tags:
       - record
+  /v1/session:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all active sessions for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sessions retrieved successfully
+          schema:
+            $ref: '#/definitions/handlers.GetAllSessionsByUserIDResponse'
+        "401":
+          description: Unauthorized (no valid session)
+          schema:
+            $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse'
+      summary: Get all user sessions
+      tags:
+      - auth
   /v1/users/:
     post:
       consumes:

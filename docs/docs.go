@@ -74,6 +74,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/auth/logout": {
+            "post": {
+                "description": "Revoke the current session token and clear the session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LogoutResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid request (no active session)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/record/telegram": {
             "post": {
                 "security": [
@@ -298,6 +333,41 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/v1/session": {
+            "get": {
+                "description": "Retrieve all active sessions for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get all user sessions",
+                "responses": {
+                    "200": {
+                        "description": "Sessions retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GetAllSessionsByUserIDResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (no valid session)",
+                        "schema": {
+                            "$ref": "#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_auth_presentation_v1_handlers.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -678,6 +748,19 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.GetAllSessionsByUserIDResponse": {
+            "description": "Response with a list of sessions",
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                }
+            }
+        },
         "handlers.GetLatestTelegramRecordsByTelegramIDRequest": {
             "type": "object",
             "properties": {
@@ -744,6 +827,16 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "example": "dGVzdC10b2tlbi0xMjM0NTY3ODkw"
+                }
+            }
+        },
+        "handlers.LogoutResponse": {
+            "description": "Logout response with the message",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Logout successful"
                 }
             }
         },

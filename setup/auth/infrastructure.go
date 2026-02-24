@@ -5,6 +5,8 @@ import (
 
 	redisinfrast "github.com/InWamos/trinity-proto/internal/auth/infrastructure"
 	redisdatabase "github.com/InWamos/trinity-proto/internal/auth/infrastructure/database"
+	"github.com/InWamos/trinity-proto/internal/auth/infrastructure/messaging/messageprocessors"
+	"github.com/InWamos/trinity-proto/internal/auth/infrastructure/messaging/saramahandlers"
 	"go.uber.org/fx"
 )
 
@@ -22,6 +24,8 @@ func NewAuthInfrastructureContainer() fx.Option {
 			func(redisDb *redisdatabase.RedisDatabase, mapper *redisinfrast.RedisMapper, logger *slog.Logger) redisinfrast.SessionRepository {
 				return redisinfrast.NewRedisSessionRepository(redisDb.GetClient(), mapper, logger)
 			},
+			saramahandlers.NewAuthConsumerGroupHandler,
+			messageprocessors.NewRemoveUserProcessor,
 		),
 	)
 }

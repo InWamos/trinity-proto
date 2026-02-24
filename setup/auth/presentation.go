@@ -18,8 +18,14 @@ func NewAuthPresentationContainer() fx.Option {
 			authclient.NewAuthClient,
 			// Provides login handler
 			handlers.NewLoginHandler,
+			// Provides logout handler
+			handlers.NewLogoutHandler,
+			// Provides session getter handler
+			handlers.NewGetAllSessionsByUserIDHandler,
 			// Provides auth multiplexer with routes
 			authv1mux.NewAuthMuxV1,
+			// Provides session management endpoints
+			authv1mux.NewSessionManagementMuxV1,
 		),
 	)
 }

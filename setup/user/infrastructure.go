@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/InWamos/trinity-proto/internal/user/infrastructure/messagebroker"
 	sqlxrepository "github.com/InWamos/trinity-proto/internal/user/infrastructure/repository/sqlx_repository"
 	"go.uber.org/fx"
 )
@@ -13,7 +14,7 @@ func NewUserInfrastructureContainer() fx.Option {
 			sqlxrepository.NewSqlxUserMapper,
 			// Provides User repository factory
 			sqlxrepository.NewSqlxUserRepositoryFactory,
-			// Provides SQLx session
+			messagebroker.NewSaramaUserMessageBroker,
 		),
 	)
 }

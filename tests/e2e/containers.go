@@ -3,10 +3,13 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"net"
 	"path/filepath"
 	"runtime"
 	"time"
 
+	dockercontainer "github.com/docker/docker/api/types/container"
+	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/modules/redis"
@@ -20,6 +23,7 @@ const (
 	PostgresImage = "postgres:18.1-trixie"
 	RedisImage    = "redis:8.4-bookworm"
 	MigrateImage  = "migrate/migrate:v4.19.1"
+	KafkaImage    = "apache/kafka:3.9.2"
 
 	// Test database credentials.
 
@@ -32,12 +36,15 @@ const (
 type TestContainers struct {
 	PostgresContainer *postgres.PostgresContainer
 	RedisContainer    *redis.RedisContainer
+	KafkaContainer    testcontainers.Container
 	Network           *testcontainers.DockerNetwork
 
 	PostgresHost string
 	PostgresPort string
 	RedisHost    string
 	RedisPort    string
+	KafkaHost    string
+	KafkaPort    string
 }
 
 // SetupContainers initializes all required containers for E2E testing.
@@ -59,11 +66,6 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 				WithOccurrence(2).
 				WithStartupTimeout(60*time.Second),
 		),
-		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-			ContainerRequest: testcontainers.ContainerRequest{
-				Name: "postgres",
-			},
-		}),
 		network.WithNetwork([]string{"postgres"}, net),
 	)
 	if err != nil {
@@ -108,31 +110,128 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 		return nil, fmt.Errorf("failed to get redis port: %w", err)
 	}
 
+	// Start Kafka container
+	kafkaContainer, kafkaHost, kafkaPort, err := startKafkaContainer(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start kafka: %w", err)
+	}
+
 	return &TestContainers{
 		PostgresContainer: pgContainer,
 		RedisContainer:    redisContainer,
+		KafkaContainer:    kafkaContainer,
 		Network:           net,
 		PostgresHost:      pgHost,
 		PostgresPort:      pgPort.Port(),
 		RedisHost:         redisHost,
 		RedisPort:         redisPort.Port(),
+		KafkaHost:         kafkaHost,
+		KafkaPort:         kafkaPort,
 	}, nil
 }
 
-// runMigrations runs database migrations using the migrate container.
+// getFreePort asks the OS for a free port by binding to :0 and releasing it.
+func getFreePort() (int, error) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
+// startKafkaContainer starts a Kafka broker in KRaft mode.
+// It pre-allocates a host port so KAFKA_ADVERTISED_LISTENERS can be set
+// correctly before container startup, preventing Sarama from reconnecting
+// to the wrong address after fetching metadata.
+func startKafkaContainer(ctx context.Context) (testcontainers.Container, string, string, error) {
+	// Allocate a free host port to use as the fixed Kafka port
+	freePort, err := getFreePort()
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to allocate free port for kafka: %w", err)
+	}
+	hostPort := fmt.Sprintf("%d", freePort)
+
+	req := testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Image:        KafkaImage,
+			ExposedPorts: []string{"9092/tcp"},
+			HostConfigModifier: func(hc *dockercontainer.HostConfig) {
+				hc.PortBindings = nat.PortMap{
+					"9092/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: hostPort}},
+				}
+			},
+			Env: map[string]string{
+				"KAFKA_NODE_ID":                                  "1",
+				"KAFKA_PROCESS_ROLES":                            "broker,controller",
+				"KAFKA_LISTENERS":                                "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
+				"KAFKA_ADVERTISED_LISTENERS":                     fmt.Sprintf("PLAINTEXT://localhost:%s", hostPort),
+				"KAFKA_CONTROLLER_LISTENER_NAMES":                "CONTROLLER",
+				"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP":           "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
+				"KAFKA_CONTROLLER_QUORUM_VOTERS":                 "1@localhost:9093",
+				"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR":         "1",
+				"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR": "1",
+				"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR":            "1",
+				"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS":         "0",
+				"KAFKA_NUM_PARTITIONS":                           "3",
+				"KAFKA_AUTO_CREATE_TOPICS_ENABLE":                "true",
+			},
+			WaitingFor: wait.ForLog("Kafka Server started").WithStartupTimeout(60 * time.Second),
+		},
+		Started: true,
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, req)
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to start kafka: %w", err)
+	}
+
+	host, err := container.Host(ctx)
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to get kafka host: %w", err)
+	}
+
+	return container, host, hostPort, nil
+}
+
 func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
 	projectRoot := filepath.Join(filepath.Dir(currentFile), "..", "..")
-	migrationsPath := filepath.Join(projectRoot, "internal", "user", "infrastructure", "migrations")
 
 	// Use container name for internal network communication
 	// PostgreSQL container is named "postgres" on the network
-	dbURL := fmt.Sprintf(
-		"postgres://%s:%s@postgres:5432/%s?sslmode=disable",
+	// Each module uses a separate migrations table to track versions independently
+	userDBURL := fmt.Sprintf(
+		"postgres://%s:%s@postgres:5432/%s?sslmode=disable&x-migrations-table=schema_migrations_user",
+		TestDBUser, TestDBPassword, TestDBName,
+	)
+	recordDBURL := fmt.Sprintf(
+		"postgres://%s:%s@postgres:5432/%s?sslmode=disable&x-migrations-table=schema_migrations_record",
 		TestDBUser, TestDBPassword, TestDBName,
 	)
 
+	// Run user module migrations
+	userMigrationsPath := filepath.Join(projectRoot, "internal", "user", "infrastructure", "migrations")
+	if err := runModuleMigrations(ctx, net, userMigrationsPath, userDBURL, "user"); err != nil {
+		return err
+	}
+
+	// Run record module migrations
+	recordMigrationsPath := filepath.Join(projectRoot, "internal", "record", "infrastructure", "migrations")
+	if err := runModuleMigrations(ctx, net, recordMigrationsPath, recordDBURL, "record"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// runModuleMigrations runs migrations for a specific module.
+func runModuleMigrations(
+	ctx context.Context,
+	net *testcontainers.DockerNetwork,
+	migrationsPath, dbURL, moduleName string,
+) error {
 	migrateReq := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image: MigrateImage,
@@ -154,32 +253,58 @@ func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error
 
 	// Attach the migrate container to the network
 	if err := network.WithNetwork([]string{}, net)(&migrateReq); err != nil {
-		return fmt.Errorf("failed to attach migrate container to network: %w", err)
+		return fmt.Errorf("failed to attach %s migrate container to network: %w", moduleName, err)
 	}
 
 	migrateContainer, err := testcontainers.GenericContainer(ctx, migrateReq)
 	if err != nil {
-		return fmt.Errorf("failed to run migrate container: %w", err)
+		return fmt.Errorf("failed to run %s migrate container: %w", moduleName, err)
 	}
 	defer migrateContainer.Terminate(ctx)
+
+	// Get logs before checking exit code
+	logs, logsErr := migrateContainer.Logs(ctx)
+	if logsErr != nil {
+		fmt.Printf("Warning: failed to get %s migration logs: %v\n", moduleName, logsErr)
+	} else {
+		fmt.Printf("=== %s migration logs ===\n", moduleName)
+		// Read and print logs
+		buf := make([]byte, 4096)
+		for {
+			n, err := logs.Read(buf)
+			if n > 0 {
+				fmt.Print(string(buf[:n]))
+			}
+			if err != nil {
+				break
+			}
+		}
+		fmt.Printf("=== end %s migration logs ===\n", moduleName)
+	}
 
 	// Check exit code
 	state, err := migrateContainer.State(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get migrate container state: %w", err)
+		return fmt.Errorf("failed to get %s migrate container state: %w", moduleName, err)
 	}
 
 	if state.ExitCode != 0 {
-		logs, _ := migrateContainer.Logs(ctx)
-		return fmt.Errorf("migrations failed with exit code %d, logs: %v", state.ExitCode, logs)
+		return fmt.Errorf("%s migrations failed with exit code %d", moduleName, state.ExitCode)
 	}
 
+	fmt.Printf("✓ %s module migrations completed successfully\n", moduleName)
 	return nil
 }
 
 // Teardown terminates all containers and cleans up resources.
 func (tc *TestContainers) Teardown(ctx context.Context) error {
 	var errs []error
+
+	if tc.KafkaContainer != nil {
+		if err := tc.KafkaContainer.Terminate(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("failed to terminate kafka: %w", err))
+		}
+	}
 
 	if tc.PostgresContainer != nil {
 		if err := tc.PostgresContainer.Terminate(ctx); err != nil {
@@ -225,5 +350,18 @@ func (tc *TestContainers) GetRedisConfig() map[string]string {
 		"REDIS_PORT":     tc.RedisPort,
 		"REDIS_DB_AUTH":  "0",
 		"REDIS_PASSWORD": "",
+	}
+}
+
+// GetKafkaConfig returns environment variables for the test Kafka broker.
+func (tc *TestContainers) GetKafkaConfig() map[string]string {
+	return map[string]string{
+		"KAFKA_BROKERS":            fmt.Sprintf("%s:%s", tc.KafkaHost, tc.KafkaPort),
+		"KAFKA_SECURITY_PROTOCOL":  "PLAINTEXT",
+		"KAFKA_SASL_MECHANISM":     "PLAIN",
+		"KAFKA_SASL_USERNAME":      "",
+		"KAFKA_SASL_PASSWORD":      "",
+		"KAFKA_COMPRESSION_TYPE":   "none",
+		"KAFKA_REQUEST_TIMEOUT_MS": "5000",
 	}
 }

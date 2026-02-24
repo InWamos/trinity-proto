@@ -36,13 +36,14 @@ Proto for the Trinity project
 
 - Auth
     - [x] Login
-    - [ ] Logout
+    - [x] Logout
     - [x] Verify
+    - [x] Get All User's sessions
     - [ ] Logout specific session
 
 # REFACTORING:
 - [ ] Fix interactors (remove transaction logic from query interactors)
-- [ ] Fix linter Errors
+- [x] Fix linter Errors
 - [x] Rely on chi router
 
 # Talking with the outside 

@@ -45,6 +45,10 @@ func TestMain(m *testing.M) {
 		os.Setenv(k, v)
 		fmt.Printf("  %s=%s\n", k, v)
 	}
+	for k, v := range testContainers.GetKafkaConfig() {
+		os.Setenv(k, v)
+		fmt.Printf("  %s=%s\n", k, v)
+	}
 
 	// Server config
 	os.Setenv("SERVER_ADDRESS", "127.0.0.1")

@@ -37,7 +37,7 @@ import (
 func main() {
 	fx.New(
 		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig,
-			config.NewServerConfig, config.NewRedisConfig),
+			config.NewServerConfig, config.NewRedisConfig, config.NewKafkaConfig),
 		fx.Provide(logger.GetLogger),
 		fx.Provide(
 			middleware.NewGlobalCORSMiddleware,
@@ -56,6 +56,6 @@ func main() {
 			return &fxevent.SlogLogger{Logger: logger}
 		}),
 		fx.Invoke(setup.CreateAdminAccountIfNotExists),
-		fx.Invoke(func(servers setup.HTTPServers) {}), //nolint:revive //False positive on Fx syntax
+		fx.Invoke(func(servers setup.HTTPServers) {}),
 	).Run()
 }

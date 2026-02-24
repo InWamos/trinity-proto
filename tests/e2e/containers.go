@@ -20,6 +20,7 @@ const (
 	PostgresImage = "postgres:18.1-trixie"
 	RedisImage    = "redis:8.4-bookworm"
 	MigrateImage  = "migrate/migrate:v4.19.1"
+	KafkaImage    = "apache/kafka:3.9.2"
 
 	// Test database credentials.
 
@@ -32,12 +33,15 @@ const (
 type TestContainers struct {
 	PostgresContainer *postgres.PostgresContainer
 	RedisContainer    *redis.RedisContainer
+	KafkaContainer    testcontainers.Container
 	Network           *testcontainers.DockerNetwork
 
 	PostgresHost string
 	PostgresPort string
 	RedisHost    string
 	RedisPort    string
+	KafkaHost    string
+	KafkaPort    string
 }
 
 // SetupContainers initializes all required containers for E2E testing.
@@ -103,18 +107,71 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 		return nil, fmt.Errorf("failed to get redis port: %w", err)
 	}
 
+	// Start Kafka container
+	kafkaContainer, kafkaHost, kafkaPort, err := startKafkaContainer(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start kafka: %w", err)
+	}
+
 	return &TestContainers{
 		PostgresContainer: pgContainer,
 		RedisContainer:    redisContainer,
+		KafkaContainer:    kafkaContainer,
 		Network:           net,
 		PostgresHost:      pgHost,
 		PostgresPort:      pgPort.Port(),
 		RedisHost:         redisHost,
 		RedisPort:         redisPort.Port(),
+		KafkaHost:         kafkaHost,
+		KafkaPort:         kafkaPort,
 	}, nil
 }
 
-// runMigrations runs database migrations using the migrate container.
+// startKafkaContainer starts a Kafka broker in KRaft mode.
+func startKafkaContainer(ctx context.Context) (testcontainers.Container, string, string, error) {
+	req := testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Image:        KafkaImage,
+			ExposedPorts: []string{"9092/tcp"},
+			Env: map[string]string{
+				"KAFKA_NODE_ID":                                  "1",
+				"KAFKA_PROCESS_ROLES":                            "broker,controller",
+				"KAFKA_LISTENERS":                               "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
+				"KAFKA_ADVERTISED_LISTENERS":                     "PLAINTEXT://localhost:9092",
+				"KAFKA_CONTROLLER_LISTENER_NAMES":               "CONTROLLER",
+				"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP":          "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
+				"KAFKA_CONTROLLER_QUORUM_VOTERS":                "1@localhost:9093",
+				"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR":        "1",
+				"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR": "1",
+				"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR":           "1",
+				"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS":        "0",
+				"KAFKA_NUM_PARTITIONS":                          "3",
+				"KAFKA_AUTO_CREATE_TOPICS_ENABLE":               "true",
+			},
+			WaitingFor: wait.ForLog("Kafka Server started").WithStartupTimeout(60 * time.Second),
+		},
+		Started: true,
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, req)
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to start kafka: %w", err)
+	}
+
+	host, err := container.Host(ctx)
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to get kafka host: %w", err)
+	}
+
+	port, err := container.MappedPort(ctx, "9092")
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to get kafka port: %w", err)
+	}
+
+	return container, host, port.Port(), nil
+}
+
+// startKafkaContainer starts a Kafka broker in KRaft mode.
 func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
@@ -221,6 +278,12 @@ func runModuleMigrations(
 func (tc *TestContainers) Teardown(ctx context.Context) error {
 	var errs []error
 
+	if tc.KafkaContainer != nil {
+		if err := tc.KafkaContainer.Terminate(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("failed to terminate kafka: %w", err))
+		}
+	}
+
 	if tc.PostgresContainer != nil {
 		if err := tc.PostgresContainer.Terminate(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("failed to terminate postgres: %w", err))
@@ -265,5 +328,18 @@ func (tc *TestContainers) GetRedisConfig() map[string]string {
 		"REDIS_PORT":     tc.RedisPort,
 		"REDIS_DB_AUTH":  "0",
 		"REDIS_PASSWORD": "",
+	}
+}
+
+// GetKafkaConfig returns environment variables for the test Kafka broker.
+func (tc *TestContainers) GetKafkaConfig() map[string]string {
+	return map[string]string{
+		"KAFKA_BROKERS":           fmt.Sprintf("%s:%s", tc.KafkaHost, tc.KafkaPort),
+		"KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
+		"KAFKA_SASL_MECHANISM":    "PLAIN",
+		"KAFKA_SASL_USERNAME":     "",
+		"KAFKA_SASL_PASSWORD":     "",
+		"KAFKA_COMPRESSION_TYPE":  "none",
+		"KAFKA_REQUEST_TIMEOUT_MS": "5000",
 	}
 }

@@ -36,6 +36,9 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
+      - name: Get latest Git tag
+        id: get_tag
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -58,9 +61,7 @@ jobs:
             type=raw,value=stable,enable=${{ github.ref == 'refs/heads/master' }}
             type=raw,value={{sha}},enable=${{ github.ref == 'refs/heads/master' }}
             type=raw,value={{date 'YYYYMMDD-HHmmss'}},enable=${{ github.ref == 'refs/heads/master' }}
-            type=semver,pattern={{version}},enable=${{ github.ref == 'refs/heads/master' }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref == 'refs/heads/master' }}
-            type=semver,pattern={{major}},enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=${{ steps.get_tag.outputs.tag }},enable=${{ github.ref == 'refs/heads/master' }}
 
       - name: Build and push Docker image
         id: build

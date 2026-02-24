@@ -50,14 +50,12 @@ func NewSaramaBroker(config *config.KafkaConfig, logger *slog.Logger) *SaramaBro
 		brokerLogger.Error("Could not connect to user sync producer", slog.Any("err", err))
 		panic(err)
 	}
-	defer userSyncProducer.Close()
 
 	authConsumerGroup, err := sarama.NewConsumerGroup(brokers, "auth-service-group", configKafka)
 	if err != nil {
 		brokerLogger.Error("Could not connect to auth consumer group", slog.Any("err", err))
 		panic(err)
 	}
-	defer authConsumerGroup.Close()
 
 	return &SaramaBroker{userSyncProducer: userSyncProducer, authConsumerGroup: authConsumerGroup, logger: brokerLogger}
 }
@@ -68,4 +66,14 @@ func (sb *SaramaBroker) GetSyncUserProducer() UserSyncProducer {
 
 func (sb *SaramaBroker) GetAuthConsumerGroup() AuthConsumer {
 	return sb.authConsumerGroup
+}
+
+func (sb *SaramaBroker) Close() error {
+	if err := sb.userSyncProducer.Close(); err != nil {
+		sb.logger.Error("failed to close user sync producer", slog.Any("err", err))
+	}
+	if err := sb.authConsumerGroup.Close(); err != nil {
+		sb.logger.Error("failed to close auth consumer group", slog.Any("err", err))
+	}
+	return nil
 }

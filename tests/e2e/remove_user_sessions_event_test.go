@@ -68,7 +68,13 @@ func TestRemoveUser_SessionsRevokedViaEvent(t *testing.T) {
 	}
 
 	// Admin deletes the user - this publishes a UserRemovedEvent to Kafka
-	deleteResp := MakeAuthorizedRequest(t, "DELETE", fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID), adminToken, nil)
+	deleteResp := MakeAuthorizedRequest(
+		t,
+		"DELETE",
+		fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID),
+		adminToken,
+		nil,
+	)
 	defer deleteResp.Body.Close()
 	if deleteResp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(deleteResp.Body)
@@ -128,7 +134,13 @@ func TestRemoveUser_AdminSessionUnaffected(t *testing.T) {
 	}
 
 	// Delete the target user
-	deleteResp := MakeAuthorizedRequest(t, "DELETE", fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID), adminToken, nil)
+	deleteResp := MakeAuthorizedRequest(
+		t,
+		"DELETE",
+		fmt.Sprintf("%s/api/v1/users/%s", baseURL, userID),
+		adminToken,
+		nil,
+	)
 	defer deleteResp.Body.Close()
 	if deleteResp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(deleteResp.Body)
@@ -142,6 +154,9 @@ func TestRemoveUser_AdminSessionUnaffected(t *testing.T) {
 	sessionsResp := MakeAuthorizedRequest(t, "GET", baseURL+"/api/v1/session", adminToken, nil)
 	defer sessionsResp.Body.Close()
 	if sessionsResp.StatusCode != http.StatusOK {
-		t.Errorf("expected admin session to remain valid after deleting another user, got status %d", sessionsResp.StatusCode)
+		t.Errorf(
+			"expected admin session to remain valid after deleting another user, got status %d",
+			sessionsResp.StatusCode,
+		)
 	}
 }

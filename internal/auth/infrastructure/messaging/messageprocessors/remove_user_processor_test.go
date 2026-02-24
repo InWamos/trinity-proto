@@ -15,7 +15,7 @@ import (
 	"github.com/InWamos/trinity-proto/internal/events/pb"
 )
 
-// mockSessionRepository is a test double for infrastructure.SessionRepository
+// mockSessionRepository is a test double for infrastructure.SessionRepository.
 type mockSessionRepository struct {
 	revokeAllCalled bool
 	revokeAllUserID uuid.UUID
@@ -36,7 +36,10 @@ func (m *mockSessionRepository) RevokeSessionByToken(ctx context.Context, token 
 	return nil
 }
 
-func (m *mockSessionRepository) GetAllSessionsByUserID(ctx context.Context, userID uuid.UUID) ([]domain.Session, error) {
+func (m *mockSessionRepository) GetAllSessionsByUserID(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]domain.Session, error) {
 	return nil, nil
 }
 

@@ -77,8 +77,15 @@ func (l *VerboseFxLogger) LogEvent(event fxevent.Event) {
 func StartTestServer(t *testing.T) (baseURL string, cleanup func()) {
 	t.Helper()
 
-	app := fxtest.New(t,
-		fx.Provide(config.NewDatabaseConfig, config.NewLoggingConfig, config.NewServerConfig, config.NewRedisConfig, config.NewKafkaConfig),
+	app := fxtest.New(
+		t,
+		fx.Provide(
+			config.NewDatabaseConfig,
+			config.NewLoggingConfig,
+			config.NewServerConfig,
+			config.NewRedisConfig,
+			config.NewKafkaConfig,
+		),
 		fx.Provide(logger.GetLogger),
 		fx.Provide(
 			middleware.NewGlobalCORSMiddleware,

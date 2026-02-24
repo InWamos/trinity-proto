@@ -3,10 +3,13 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"net"
 	"path/filepath"
 	"runtime"
 	"time"
 
+	dockercontainer "github.com/docker/docker/api/types/container"
+	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/modules/redis"
@@ -127,26 +130,51 @@ func SetupContainers(ctx context.Context) (*TestContainers, error) {
 	}, nil
 }
 
+// getFreePort asks the OS for a free port by binding to :0 and releasing it.
+func getFreePort() (int, error) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
 // startKafkaContainer starts a Kafka broker in KRaft mode.
+// It pre-allocates a host port so KAFKA_ADVERTISED_LISTENERS can be set
+// correctly before container startup, preventing Sarama from reconnecting
+// to the wrong address after fetching metadata.
 func startKafkaContainer(ctx context.Context) (testcontainers.Container, string, string, error) {
+	// Allocate a free host port to use as the fixed Kafka port
+	freePort, err := getFreePort()
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to allocate free port for kafka: %w", err)
+	}
+	hostPort := fmt.Sprintf("%d", freePort)
+
 	req := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image:        KafkaImage,
 			ExposedPorts: []string{"9092/tcp"},
+			HostConfigModifier: func(hc *dockercontainer.HostConfig) {
+				hc.PortBindings = nat.PortMap{
+					"9092/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: hostPort}},
+				}
+			},
 			Env: map[string]string{
 				"KAFKA_NODE_ID":                                  "1",
 				"KAFKA_PROCESS_ROLES":                            "broker,controller",
-				"KAFKA_LISTENERS":                               "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
-				"KAFKA_ADVERTISED_LISTENERS":                     "PLAINTEXT://localhost:9092",
-				"KAFKA_CONTROLLER_LISTENER_NAMES":               "CONTROLLER",
-				"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP":          "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
-				"KAFKA_CONTROLLER_QUORUM_VOTERS":                "1@localhost:9093",
-				"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR":        "1",
+				"KAFKA_LISTENERS":                                "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093",
+				"KAFKA_ADVERTISED_LISTENERS":                     fmt.Sprintf("PLAINTEXT://localhost:%s", hostPort),
+				"KAFKA_CONTROLLER_LISTENER_NAMES":                "CONTROLLER",
+				"KAFKA_LISTENER_SECURITY_PROTOCOL_MAP":           "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT",
+				"KAFKA_CONTROLLER_QUORUM_VOTERS":                 "1@localhost:9093",
+				"KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR":         "1",
 				"KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR": "1",
-				"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR":           "1",
-				"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS":        "0",
-				"KAFKA_NUM_PARTITIONS":                          "3",
-				"KAFKA_AUTO_CREATE_TOPICS_ENABLE":               "true",
+				"KAFKA_TRANSACTION_STATE_LOG_MIN_ISR":            "1",
+				"KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS":         "0",
+				"KAFKA_NUM_PARTITIONS":                           "3",
+				"KAFKA_AUTO_CREATE_TOPICS_ENABLE":                "true",
 			},
 			WaitingFor: wait.ForLog("Kafka Server started").WithStartupTimeout(60 * time.Second),
 		},
@@ -163,15 +191,9 @@ func startKafkaContainer(ctx context.Context) (testcontainers.Container, string,
 		return nil, "", "", fmt.Errorf("failed to get kafka host: %w", err)
 	}
 
-	port, err := container.MappedPort(ctx, "9092")
-	if err != nil {
-		return nil, "", "", fmt.Errorf("failed to get kafka port: %w", err)
-	}
-
-	return container, host, port.Port(), nil
+	return container, host, hostPort, nil
 }
 
-// startKafkaContainer starts a Kafka broker in KRaft mode.
 func runMigrations(ctx context.Context, net *testcontainers.DockerNetwork) error {
 	// Get the project root directory
 	_, currentFile, _, _ := runtime.Caller(0)
@@ -334,12 +356,12 @@ func (tc *TestContainers) GetRedisConfig() map[string]string {
 // GetKafkaConfig returns environment variables for the test Kafka broker.
 func (tc *TestContainers) GetKafkaConfig() map[string]string {
 	return map[string]string{
-		"KAFKA_BROKERS":           fmt.Sprintf("%s:%s", tc.KafkaHost, tc.KafkaPort),
-		"KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
-		"KAFKA_SASL_MECHANISM":    "PLAIN",
-		"KAFKA_SASL_USERNAME":     "",
-		"KAFKA_SASL_PASSWORD":     "",
-		"KAFKA_COMPRESSION_TYPE":  "none",
+		"KAFKA_BROKERS":            fmt.Sprintf("%s:%s", tc.KafkaHost, tc.KafkaPort),
+		"KAFKA_SECURITY_PROTOCOL":  "PLAINTEXT",
+		"KAFKA_SASL_MECHANISM":     "PLAIN",
+		"KAFKA_SASL_USERNAME":      "",
+		"KAFKA_SASL_PASSWORD":      "",
+		"KAFKA_COMPRESSION_TYPE":   "none",
 		"KAFKA_REQUEST_TIMEOUT_MS": "5000",
 	}
 }

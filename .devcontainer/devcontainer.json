@@ -10,7 +10,7 @@
 	},
 	"features": {
 		"ghcr.io/dhoeric/features/act:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:3": {}
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "sh .devcontainer/post-create.sh"
